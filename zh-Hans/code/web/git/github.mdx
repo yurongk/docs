@@ -9,7 +9,7 @@ tags:
 
 `GitHub` 在当前后端实现中仅支持 `APP_INSTALLATION` 认证方式（GitHub App 安装）。
 
-## 后端前置配置
+## 后端前置配置(本地部署才需要)
 
 在 API 服务环境变量中至少配置：
 
@@ -26,16 +26,15 @@ tags:
 
 ## Web 端配置步骤
 
-1. 打开 `设置 -> 连接器`（`/settings/connectors`）。
+1. 打开 `设置 -> 连接器 -> Git`（`/settings/connectors?tab=git`）。
 2. 在 `Provider` 选择 `GitHub`。
 3. `Auth method` 会是 `APP_INSTALLATION`。
-4. 复制页面中的 `Webhook URL`。
-5. 点击 `开始连接`，跳转到 GitHub App 安装页。
-6. 在 GitHub 完成安装并授权仓库后，页面会自动回到连接器页，连接将出现在 `已有连接` 列表中。
+4. 点击 `开始连接`，跳转到 GitHub App 安装页。
+5. 在 GitHub 完成安装并授权仓库后，页面会自动回到连接器页，连接将出现在 `已有连接` 列表中。
 
 ## GitHub App 侧建议
 
-- 在 GitHub App 的 Webhook 设置中填入上一步复制的 `Webhook URL`。
+- 在 GitHub App 的 Webhook 设置中填入上一步复制的 `Webhook URL` (本地部署才需要)。
 - 如果你设置了 `GITHUB_WEBHOOK_SECRET`，GitHub App 中的 Webhook Secret 需要保持一致。
 - 建议开启事件：`pull_request`、`issue_comment`、`issues`（对应当前后端处理逻辑）。
 
