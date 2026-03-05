@@ -358,6 +358,18 @@
                 ]
               },
               {
+                "tab": "OpenAPI",
+                "groups": [
+                  {
+                    "group": "AI",
+                    "openapi": {
+                      "source": "/api/openapi.ai.json",
+                      "directory": "en/api-reference/ai"
+                    }
+                  }
+                ]
+              },
+              {
                 "tab": "Troubleshooting",
                 "groups": [
                   {
@@ -980,6 +992,18 @@
                       "zh-Hans/ai/chatkit/chatkit-effect",
                       "zh-Hans/ai/chatkit/chatkit-actions"
                     ]
+                  }
+                ]
+              },
+              {
+                "tab": "OpenAPI",
+                "groups": [
+                  {
+                    "group": "AI",
+                    "openapi": {
+                      "source": "/api/openapi.ai.json",
+                      "directory": "zh-Hans/api-reference/ai"
+                    }
                   }
                 ]
               },

@@ -190,7 +190,7 @@ psql -h postgres -U metad_user -d metad_db < $BACKUP_FILE
        if [ -z "$BACKUP_FILE" ]; then
          echo "Usage:
 
- $0 <backup_file>"
+ $0 backup_file"
          exit 1
        fi
 
