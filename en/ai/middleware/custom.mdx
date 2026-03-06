@@ -2,6 +2,7 @@
 title: Custom Middleware
 sidebar_position: 3
 ---
+
 This document introduces the Xpert Agent middleware capabilities and its plugin-based implementation approach, comparable to LangChain Middleware (refer to official documentation: overview, built-in). Through middleware, you can insert cross-cutting logic (logging, caching, rate limiting, security, prompt governance, etc.) at key nodes in the Agent lifecycle without modifying core orchestration logic.
 
 ## Core Concepts
@@ -28,6 +29,102 @@ Additionally, you can declare:
 - `contextSchema`: Runtime-only readable context, not persisted.
 - `tools`: Dynamically injected `DynamicStructuredTool` list.
 - `JumpToTarget`: Return `jumpTo` in hooks to control jumps (e.g., `model`, `tools`, `end`).
+
+### StateSchema Deep Dive
+
+#### What is StateSchema?
+
+`StateSchema` is a runtime state validation schema defined using the [Zod](https://zod.dev/) library. It defines the state data structure that needs to be maintained and transmitted during middleware execution.
+
+#### Zod Introduction
+
+Zod is a TypeScript-first data validation library:
+
+```typescript
+import { z } from 'zod'
+
+// Define schema
+const schema = z.object({
+  fieldName: z.type().method()
+})
+
+// Validate data
+const validData = schema.parse(unknownData)
+```
+
+#### StateSchema Example: SkillsMiddleware
+
+The SkillsMiddleware's stateSchema is defined as follows:
+
+```typescript
+readonly stateSchema = z.object({
+  selectedSkillIds: z.array(z.string()).optional(),
+  selectedSkillWorkspaceId: z.string().optional()
+})
+```
+
+**Field Description**
+
+| Field Name | Type | Required | Description |
+|------|------|------|------|
+| `selectedSkillIds` | `string[]` | No | List of runtime-selected skill IDs for dynamically configuring enabled skills |
+| `selectedSkillWorkspaceId` | `string` | No | Workspace ID of the skills, allowing skills to be loaded from different workspaces |
+
+**Use Cases**
+
+1. **Runtime Dynamic Skill Selection**: During Agent execution, dynamically select which skills to enable based on user input or context
+
+2. **Workspace Isolation**: Support loading skills from different workspaces, enabling multi-tenancy and workspace isolation
+
+3. **State Persistence**: Maintain user skill selection history for later queries and recovery
+
+**State Resolution Flow**
+
+In SkillsMiddleware, state is resolved through the `resolveRuntimeSkillSelection()` method:
+
+```typescript
+private resolveRuntimeSkillSelection(state: Record<string, unknown>): {
+  skillIds: string[]
+  workspaceId: string
+  hasRuntimeSelection: boolean
+}
+```
+
+The flow includes:
+
+1. Read `selectedSkillIds` and `selectedSkillWorkspaceId` from current state and initial state
+2. Sanitize and normalize data using `sanitizeSkillIds()` and `sanitizeWorkspaceId()`
+3. Prioritize current state values, fallback to initial state
+4. Return resolution results and whether runtime selection exists
+
+#### StateSchema Definition Best Practices
+
+1. **Use `optional()`**: For optional fields, explicitly mark them as optional
+   ```typescript
+   fieldName: z.string().optional()
+   ```
+
+2. **Type Matching**: Ensure defined types match actual data types in use
+
+3. **Validation & Cleanup**: Validate and clean state data before use
+
+4. **Documentation**: Add detailed comments explaining each state field
+
+#### Why StateSchema Matters
+
+**Advantages**
+
+- **Type Safety**: Check state data types at compile time
+- **Runtime Validation**: Validate state data completeness and correctness at execution
+- **Auto Transformation**: Automatically transform and clean state data
+- **IDE Support**: Better code completion and type hints
+
+**Application Scenarios**
+
+- Maintain middleware runtime configuration
+- Share state across middleware chain
+- Implement stateful complex logic
+- Support conditional execution and dynamic behavior
 
 ## Writing a Middleware
 
@@ -80,6 +177,37 @@ export class MyAgentMiddlewareModule {}
 - During development/deployment, add the plugin to [plugin environment variables](/docs/plugin/install).
 - In the workflow editor, add middleware nodes to the Agent and configure order (execution order can be adjusted by arrangement).
 
+## Middleware Lifecycle
+
+### Initialization Phase
+
+```
+Constructor → Dependency Injection → createMiddleware() → Return AgentMiddleware
+```
+
+### Execution Phase
+
+```
+Request with State → wrapModelCall() → [Custom Logic] → Model Call → Response
+```
+
+## Related Type Definitions
+
+```typescript
+interface IAgentMiddlewareStrategy<TOptions> {
+  readonly meta: TAgentMiddlewareMeta
+  readonly stateSchema: ZodSchema
+  createMiddleware(options: TOptions, context: IAgentMiddlewareContext): Promise<AgentMiddleware>
+}
+
+interface AgentMiddleware {
+  name: string
+  stateSchema: ZodSchema
+  tools?: Tool[]
+  wrapModelCall?: (request: any, handler: (req: any) => Promise<any>) => Promise<any>
+}
+```
+
 ## Built-in Examples
 
 - **SummarizationMiddleware**  
@@ -96,3 +224,9 @@ export class MyAgentMiddlewareModule {}
 - Following LangChain Middleware approach: decompose cross-cutting concerns like logging, auditing, caching, rate limiting, and gradual model switching into independent middleware, composing them by connection order.
 
 Through this approach, you can seamlessly migrate LangChain's Middleware model into Xpert's plugin system, reusing existing orchestration, workflow, and UI configuration capabilities.
+
+## Reference Resources
+
+- [Zod Documentation](https://zod.dev/)
+- [Agent Middleware Overview](./index.mdx)
+- [SkillsMiddleware Implementation](https://github.com/langgenius/xpert/tree/main/packages/server-ai/src/skill-package/plugins/skills-middleware)

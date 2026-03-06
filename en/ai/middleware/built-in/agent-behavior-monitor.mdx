@@ -1,6 +1,6 @@
 ---
 title: Agent Behavior Monitor Middleware
-sidebar_position: 5
+sidebar_position: 3
 ---
 
 This tutorial covers `@xpert-ai/plugin-agent-behavior-monitor` from `xpert-plugins`, used to detect and handle abnormal agent behavior during runtime.
@@ -98,9 +98,3 @@ Each run writes a snapshot. Check:
 - `ringBuffer`: events like `llm_judge`, `tool_call`, `tool_error`
 - `hits`: matched rules
 - `summary`: total hits, blocked count, terminated flag
-
-If expected blocking did not happen:
-
-1. Check whether action is still `alert_only`.
-2. Confirm `judgeModel` is configured for input rules.
-3. Inspect `llm_judge` event details and verify `matched=true` on the intended rule.

@@ -1,7 +1,7 @@
 {
   "en": {
     "ai": "AI",
-    "agent-middleware": "Agent Middleware",
+    "middleware": "Agent Middleware",
     "ai-assistant": "AI Assistant",
     "conversation": "Conversation",
     "digital-expert": "Digital Expert",
@@ -20,7 +20,7 @@
   },
   "zh-Hans": {
     "ai": "AI",
-    "agent-middleware": "智能体中间件",
+    "middleware": "智能体中间件",
     "ai-assistant": "AI 助手",
     "conversation": "对话",
     "digital-expert": "数字专家",
@@ -58,6 +58,7 @@
     "git": "Git",
     "lark": "飞书",
     "skill": "技能",
-    "trigger": "触发器"
+    "trigger": "触发器",
+    "built-in": "内置"
   }
 }

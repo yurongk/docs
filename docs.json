@@ -300,11 +300,16 @@
                   {
                     "group": "Default",
                     "pages": [
-                      "en/ai/agent-middleware/built-in",
-                      "en/ai/agent-middleware/sensitive-filter",
-                      "en/ai/agent-middleware/agent-behavior-monitor",
-                      "en/ai/agent-middleware/custom",
-                      "en/ai/agent-middleware/agent-middleware"
+                      "en/ai/middleware/index",
+                      "en/ai/middleware/custom"
+                    ]
+                  },
+                  {
+                    "group": "Built In",
+                    "pages": [
+                      "en/ai/middleware/built-in/index",
+                      "en/ai/middleware/built-in/sensitive-filter",
+                      "en/ai/middleware/built-in/agent-behavior-monitor"
                     ]
                   }
                 ]
@@ -356,18 +361,6 @@
                       "en/ai/chatkit/chatkit-effect",
                       "en/ai/chatkit/chatkit-actions"
                     ]
-                  }
-                ]
-              },
-              {
-                "tab": "OpenAPI",
-                "groups": [
-                  {
-                    "group": "AI",
-                    "openapi": {
-                      "source": "/api/openapi.ai.json",
-                      "directory": "en/api-reference/ai"
-                    }
                   }
                 ]
               },
@@ -934,11 +927,16 @@
                   {
                     "group": "默认",
                     "pages": [
-                      "zh-Hans/ai/agent-middleware/built-in",
-                      "zh-Hans/ai/agent-middleware/sensitive-filter",
-                      "zh-Hans/ai/agent-middleware/agent-behavior-monitor",
-                      "zh-Hans/ai/agent-middleware/custom",
-                      "zh-Hans/ai/agent-middleware/agent-middleware"
+                      "zh-Hans/ai/middleware/index",
+                      "zh-Hans/ai/middleware/custom"
+                    ]
+                  },
+                  {
+                    "group": "内置",
+                    "pages": [
+                      "zh-Hans/ai/middleware/built-in/index",
+                      "zh-Hans/ai/middleware/built-in/sensitive-filter",
+                      "zh-Hans/ai/middleware/built-in/agent-behavior-monitor"
                     ]
                   }
                 ]
@@ -996,18 +994,6 @@
                       "zh-Hans/ai/chatkit/chatkit-effect",
                       "zh-Hans/ai/chatkit/chatkit-actions"
                     ]
-                  }
-                ]
-              },
-              {
-                "tab": "OpenAPI",
-                "groups": [
-                  {
-                    "group": "AI",
-                    "openapi": {
-                      "source": "/api/openapi.ai.json",
-                      "directory": "zh-Hans/api-reference/ai"
-                    }
                   }
                 ]
               },
