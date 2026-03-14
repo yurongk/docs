@@ -1,0 +1,145 @@
+---
+title: 钉钉
+sidebar_position: 7
+---
+
+通过钉钉集成，Xpert 可以接收钉钉单聊和群聊消息，并把数字专家回复发送回钉钉。
+
+## 能力概览
+
+当前 `@xpert-ai/plugin-dingtalk` 支持：
+
+- HTTP 回调接收钉钉消息事件
+- 单聊消息处理
+- 群聊 `@机器人` 消息处理
+- 通知中间件发送文本、Markdown、卡片消息
+- 通知中间件更新消息
+- 通知中间件撤回人与机器人会话（OTO）消息
+
+当前版本限制：
+
+- 仅支持 **HTTP 回调**，不支持 Stream 模式
+- 群聊中仅处理 `@机器人` 消息
+- 撤回能力当前只覆盖 OTO（人与机器人会话）消息
+- 群聊列表查询在不同租户的可用性不稳定，不建议依赖自动拉取群列表
+
+## 准备工作
+
+开始前请先准备：
+
+1. 钉钉企业账号（有应用管理权限）
+2. 企业内部应用（已开启机器人）
+3. 一个公网可访问的 Xpert 服务地址
+4. 回调安全参数（`callbackToken`、`callbackAesKey`）
+
+## 权限要求
+
+如果需要使用用户选择器或 `dingtalk_list_users` 工具读取用户列表，必须在钉钉应用权限中开通：
+
+- `qyapi_get_department_member`（通讯录部门成员读权限）
+
+未开通时，接口会返回权限不足错误（例如 `60011`）。
+
+## 在 Xpert 创建钉钉集成
+
+进入 **设置 -> 系统集成**，创建提供方为“钉钉”的集成。
+
+### 必填配置
+
+| 配置项 | 说明 |
+| --- | --- |
+| `Client ID (AppKey)` | 钉钉应用的 AppKey（即 Client ID） |
+| `Client Secret` | 钉钉应用密钥 |
+| `启用 HTTP 回调` | 当前版本必须开启 |
+| `回调 Token` | 用于验签 |
+| `回调 AES Key` | 用于解密回调密文 |
+
+### 推荐配置
+
+| 配置项 | 说明 |
+| --- | --- |
+| `机器人编码` | 用于主动发消息、更新消息、撤回消息 |
+| `数字专家` | 未命中触发器绑定时的兜底 Xpert |
+| `首选语言` | `zh-Hans` 或 `en` |
+
+:::tip
+`Client ID` 与钉钉控制台中的 `AppKey` 是同一个值。
+:::
+
+## 配置钉钉回调
+
+集成保存后，可在系统集成“测试”中拿到回调地址：
+
+```text
+POST /api/dingtalk/webhook/:integrationId
+```
+
+完整示例：
+
+```text
+https://api.xpertai.cn/api/dingtalk/webhook/<integrationId>
+```
+
+钉钉控制台配置建议：
+
+1. 在“事件与回调”或“机器人与消息推送”中使用上面的公网地址。
+2. 保证钉钉侧 `token/aes_key` 与 Xpert 集成配置一致。
+3. 配置接收方式为 HTTP 推送。
+
+:::tip
+若配置回调时报“地址校验失败”，优先检查：公网可访问性、反向代理转发、证书链是否完整。
+:::
+
+## 搭建自动回复机器人（MyCoder 场景）
+
+1. 完成钉钉集成配置并通过测试。
+2. 在目标专家工作流中添加 **钉钉触发器** 并选择该钉钉集成。
+3. 发布专家。
+4. 将应用机器人加入目标群。
+5. 在群里通过 `@机器人` 发送消息进行验证。
+
+发布后，消息路由优先级为：
+
+1. 已有会话绑定
+2. 钉钉触发器绑定（`integrationId -> xpertId`）
+3. 集成配置中的 `xpertId` 兜底
+
+## 钉钉通知中间件
+
+常用工具：
+
+- `dingtalk_send_text_notification`
+- `dingtalk_send_rich_notification`
+- `dingtalk_update_message`
+- `dingtalk_recall_message`
+- `dingtalk_list_users`
+
+`dingtalk_send_rich_notification` 的 `mode` 支持：
+
+- `markdown`
+- `interactive`
+- `template`
+
+### 收件人配置
+
+通知中间件通过 `recipient_type + recipient_id` 定位收件人。
+
+常见 `recipient_type`：
+
+- `user_id`
+- `open_id`
+- `chat_id`
+
+实践建议：
+
+- 通知用户优先使用稳定的用户标识（如 `open_id` 或平台统一映射后的 `user_id`）。
+- 通知群聊使用 `chat_id`（即 `openConversationId`）。
+- `recipient_id` 可配置为运行时变量（如 `{{state.dingtalkRecipientId}}`）。
+
+
+## 参考文档
+
+- [钉钉开放平台](https://open.dingtalk.com/document/dingstart)
+- [机器人开发总览](https://open.dingtalk.com/document/development/development-robot-overview)
+- [机器人发送群消息](https://open.dingtalk.com/document/development/the-robot-sends-a-group-message)
+- [机器人发送互动卡片](https://open.dingtalk.com/document/development/robots-send-interactive-cards)

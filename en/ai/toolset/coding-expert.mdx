@@ -1,0 +1,446 @@
+---
+title: Coding Expert
+sidebar_position: 8
+tags:
+  - Coding Expert
+  - GitHub
+  - GitLab
+  - Gitee
+  - Yunxiao
+---
+
+:::tip PRO
+This feature is available in the **Professional Edition**.
+:::
+
+The Coding Expert is a powerful AI programming assistant that can connect to mainstream code management platforms (GitHub, GitLab, Gitee, Yunxiao) to automate code review, issue handling, code modification, and PR submission.
+
+With the Coding Expert, you can:
+
+- 📋 **Automatically Review Issues**: Intelligently analyze and categorize issues, providing solution suggestions
+- 🔧 **Automatically Modify Code**: Automatically modify code files based on issues or requirements
+- 🚀 **Automatically Submit PRs**: Create Pull Requests with auto-generated descriptions
+- 🤝 **Code Review**: Intelligently review PRs and provide improvement suggestions
+- 📝 **Generate Documentation**: Automatically generate or update project documentation
+
+## 📦 Supported Platforms
+
+| Platform | Integration Method | Description |
+|----------|-------------------|-------------|
+| **GitHub** | APP_INSTALLATION | GitHub App installation mode - platform configures App, users install and authorize |
+| **GitLab** | OAUTH_WEB / PAT | Supports OAuth authorization or Personal Access Token (PAT) |
+| **Gitee** | OAUTH_WEB / PAT | Supports OAuth authorization or Personal Access Token (PAT) |
+| **Yunxiao Codeup** | PAT | Only supports Personal Access Token (PAT) mode |
+
+## 🔧 Backend Configuration
+
+Before using the Coding Expert, you need to configure the relevant environment variables in the backend.
+
+### Callback URL Rules
+
+The backend unified callback route is: `/v1/git/connections/callback/:providerId`
+
+Local development example (backend running on port 3001):
+
+| Platform | Callback URL |
+|----------|--------------|
+| **GitHub** | `http://localhost:3001/v1/git/connections/callback/github` |
+| **GitLab** | `http://localhost:3001/v1/git/connections/callback/gitlab` |
+| **Gitee** | `http://localhost:3001/v1/git/connections/callback/gitee` |
+
+:::info Production Environment
+In production, replace `http://localhost:3001` with your public API domain (e.g., `https://api.xxx.com`).
+:::
+
+:::note Yunxiao Codeup
+Yunxiao Codeup does not support third-party OAuth callbacks, use PAT mode for direct connection.
+:::
+
+### Environment Variables Configuration
+
+Configure the following required items in the `.env` file:
+
+```bash
+# GitHub App Configuration
+GITHUB_APP_SLUG=
+GITHUB_APP_ID=
+GITHUB_APP_PRIVATE_KEY=
+
+# GitLab OAuth Configuration
+GITLAB_CLIENT_ID=
+GITLAB_CLIENT_SECRET=
+GITLAB_REDIRECT_URI=http://localhost:3001/v1/git/connections/callback/gitlab
+GITLAB_SCOPES=api read_user
+
+# Gitee OAuth Configuration
+GITEE_CLIENT_ID=
+GITEE_CLIENT_SECRET=
+GITEE_REDIRECT_URI=http://localhost:3001/v1/git/connections/callback/gitee
+GITEE_SCOPES=user_info projects pull_requests
+
+# Credentials Encryption Key (Required, 32 bytes)
+GIT_CREDENTIALS_KEY=
+```
+
+:::warning Important Notes
+- `GIT_CREDENTIALS_KEY` is required and must be a 32-byte string
+- Ensure the API service actually reads this `.env` file (depending on the actual startup method, the file may be in the root directory or `apps/api/.env`)
+:::
+
+---
+
+## 🚀 Platform Configuration Steps
+
+### GitHub Configuration (App Mode)
+
+GitHub uses **App Installation** mode, where the platform pre-configures the GitHub App and users only need to install and authorize it in the system.
+
+#### 1. Create GitHub App
+
+1. Log in to [GitHub](https://github.com), go to **Settings** → **Developer settings** → **GitHub Apps**
+2. Click **New GitHub App** button
+3. Fill in the application information:
+
+   | Field | Description | Example |
+   |-------|-------------|---------|
+   | GitHub App name | Application name | XpertAI Coding Expert |
+   | Homepage URL | Homepage URL | https://app.xpertai.cn |
+   | Description | Application description | AI coding agent for automated code tasks |
+   | Identification | URL slug | xpertai-coding-agent |
+
+4. Configure **Webhook** (optional):
+   - Active: Uncheck (if Webhook is not needed)
+   - Webhook URL: Leave empty
+
+5. Configure **App permissions**:
+
+   | Permission | Access Level | Description |
+   |------------|--------------|-------------|
+   | Repository permissions | | |
+   | - Administration | Read & write | Repository management |
+   | - Contents | Read & write | Code content read/write |
+   | - Issues | Read & write | Issue management |
+   | - Pull requests | Read & write | PR management |
+   | - Metadata | Read-only | Metadata read |
+   | Organization permissions | | |
+   | - Members | Read-only | Member read |
+
+6. Configure **Where can this GitHub App be installed?**
+   - Select: **Only on this account** or **Any account**
+
+7. Click **Create GitHub App** to create the app
+
+#### 2. Get and Save Credentials
+
+After successful creation, get the following information on the app details page:
+
+| Field | Environment Variable | Description |
+|-------|-------------------|-------------|
+| **App ID** | `GITHUB_APP_ID` | Application ID |
+| **App Slug** | `GITHUB_APP_SLUG` | Application identifier (name shown in URL) |
+| **Private Key** | `GITHUB_APP_PRIVATE_KEY` | Private key file content |
+
+:::tip Getting Private Key
+At the bottom of the app details page, click **Generate a private key** to download the `.pem` file, open the file and copy all content to `GITHUB_APP_PRIVATE_KEY`.
+:::
+
+#### 3. User Authorization Flow
+
+When users click connect in the system:
+
+1. System redirects to GitHub App installation page
+2. User selects repositories to authorize (all repositories or specific repositories)
+3. Click **Save** to complete authorization
+4. After successful authorization, the system can access the user's authorized repositories
+
+---
+
+### GitLab Configuration
+
+GitLab supports two integration methods: **OAuth Mode** (recommended) and **PAT Mode**.
+
+#### OAuth Mode (Recommended)
+
+##### 1. Create GitLab Application
+
+1. Log in to [GitLab](https://gitlab.com), go to **User Settings** → **Applications**
+2. Fill in the application information:
+
+   | Field | Description | Example |
+   |-------|-------------|---------|
+   | Name | Application name | XpertAI Coding Expert |
+   | Redirect URI | Callback URL | `http://localhost:3001/v1/git/connections/callback/gitlab` |
+
+3. Check the following permissions (Scopes):
+
+   | Permission | Description |
+   |------------|-------------|
+   | `api` | Full API access |
+   | `read_user` | Read user information |
+
+:::warning Permission Matching Principle
+`GITLAB_SCOPES` must be exactly the same as the permissions configured in the GitLab application, otherwise the authorization will succeed but the API will return 401/403 errors.
+:::
+
+4. Click **Save application** to create the app
+
+##### 2. Get and Save Credentials
+
+After successful creation, copy the following information to `.env`:
+
+| Field | Environment Variable | Description |
+|-------|-------------------|-------------|
+| **Application ID** | `GITLAB_CLIENT_ID` | Application ID |
+| **Secret** | `GITLAB_CLIENT_SECRET` | Application secret |
+
+##### 3. User Authorization Flow
+
+When users click connect in the system:
+
+1. System redirects to GitLab authorization page
+2. User clicks **Authorize** to complete authorization
+3. After successful authorization, the system can access the user's GitLab repositories
+
+#### PAT Mode
+
+PAT mode does not require configuring `GITLAB_CLIENT_ID` and `GITLAB_CLIENT_SECRET`.
+
+##### User Configuration Steps
+
+1. User generates a Personal Access Token in GitLab
+2. Select GitLab on the system connection page
+3. Select **PAT** mode
+4. Enter the following information:
+   - **Token**: Personal access token
+   - **Base URL** (optional): GitLab instance URL (if using self-hosted GitLab)
+
+---
+
+### Gitee Configuration
+
+Gitee supports two integration methods: **OAuth Mode** and **PAT Mode**.
+
+#### OAuth Mode
+
+##### 1. Create Gitee Third-Party Application
+
+1. Log in to [Gitee](https://gitee.com), go to **Settings** → **Third-Party Applications** → **Create Application**
+2. Fill in the application information:
+
+   | Field | Description | Example |
+   |-------|-------------|---------|
+   | Application Name | Application name | XpertAI Coding Expert |
+   | Application Introduction | Application description | AI coding agent for automated code tasks |
+   | Application Homepage | Homepage URL | https://app.xpertai.cn |
+   | Application Callback URL | Callback URL | `http://localhost:3001/v1/git/connections/callback/gitee` |
+
+3. Check the following permissions (Scopes):
+
+   | Permission | Description |
+   |------------|-------------|
+   | `user_info` | User information |
+   | `projects` | Project access |
+   | `pull_requests` | PR management |
+
+:::warning Permission Matching Principle
+`GITEE_SCOPES` must be exactly the same as the permissions configured in the Gitee application, otherwise the authorization will succeed but the API will return 401/403 errors.
+:::
+
+4. Click **Create Application**
+
+##### 2. Get and Save Credentials
+
+After successful creation, copy the following information to `.env`:
+
+| Field | Environment Variable | Description |
+|-------|-------------------|-------------|
+| **Client ID** | `GITEE_CLIENT_ID` | Application ID |
+| **Client Secret** | `GITEE_CLIENT_SECRET` | Application secret |
+
+##### 3. User Authorization Flow
+
+When users click connect in the system:
+
+1. System redirects to Gitee authorization page
+2. User clicks **Agree to Authorize** to complete authorization
+3. After successful authorization, the system can access the user's Gitee repositories
+
+#### PAT Mode
+
+PAT mode does not require configuring `GITEE_CLIENT_ID` and `GITEE_CLIENT_SECRET`.
+
+##### User Configuration Steps
+
+1. User generates a Personal Access Token in Gitee
+2. Select Gitee on the system connection page
+3. Select **PAT** mode
+4. Enter the personal access token
+
+---
+
+### Yunxiao Codeup Configuration (PAT Mode)
+
+Yunxiao Codeup only supports **PAT Mode** and does not support OAuth callbacks.
+
+#### 1. Create Yunxiao PAT
+
+1. Log in to [Yunxiao](https://devops.aliyun.com)
+2. Go to **Personal Settings** → **Access Tokens** → **Create Access Token**
+3. Configure token permissions:
+
+   | Permission | Description |
+   |------------|-------------|
+   | Code Repository | Read and write code repositories |
+   | Branch | Read and create branches |
+   | Merge Request | Read and create merge requests |
+   | Issue | Read and manage issues |
+
+4. Click **Create** and copy the generated token
+
+#### 2. User Configuration Steps
+
+On the system connection page:
+
+1. Select **Yunxiao Codeup**
+2. Fill in the following information:
+   - **Organization ID**: Yunxiao organization ID
+   - **Token**: Personal access token
+
+:::tip Getting Organization ID
+You can view the organization ID in the Yunxiao organization settings page under "Joined Organizations". It is a string like "6932875abb64aae55975251f".
+:::
+
+---
+
+## 🚀 Using the Coding Expert
+
+After configuration, you can use the Coding Expert tools in agents or workflows.
+
+### Available Tools
+
+| Tool Name | Description |
+|-----------|-------------|
+| `list_repositories` | List repositories the user has access to |
+| `list_issues` | List issues in a repository |
+| `get_issue` | Get detailed issue information |
+| `create_issue` | Create a new issue |
+| `update_issue` | Update issue status or content |
+| `list_pull_requests` | List pull requests in a repository |
+| `get_pull_request` | Get detailed PR information |
+| `create_pull_request` | Create a new pull request |
+| `review_pull_request` | Review a pull request |
+| `get_file_content` | Get file content |
+| `update_file` | Modify or create a file |
+| `create_commit` | Commit code changes |
+
+
+- Manually review all code changes
+- Check if the agent's modifications comply with project standards
+- Verify that the functionality works correctly
+
+### 4. Error Handling
+
+The Coding Expert may encounter errors during execution, it's recommended to:
+
+- Configure error notification mechanisms to detect issues in time
+- Log operations for troubleshooting
+- Set up retry mechanisms for handling temporary errors
+
+---
+
+## 🔒 Security Considerations
+
+### 1. Credential Security
+
+- Do not commit sensitive information like Client Secret, AppSecret, Private Key to code repositories
+- Regularly rotate application secrets and tokens
+- Use environment variables to store sensitive information
+- Ensure `GIT_CREDENTIALS_KEY` is stored securely
+
+### 2. Access Control
+
+- Limit the scope of repositories the Coding Expert can access
+- Configure different application instances for different projects
+- Regularly review the list of authorized applications
+
+### 3. Audit Logs
+
+- Enable platform audit logging
+- Regularly check the Coding Expert's operation records
+- Handle abnormal operations promptly
+
+---
+
+## 📚 FAQ
+
+### Q1: What to do if authorization fails?
+
+**A**: Please check the following:
+- Whether the callback URL is correctly configured (including protocol http/https)
+- Whether application permissions are correctly checked
+- Whether environment variables in `.env` file are correctly configured
+- Whether the API service actually reads the `.env` file
+
+### Q2: Authorization succeeds but API returns 401/403 errors?
+
+**A**: This is usually caused by permission configuration mismatch:
+- Check if `GITLAB_SCOPES` or `GITEE_SCOPES` are exactly the same as the permissions configured in the platform application
+- Confirm that the application permission scope is sufficient
+- Recreate the application and ensure permission configuration is correct
+
+### Q3: Coding Expert cannot access private repositories?
+
+**A**: Please confirm:
+- User has correctly authorized or provided a valid PAT
+- PAT has permission to access the repository
+- Whether the repository's access settings allow third-party application access
+
+### Q4: How to limit the Coding Expert's operation scope?
+
+**A**: You can:
+- Select specific repositories when installing GitHub App
+- Clearly define the operation scope in the agent's prompt
+- Use branch protection rules to restrict operable branches
+
+### Q5: What to do if the code modified by the Coding Expert is incorrect?
+
+**A**: It's recommended to:
+- Enable branch protection and require manual review
+- Configure CI/CD checks to automatically detect code issues
+- Close problematic PRs promptly and provide feedback to the agent
+
+---
+
+## 🎓 Summary
+
+The Coding Expert is a powerful AI programming assistant that can automate various code tasks by connecting to mainstream code management platforms.
+
+**Configuration Key Points:**
+
+1. ✅ Configure backend environment variables (`.env`)
+2. ✅ Create applications on each platform (GitHub App / GitLab Application / Gitee Application)
+3. ✅ Configure correct callback URLs and permission scopes
+4. ✅ User completes authorization or provides PAT
+5. ✅ Follow security best practices
+
+**Integration Method Comparison:**
+
+| Platform | Recommended Method | Callback Required | User Action |
+|----------|-------------------|-------------------|--------------|
+| GitHub | App Installation | ✅ Yes | Install and authorize |
+| GitLab | OAuth | ✅ Yes | Click to authorize |
+| GitLab | PAT | ❌ No | Enter token |
+| Gitee | OAuth | ✅ Yes | Click to authorize |
+| Gitee | PAT | ❌ No | Enter token |
+| Yunxiao | PAT | ❌ No | Enter token |
+
+After configuration, you can let the Coding Expert help you automate code tasks and improve development efficiency!
+
+---
+
+## 🔗 Related Links
+
+- [GitHub Apps Documentation](https://docs.github.com/en/developers/apps)
+- [GitLab Applications Documentation](https://docs.gitlab.com/ee/integration/oauth_provider.html)
+- [Gitee Open Platform Documentation](https://open.gitee.com/api)
+- [Yunxiao Open Platform Documentation](https://help.aliyun.com/document_detail/171872.html)
