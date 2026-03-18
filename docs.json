@@ -391,6 +391,18 @@
                     ]
                   }
                 ]
+              },
+              {
+                "tab": "OpenAPI",
+                "groups": [
+                  {
+                    "group": "AI",
+                    "openapi": {
+                      "source": "api/openapi.ai.json",
+                      "directory": "en/api-reference"
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -1021,6 +1033,18 @@
                       "zh-Hans/ai/tutorial/project-group-single-vs-multi-agent",
                       "zh-Hans/ai/tutorial/agentic-bi-end-to-end-analysis"
                     ]
+                  }
+                ]
+              },
+              {
+                "tab": "OpenAPI",
+                "groups": [
+                  {
+                    "group": "AI",
+                    "openapi": {
+                      "source": "api/openapi.ai.json",
+                      "directory": "zh-Hans/api-reference"
+                    }
                   }
                 ]
               }
