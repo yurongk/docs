@@ -101,7 +101,38 @@
       "tabs": [
         {
           "slug": "web",
-          "groups": []
+          "groups": [
+            {
+              "slug": "__default__",
+              "pages": [
+                "index",
+                "tasks",
+                "change-sets",
+                "environments"
+              ]
+            },
+            {
+              "slug": "guides",
+              "pages": [
+                "system-logger"
+              ]
+            },
+            {
+              "slug": "git",
+              "pages": [
+                "github",
+                "gitlab",
+                "gitee",
+                "codeup"
+              ]
+            },
+            {
+              "slug": "lark",
+              "pages": [
+                "index"
+              ]
+            }
+          ]
         }
       ]
     }

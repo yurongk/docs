@@ -668,6 +668,12 @@
                     ]
                   },
                   {
+                    "group": "Guides",
+                    "pages": [
+                      "en/code/web/guides/system-logger"
+                    ]
+                  },
+                  {
                     "group": "Git",
                     "pages": [
                       "en/code/web/git/github",
@@ -1309,6 +1315,12 @@
                       "zh-Hans/code/web/tasks",
                       "zh-Hans/code/web/change-sets",
                       "zh-Hans/code/web/environments"
+                    ]
+                  },
+                  {
+                    "group": "指南",
+                    "pages": [
+                      "zh-Hans/code/web/guides/system-logger"
                     ]
                   },
                   {

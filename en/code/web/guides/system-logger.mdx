@@ -1,0 +1,120 @@
+---
+title: System Logger Configuration
+sidebar_position: 1
+tags:
+  - AI
+  - Agent
+  - Code
+---
+
+This guide explains how the backend system logger is configured and what each setting changes at runtime.
+
+## Overview
+
+The current logger is built on `nestjs-pino` and `pino`.
+
+- HTTP request logs and Nest application logs go through the same logger pipeline.
+- Logs are written to the console and to a rotating file at the same time.
+- In non-production environments the console output is prettified with `pino-pretty`.
+- In production the console output stays as structured JSON on `stdout`.
+- The default log file is `xpert-server.log`.
+
+## Configuration
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `NODE_ENV` | `development` | Controls console formatting. `production` keeps JSON output on `stdout`; other values use pretty single-line output. |
+| `LOG_LEVEL` | `log` | Base log level. Nest-style values are mapped to pino levels: `verbose -> trace`, `debug -> debug`, `log -> info`, `warn -> warn`, `error -> error`, `fatal -> fatal`. Direct pino levels such as `trace`, `info`, `fatal`, and `silent` also work. |
+| `LOG_FILE_PATH` | unset | Full path of the active log file. When set, it takes precedence over `LOG_DIR`. |
+| `LOG_DIR` | `<process.cwd()>/logs` | Log directory used when `LOG_FILE_PATH` is not set. The active file name is `xpert-server.log`. |
+| `LOG_FILE_MAX_SIZE` | `10m` | Maximum size of the active log file before rotation. Supported units: `b`, `k`, `kb`, `m`, `mb`, `g`, `gb`. |
+| `LOG_FILE_MAX_FILES` | `5` | Total number of files kept, including the active file. |
+
+## Output behavior
+
+### Console
+
+- `NODE_ENV=production`: raw JSON logs are written to `stdout`.
+- Any other environment: logs are colorized, flattened to one line, and formatted with readable timestamps.
+
+### File
+
+- File logs are always written as structured JSON.
+- The destination directory is created automatically when needed.
+- The logger opens the file in append mode, so restarts continue writing to the same active file.
+- Path resolution follows this order: `LOG_FILE_PATH` -> `LOG_DIR/xpert-server.log` -> `<process.cwd()>/logs/xpert-server.log`.
+
+## Rotation behavior
+
+- Rotation happens before a write that would push the active file past `LOG_FILE_MAX_SIZE`.
+- Rotated files are named like `xpert-server.log.1`, `xpert-server.log.2`, and so on.
+- `LOG_FILE_MAX_FILES=5` means 1 active file plus 4 backups.
+- `LOG_FILE_MAX_FILES=1` keeps no backup files and replaces the active file on each rotation.
+
+## Request metadata and safety
+
+Each request log is enriched with:
+
+- `service: xpert-server`
+- `env`
+- `traceparent`
+- `tracestate`
+
+The logger also applies these protections:
+
+- Reuses `x-request-id` only when the incoming header is a valid UUID.
+- Generates a new UUID when the request does not provide a valid request id.
+- Returns the final request id in the response header `x-request-id`.
+- Skips automatic access logging for `/health` and `/api/health`.
+- Redacts sensitive fields with `[Redacted]`.
+
+The current redaction list covers:
+
+- `req.headers.authorization`
+- `req.headers.cookie`
+- `req.headers["x-api-key"]`
+- `req.body.password`
+- `req.body.token`
+- `req.body.accessToken`
+- `req.body.refreshToken`
+
+## Bootstrap integration
+
+The logger is wired into Nest during bootstrap:
+
+- `providePinoLoggerModule()` registers the pino HTTP logger.
+- `app.useLogger(app.get(Logger))` makes Nest use the pino-backed logger.
+- `NestLogger.overrideLogger(resolveNestLogLevels())` keeps Nest log filtering aligned with `LOG_LEVEL`.
+
+That means the same configuration controls both framework logs and request logs.
+
+## Recommended examples
+
+Use a directory-based configuration:
+
+```bash
+NODE_ENV=production
+LOG_LEVEL=info
+LOG_DIR=/var/log/xpert
+LOG_FILE_MAX_SIZE=50m
+LOG_FILE_MAX_FILES=7
+```
+
+Use a fixed file path:
+
+```bash
+NODE_ENV=production
+LOG_LEVEL=debug
+LOG_FILE_PATH=/var/log/xpert/xpert-server.log
+LOG_FILE_MAX_SIZE=100m
+LOG_FILE_MAX_FILES=10
+```
+
+When `LOG_FILE_PATH` is set, `LOG_DIR` is ignored.
+
+## Relevant source files
+
+- `xpert/packages/server/src/logger/pino-logger.ts`
+- `xpert/packages/server/src/logger/pino-rotating-file.stream.ts`
+- `xpert/packages/config/src/environments/ienvironment.ts`
+- `xpert/packages/server/src/bootstrap/index.ts`
