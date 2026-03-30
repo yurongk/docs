@@ -58,20 +58,23 @@
       {
         "language": "en",
         "default": true,
-        "navbar": [
-          {
-            "label": "GitHub",
-            "href": "https://github.com/xpert-ai/xpert"
-          },
-          {
-            "label": "Support",
-            "href": "mailto:service@xpertai.cn"
-          },
-          {
+        "navbar": {
+          "links": [
+            {
+              "label": "GitHub",
+              "href": "https://github.com/xpert-ai/xpert"
+            },
+            {
+              "label": "Support",
+              "href": "mailto:service@xpertai.cn"
+            }
+          ],
+          "primary": {
+            "type": "button",
             "label": "Try XpertAI",
             "href": "https://app.xpertai.cn/"
           }
-        ],
+        },
         "products": [
           {
             "product": "AI",
@@ -696,20 +699,23 @@
       },
       {
         "language": "zh-Hans",
-        "navbar": [
-          {
-            "label": "GitHub",
-            "href": "https://github.com/xpert-ai/xpert"
-          },
-          {
-            "label": "支持",
-            "href": "mailto:service@xpertai.cn"
-          },
-          {
+        "navbar": {
+          "links": [
+            {
+              "label": "GitHub",
+              "href": "https://github.com/xpert-ai/xpert"
+            },
+            {
+              "label": "支持",
+              "href": "mailto:service@xpertai.cn"
+            }
+          ],
+          "primary": {
+            "type": "button",
             "label": "试用 XpertAI",
             "href": "https://app.xpertai.cn/"
           }
-        ],
+        },
         "products": [
           {
             "product": "AI",

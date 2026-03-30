@@ -133,21 +133,6 @@ let NAVIGATION_ORDER_INDEXES = {
 
 /* ===================== Navbar multilingual mapping ===================== */
 
-// navbar inside language node (array format)
-const NAVBAR_ARRAY_BY_LANGUAGE = {
-  en: [
-    { label: "GitHub", href: "https://github.com/xpert-ai/xpert" },
-    { label: "Support", href: "mailto:service@xpertai.cn" },
-    { label: "Try XpertAI", href: "https://app.xpertai.cn/" },
-  ],
-  "zh-Hans": [
-    { label: "GitHub", href: "https://github.com/xpert-ai/xpert" },
-    { label: "支持", href: "mailto:service@xpertai.cn" },
-    { label: "试用 XpertAI", href: "https://app.xpertai.cn/" },
-  ],
-};
-
-// top-level navbar (object format) — avoid crash if main() references undefined
 const NAVBAR_BY_LANGUAGE = {
   en: {
     links: [
@@ -156,8 +141,8 @@ const NAVBAR_BY_LANGUAGE = {
     ],
     primary: {
       type: "button",
-      label: "Try Chat-Kit",
-      href: "https://xpertai.cn/docs/ai/",
+      label: "Try XpertAI",
+      href: "https://app.xpertai.cn/",
     },
   },
   "zh-Hans": {
@@ -167,8 +152,8 @@ const NAVBAR_BY_LANGUAGE = {
     ],
     primary: {
       type: "button",
-      label: "试用 Chat-Kit",
-      href: "https://xpertai.cn/zh-Hans/docs/ai/",
+      label: "试用 XpertAI",
+      href: "https://app.xpertai.cn/",
     },
   },
 };
@@ -866,8 +851,8 @@ async function buildNavigationForLanguage(language, docs, contentRootAbs, update
   return {
     ...restConfig, // keep other config (e.g., default)
     language,
-    // add per-language navbar (array format)
-    navbar: NAVBAR_ARRAY_BY_LANGUAGE[language] ?? NAVBAR_ARRAY_BY_LANGUAGE.en,
+    // add per-language navbar (object format required by Mintlify schema)
+    navbar: NAVBAR_BY_LANGUAGE[language] ?? NAVBAR_BY_LANGUAGE.en,
     products: mergedProducts, // generated pages + preserved manual navigation config
   };
 }
