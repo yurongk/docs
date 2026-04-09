@@ -198,7 +198,8 @@
                       "en/ai/toolset/scheduled-tasks",
                       "en/ai/toolset/feishu",
                       "en/ai/toolset/dingtalk",
-                      "en/ai/toolset/planning-tasks"
+                      "en/ai/toolset/planning-tasks",
+                      "en/ai/toolset/coding-expert"
                     ]
                   },
                   {
@@ -294,7 +295,8 @@
                       "en/ai/ai-assistant/index",
                       "en/ai/ai-assistant/settings",
                       "en/ai/ai-assistant/command",
-                      "en/ai/ai-assistant/roles"
+                      "en/ai/ai-assistant/roles",
+                      "en/ai/ai-assistant/configure-ai-assistant"
                     ]
                   }
                 ]
@@ -365,6 +367,12 @@
                       "en/ai/chatkit/chatkit-tool",
                       "en/ai/chatkit/chatkit-effect",
                       "en/ai/chatkit/chatkit-actions"
+                    ]
+                  },
+                  {
+                    "group": "Sdk",
+                    "pages": [
+                      "en/ai/chatkit/sdk/integrate-xpertai-api"
                     ]
                   },
                   {
@@ -854,7 +862,8 @@
                       "zh-Hans/ai/toolset/scheduled-tasks",
                       "zh-Hans/ai/toolset/feishu",
                       "zh-Hans/ai/toolset/dingtalk",
-                      "zh-Hans/ai/toolset/planning-tasks"
+                      "zh-Hans/ai/toolset/planning-tasks",
+                      "zh-Hans/ai/toolset/coding-expert"
                     ]
                   },
                   {
@@ -950,6 +959,7 @@
                       "zh-Hans/ai/ai-assistant/configure-ai-provider",
                       "zh-Hans/ai/ai-assistant/command",
                       "zh-Hans/ai/ai-assistant/role",
+                      "zh-Hans/ai/ai-assistant/configure-ai-assistant",
                       "zh-Hans/ai/ai-assistant/ai-assitant"
                     ]
                   }
@@ -1027,6 +1037,12 @@
                       "zh-Hans/ai/chatkit/chatkit-tool",
                       "zh-Hans/ai/chatkit/chatkit-effect",
                       "zh-Hans/ai/chatkit/chatkit-actions"
+                    ]
+                  },
+                  {
+                    "group": "Sdk",
+                    "pages": [
+                      "zh-Hans/ai/chatkit/sdk/integrate-xpertai-api"
                     ]
                   },
                   {
