@@ -370,12 +370,6 @@
                     ]
                   },
                   {
-                    "group": "Sdk",
-                    "pages": [
-                      "en/ai/chatkit/sdk/integrate-xpertai-api"
-                    ]
-                  },
-                  {
                     "group": "SDK",
                     "pages": [
                       "en/ai/chatkit/sdk/integrate-xpertai-api"
@@ -1037,12 +1031,6 @@
                       "zh-Hans/ai/chatkit/chatkit-tool",
                       "zh-Hans/ai/chatkit/chatkit-effect",
                       "zh-Hans/ai/chatkit/chatkit-actions"
-                    ]
-                  },
-                  {
-                    "group": "Sdk",
-                    "pages": [
-                      "zh-Hans/ai/chatkit/sdk/integrate-xpertai-api"
                     ]
                   },
                   {
