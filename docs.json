@@ -197,7 +197,9 @@
                       "en/ai/toolset/custom-toolset",
                       "en/ai/toolset/scheduled-tasks",
                       "en/ai/toolset/feishu",
-                      "en/ai/toolset/planning-tasks"
+                      "en/ai/toolset/dingtalk",
+                      "en/ai/toolset/planning-tasks",
+                      "en/ai/toolset/coding-expert"
                     ]
                   },
                   {
@@ -256,6 +258,7 @@
                       "en/ai/workflow/error-handling",
                       "en/ai/workflow/terminal",
                       "en/ai/workflow/trigger",
+                      "en/ai/workflow/dingtalk-trigger",
                       "en/ai/workflow/if-else",
                       "en/ai/workflow/answer",
                       "en/ai/workflow/assigner",
@@ -292,7 +295,8 @@
                       "en/ai/ai-assistant/index",
                       "en/ai/ai-assistant/settings",
                       "en/ai/ai-assistant/command",
-                      "en/ai/ai-assistant/roles"
+                      "en/ai/ai-assistant/roles",
+                      "en/ai/ai-assistant/configure-ai-assistant"
                     ]
                   }
                 ]
@@ -363,6 +367,12 @@
                       "en/ai/chatkit/chatkit-tool",
                       "en/ai/chatkit/chatkit-effect",
                       "en/ai/chatkit/chatkit-actions"
+                    ]
+                  },
+                  {
+                    "group": "SDK",
+                    "pages": [
+                      "en/ai/chatkit/sdk/integrate-xpertai-api"
                     ]
                   }
                 ]
@@ -845,7 +855,9 @@
                       "zh-Hans/ai/toolset/custom-toolset",
                       "zh-Hans/ai/toolset/scheduled-tasks",
                       "zh-Hans/ai/toolset/feishu",
-                      "zh-Hans/ai/toolset/planning-tasks"
+                      "zh-Hans/ai/toolset/dingtalk",
+                      "zh-Hans/ai/toolset/planning-tasks",
+                      "zh-Hans/ai/toolset/coding-expert"
                     ]
                   },
                   {
@@ -900,6 +912,7 @@
                       "zh-Hans/ai/workflow/error-handling",
                       "zh-Hans/ai/workflow/execution-endpoint",
                       "zh-Hans/ai/workflow/trigger",
+                      "zh-Hans/ai/workflow/dingtalk-trigger",
                       "zh-Hans/ai/workflow/answer",
                       "zh-Hans/ai/workflow/sub-process",
                       "zh-Hans/ai/workflow/variable-assignment",
@@ -940,6 +953,7 @@
                       "zh-Hans/ai/ai-assistant/configure-ai-provider",
                       "zh-Hans/ai/ai-assistant/command",
                       "zh-Hans/ai/ai-assistant/role",
+                      "zh-Hans/ai/ai-assistant/configure-ai-assistant",
                       "zh-Hans/ai/ai-assistant/ai-assitant"
                     ]
                   }
@@ -1017,6 +1031,12 @@
                       "zh-Hans/ai/chatkit/chatkit-tool",
                       "zh-Hans/ai/chatkit/chatkit-effect",
                       "zh-Hans/ai/chatkit/chatkit-actions"
+                    ]
+                  },
+                  {
+                    "group": "SDK",
+                    "pages": [
+                      "zh-Hans/ai/chatkit/sdk/integrate-xpertai-api"
                     ]
                   }
                 ]

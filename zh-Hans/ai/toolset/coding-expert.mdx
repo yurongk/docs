@@ -1,0 +1,446 @@
+---
+title: 编码专家
+sidebar_position: 8
+tags:
+  - Coding Expert
+  - GitHub
+  - GitLab
+  - Gitee
+  - 云效
+---
+
+:::tip PRO
+此功能在**专业版**中支持。
+:::
+
+编码专家是一个强大的 AI 编程助手，可以连接到主流代码管理平台（GitHub、GitLab、Gitee、云效），实现自动化代码审查、Issue 处理、代码修改和 PR 提交等功能。
+
+通过编码专家，你可以：
+
+- 📋 **自动审查 Issue**：智能分析并分类 Issue，提供解决方案建议
+- 🔧 **自动修改代码**：根据 Issue 或需求自动修改代码文件
+- 🚀 **自动提交 PR**：将修改后的代码创建 Pull Request 并自动填写描述
+- 🤝 **代码审查**：对 PR 进行智能审查，提供改进建议
+- 📝 **生成文档**：自动生成或更新项目文档
+
+## 📦 支持的平台
+
+| 平台 | 接入方式 | 说明 |
+|------|---------|------|
+| **GitHub** | APP_INSTALLATION | GitHub App 安装模式，平台方配置 App，用户安装授权 |
+| **GitLab** | OAUTH_WEB / PAT | 支持 OAuth 授权或个人访问令牌（PAT） |
+| **Gitee** | OAUTH_WEB / PAT | 支持 OAuth 授权或个人访问令牌（PAT） |
+| **云效 Codeup** | PAT | 仅支持个人访问令牌（PAT）模式 |
+
+## 🔧 后端配置
+
+在使用编码专家之前，需要先在后端配置相关环境变量。
+
+### 回调地址规则
+
+后端统一回调路由为：`/v1/git/connections/callback/:providerId`
+
+本地开发示例（后端运行在 3001 端口）：
+
+| 平台 | 回调地址 |
+|------|---------|
+| **GitHub** | `http://localhost:3001/v1/git/connections/callback/github` |
+| **GitLab** | `http://localhost:3001/v1/git/connections/callback/gitlab` |
+| **Gitee** | `http://localhost:3001/v1/git/connections/callback/gitee` |
+
+:::info 生产环境
+在生产环境中，请将 `http://localhost:3001` 替换为你的公网 API 域名（如 `https://api.xxx.com`）。
+:::
+
+:::note 云效 Codeup
+云效 Codeup 不支持第三方 OAuth 回调，使用 PAT 模式直接连接。
+:::
+
+### 环境变量配置
+
+在 `.env` 文件中配置以下必填项：
+
+```bash
+# GitHub App 配置
+GITHUB_APP_SLUG=
+GITHUB_APP_ID=
+GITHUB_APP_PRIVATE_KEY=
+
+# GitLab OAuth 配置
+GITLAB_CLIENT_ID=
+GITLAB_CLIENT_SECRET=
+GITLAB_REDIRECT_URI=http://localhost:3001/v1/git/connections/callback/gitlab
+GITLAB_SCOPES=api read_user
+
+# Gitee OAuth 配置
+GITEE_CLIENT_ID=
+GITEE_CLIENT_SECRET=
+GITEE_REDIRECT_URI=http://localhost:3001/v1/git/connections/callback/gitee
+GITEE_SCOPES=user_info projects pull_requests
+
+# 凭据加密密钥（必填，32字节）
+GIT_CREDENTIALS_KEY=
+```
+
+:::warning 重要提示
+- `GIT_CREDENTIALS_KEY` 为必填项，必须是 32 字节的字符串
+- 请确保 API 服务实际读取到该 `.env` 文件（根据实际启动方式，文件可能在根目录或 `apps/api/.env`）
+:::
+
+---
+
+## 🚀 平台配置步骤
+
+### GitHub 配置（App 模式）
+
+GitHub 使用 **App Installation** 模式，由平台方预先配置 GitHub App，用户只需在系统中安装授权即可。
+
+#### 1. 创建 GitHub App
+
+1. 登录 [GitHub](https://github.com)，进入 **Settings** → **Developer settings** → **GitHub Apps**
+2. 点击 **New GitHub App** 按钮
+3. 填写应用信息：
+
+   | 字段 | 说明 | 示例 |
+   |------|------|------|
+   | GitHub App name | 应用名称 | XpertAI Coding Agent |
+   | Homepage URL | 主页地址 | https://app.xpertai.cn |
+   | Description | 应用描述 | AI 编码专家，自动处理代码任务 |
+   | Identification | URL slug | xpertai-coding-agent |
+
+4. 配置 **Webhook**（可选）：
+   - Active: 取消勾选（如不需要 Webhook）
+   - Webhook URL: 留空
+
+5. 配置 **App permissions**（应用权限）：
+
+   | 权限 | 访问级别 | 说明 |
+   |------|---------|------|
+   | Repository permissions | | |
+   | - Administration | Read & write | 仓库管理 |
+   | - Contents | Read & write | 代码内容读写 |
+   | - Issues | Read & write | Issue 管理 |
+   | - Pull requests | Read & write | PR 管理 |
+   | - Metadata | Read-only | 元数据读取 |
+   | Organization permissions | | |
+   | - Members | Read-only | 成员读取 |
+
+6. 配置 **Where can this GitHub App be installed?**
+   - 选择：**Only on this account** 或 **Any account**
+
+7. 点击 **Create GitHub App** 创建应用
+
+#### 2. 获取并保存凭证
+
+创建成功后，在应用详情页面获取以下信息：
+
+| 字段 | 对应环境变量 | 说明 |
+|------|------------|------|
+| **App ID** | `GITHUB_APP_ID` | 应用 ID |
+| **App Slug** | `GITHUB_APP_SLUG` | 应用标识（URL 中显示的名称） |
+| **Private Key** | `GITHUB_APP_PRIVATE_KEY` | 私钥文件内容 |
+
+:::tip 获取 Private Key
+在应用详情页面底部，点击 **Generate a private key** 下载 `.pem` 文件，打开文件复制全部内容到 `GITHUB_APP_PRIVATE_KEY`。
+:::
+
+#### 3. 用户授权流程
+
+用户在系统内点击连接后：
+
+1. 系统跳转到 GitHub App 安装页面
+2. 用户选择要授权的仓库（所有仓库或指定仓库）
+3. 点击 **Save** 完成授权
+4. 授权成功后，系统即可访问用户授权的仓库
+
+---
+
+### GitLab 配置
+
+GitLab 支持两种接入方式：**OAuth 模式**（推荐）和 **PAT 模式**。
+
+#### OAuth 模式（推荐）
+
+##### 1. 创建 GitLab Application
+
+1. 登录 [GitLab](https://gitlab.com)，进入 **User Settings** → **Applications**
+2. 填写应用信息：
+
+   | 字段 | 说明 | 示例 |
+   |------|------|------|
+   | Name | 应用名称 | XpertAI Coding Agent |
+   | Redirect URI | 回调地址 | `http://localhost:3001/v1/git/connections/callback/gitlab` |
+
+3. 勾选以下权限（Scopes）：
+
+   | 权限 | 说明 |
+   |------|------|
+   | `api` | 完整的 API 访问权限 |
+   | `read_user` | 读取用户信息 |
+
+:::warning 权限匹配原则
+`GITLAB_SCOPES` 必须与 GitLab 应用配置中的权限完全一致，否则会授权成功但接口报 401/403 错误。
+:::
+
+4. 点击 **Save application** 创建应用
+
+##### 2. 获取并保存凭证
+
+创建成功后，复制以下信息到 `.env`：
+
+| 字段 | 对应环境变量 | 说明 |
+|------|------------|------|
+| **Application ID** | `GITLAB_CLIENT_ID` | 应用 ID |
+| **Secret** | `GITLAB_CLIENT_SECRET` | 应用密钥 |
+
+##### 3. 用户授权流程
+
+用户在系统内点击连接后：
+
+1. 系统跳转到 GitLab 授权页面
+2. 用户点击 **Authorize** 完成授权
+3. 授权成功后，系统即可访问用户的 GitLab 仓库
+
+#### PAT 模式
+
+PAT 模式不需要配置 `GITLAB_CLIENT_ID` 和 `GITLAB_CLIENT_SECRET`。
+
+##### 用户配置步骤
+
+1. 用户在 GitLab 生成个人访问令牌（Personal Access Token）
+2. 在系统连接页选择 GitLab
+3. 选择 **PAT** 模式
+4. 输入以下信息：
+   - **Token**：个人访问令牌
+   - **Base URL**（可选）：GitLab 实例地址（如使用自建 GitLab）
+
+---
+
+### Gitee 配置
+
+Gitee 支持两种接入方式：**OAuth 模式**和 **PAT 模式**。
+
+#### OAuth 模式
+
+##### 1. 创建 Gitee 第三方应用
+
+1. 登录 [Gitee](https://gitee.com)，进入 **设置** → **第三方应用** → **创建应用**
+2. 填写应用信息：
+
+   | 字段 | 说明 | 示例 |
+   |------|------|------|
+   | 应用名称 | 应用名称 | XpertAI Coding Agent |
+   | 应用介绍 | 应用描述 | AI 编码专家，自动处理代码任务 |
+   | 应用主页 | 主页地址 | https://app.xpertai.cn |
+   | 应用回调地址 | 回调地址 | `http://localhost:3001/v1/git/connections/callback/gitee` |
+
+3. 勾选以下权限（Scopes）：
+
+   | 权限 | 说明 |
+   |------|------|
+   | `user_info` | 用户信息 |
+   | `projects` | 项目访问 |
+   | `pull_requests` | PR 管理 |
+
+:::warning 权限匹配原则
+`GITEE_SCOPES` 必须与 Gitee 应用配置中的权限完全一致，否则会授权成功但接口报 401/403 错误。
+:::
+
+4. 点击 **创建应用**
+
+##### 2. 获取并保存凭证
+
+创建成功后，复制以下信息到 `.env`：
+
+| 字段 | 对应环境变量 | 说明 |
+|------|------------|------|
+| **Client ID** | `GITEE_CLIENT_ID` | 应用 ID |
+| **Client Secret** | `GITEE_CLIENT_SECRET` | 应用密钥 |
+
+##### 3. 用户授权流程
+
+用户在系统内点击连接后：
+
+1. 系统跳转到 Gitee 授权页面
+2. 用户点击 **同意授权** 完成授权
+3. 授权成功后，系统即可访问用户的 Gitee 仓库
+
+#### PAT 模式
+
+PAT 模式不需要配置 `GITEE_CLIENT_ID` 和 `GITEE_CLIENT_SECRET`。
+
+##### 用户配置步骤
+
+1. 用户在 Gitee 生成个人访问令牌
+2. 在系统连接页选择 Gitee
+3. 选择 **PAT** 模式
+4. 输入个人访问令牌
+
+---
+
+### 云效 Codeup 配置（PAT 模式）
+
+云效 Codeup 仅支持 **PAT 模式**，不支持 OAuth 回调。
+
+#### 1. 创建云效 PAT
+
+1. 登录 [云效](https://devops.aliyun.com)
+2. 进入 **个人设置** → **访问令牌** → **创建访问令牌**
+3. 配置令牌权限：
+
+   | 权限 | 说明 |
+   |------|------|
+   | 代码库 | 读取和写入代码库 |
+   | 分支 | 读取和创建分支 |
+   | 合并请求 | 读取和创建合并请求 |
+   | Issue | 读取和管理 Issue |
+
+4. 点击 **创建** 并复制生成的令牌
+
+#### 2. 用户配置步骤
+
+用户在系统连接页：
+
+1. 选择 **云效 Codeup**
+2. 填写以下信息：
+   - **Organization ID**：云效组织 ID
+   - **Token**：个人访问令牌
+
+:::tip 获取 Organization ID
+在云效组织设置页面的"已加入组织"中可以查看组织 ID，格式是一个字符串，如 "6932875abb64aae55975251f"。
+:::
+
+---
+
+## 🚀 使用编码专家
+
+配置完成后，你可以在智能体或工作流中使用编码专家工具。
+
+### 可用工具
+
+| 工具名称 | 功能说明 |
+|---------|---------|
+| `list_repositories` | 列出用户有权限访问的代码仓库 |
+| `list_issues` | 列出仓库中的 Issue |
+| `get_issue` | 获取 Issue 详细信息 |
+| `create_issue` | 创建新的 Issue |
+| `update_issue` | 更新 Issue 状态或内容 |
+| `list_pull_requests` | 列出仓库中的 Pull Request |
+| `get_pull_request` | 获取 PR 详细信息 |
+| `create_pull_request` | 创建新的 Pull Request |
+| `review_pull_request` | 审查 Pull Request |
+| `get_file_content` | 获取文件内容 |
+| `update_file` | 修改或创建文件 |
+| `create_commit` | 提交代码变更 |
+
+
+- 人工审查所有代码变更
+- 检查智能体的修改是否符合项目规范
+- 验证功能是否正常工作
+
+### 4. 错误处理
+
+编码专家在执行过程中可能会遇到错误，建议：
+
+- 配置错误通知机制，及时发现问题
+- 记录操作日志，便于追溯问题
+- 设置重试机制，处理临时性错误
+
+---
+
+## 🔒 安全注意事项
+
+### 1. 凭证安全
+
+- 不要将 Client Secret、AppSecret、Private Key 等敏感信息提交到代码仓库
+- 定期轮换应用的密钥和令牌
+- 使用环境变量存储敏感信息
+- 确保 `GIT_CREDENTIALS_KEY` 安全存储
+
+### 2. 访问控制
+
+- 限制编码专家可以访问的仓库范围
+- 为不同的项目配置不同的应用实例
+- 定期审查授权的应用列表
+
+### 3. 审计日志
+
+- 启用平台的审计日志功能
+- 定期检查编码专家的操作记录
+- 发现异常操作及时处理
+
+---
+
+## 📚 常见问题
+
+### Q1：授权失败怎么办？
+
+**A**：请检查以下几点：
+- 回调地址是否正确配置（包括协议 http/https）
+- 应用权限是否正确勾选
+- `.env` 文件中的环境变量是否正确配置
+- API 服务是否正确读取到 `.env` 文件
+
+### Q2：授权成功但接口报 401/403 错误？
+
+**A**：这通常是权限配置不匹配导致的：
+- 检查 `GITLAB_SCOPES` 或 `GITEE_SCOPES` 是否与平台应用配置中的权限完全一致
+- 确认应用权限范围是否足够
+- 重新创建应用并确保权限配置正确
+
+### Q3：编码专家无法访问私有仓库？
+
+**A**：请确认：
+- 用户已正确授权或提供了有效的 PAT
+- PAT 具备访问该仓库的权限
+- 仓库的访问设置是否允许第三方应用访问
+
+### Q4：如何限制编码专家的操作范围？
+
+**A**：可以通过以下方式：
+- 在 GitHub App 安装时选择特定仓库
+- 在智能体提示词中明确操作范围
+- 使用分支保护规则限制可操作的分支
+
+### Q5：编码专家修改的代码有误怎么办？
+
+**A**：建议：
+- 启用分支保护，要求人工审查
+- 配置 CI/CD 检查，自动检测代码问题
+- 及时关闭有问题的 PR，并反馈给智能体
+
+---
+
+## 🎓 总结
+
+编码专家是一个强大的 AI 编程助手，通过连接主流代码管理平台，可以自动化处理各种代码任务。
+
+**配置要点回顾：**
+
+1. ✅ 配置后端环境变量（`.env`）
+2. ✅ 在各平台创建应用（GitHub App / GitLab Application / Gitee 应用）
+3. ✅ 配置正确的回调地址和权限范围
+4. ✅ 用户完成授权或提供 PAT
+5. ✅ 遵循安全最佳实践
+
+**接入方式对比：**
+
+| 平台 | 推荐方式 | 是否需要回调 | 用户操作 |
+|------|---------|------------|---------|
+| GitHub | App Installation | ✅ 是 | 安装授权 |
+| GitLab | OAuth | ✅ 是 | 点击授权 |
+| GitLab | PAT | ❌ 否 | 输入令牌 |
+| Gitee | OAuth | ✅ 是 | 点击授权 |
+| Gitee | PAT | ❌ 否 | 输入令牌 |
+| 云效 | PAT | ❌ 否 | 输入令牌 |
+
+配置完成后，你就可以让编码专家帮助你自动化处理代码任务，提高开发效率！
+
+---
+
+## 🔗 相关链接
+
+- [GitHub Apps 文档](https://docs.github.com/en/developers/apps)
+- [GitLab Applications 文档](https://docs.gitlab.com/ee/integration/oauth_provider.html)
+- [Gitee 开放平台文档](https://open.gitee.com/api)
+- [云效开放平台文档](https://help.aliyun.com/document_detail/171872.html)
