@@ -135,6 +135,34 @@
           ]
         }
       ]
+    },
+    {
+      "slug": "harness",
+      "tabs": [
+        {
+          "slug": "overview",
+          "groups": [
+            {
+              "slug": "__default__",
+              "pages": [
+                "index",
+                "continuous-integration",
+                "continuous-delivery",
+                "feature-flags",
+                "feature-management",
+                "security-testing",
+                "cloud-cost",
+                "chaos-engineering",
+                "reliability",
+                "infrastructure-code",
+                "error-tracking",
+                "release-orchestration",
+                "software-supply-chain"
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }

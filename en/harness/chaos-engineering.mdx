@@ -1,0 +1,88 @@
+---
+title: Chaos Engineering
+description: Learn about Harness Chaos Engineering module for improving system resilience through fault injection
+---
+
+# Chaos Engineering
+
+The Harness Chaos Engineering (CE) module is built on the CNCF Litmus project, helping teams discover system weaknesses by proactively injecting faults and improve production environment resilience and reliability.
+
+## Core Features
+
+### Fault Library
+Built-in 200+ pre-configured faults covering multiple scenarios:
+
+| Category | Fault Types |
+|----------|------------|
+| Kubernetes | Pod Kill, Container Kill, Pod CPU/Memory Stress |
+| Cloud Platform | AWS AZ Failure, Azure VM Stress, GCP Network Latency |
+| Network | Network Partition, DNS Failure, Packet Loss |
+| Application | Process Kill, Service Delay, Exception Injection |
+| Infrastructure | Disk Stress, IO Delay, Node Restart |
+
+### Experiment Orchestration
+- **Visual Editor**: Design chaos experiments through a graphical interface
+- **Probe System**: Verify system behavior under faults meets expectations
+- **Timeline View**: Visual representation of experiment execution and results
+
+### ChaosGuard
+Enterprise-grade chaos engineering governance platform:
+- **Expert Guardrails**: Pre-defined best practices and safety boundaries
+- **Auto Guardrails**: Runtime protection of production systems from unexpected faults
+- **Scaled Management**: Manage chaos experiments across multiple teams and projects
+
+## Use Cases
+
+| Scenario | Description |
+|----------|-------------|
+| Resilience Verification | Verify system performance under component failures |
+| SLO Verification | Confirm system meets predefined reliability goals |
+| Drill Preparation | Train teams on fault handling capabilities |
+| Regression Testing | Ensure new version deployment maintains resilience |
+
+## Getting Started
+
+### 1. Install Chaos Delegate
+Install Harness Chaos Delegate in your Kubernetes cluster.
+
+### 2. Create Chaos Experiment
+Use Chaos Studio to design experiments, selecting target applications and fault types.
+
+### 3. Define Probes
+Configure verification probes to confirm expected system behavior under faults:
+
+```yaml
+probes:
+  - name: http-probe
+    type: http
+    httpProbe:
+      url: "http://payment-service/health"
+      responseCode: "200"
+      timeout: 5s
+```
+
+### 4. Execute Experiment
+Execute the experiment in a non-production environment and observe system behavior.
+
+### 5. Analyze Results
+Evaluate system resilience based on probe results and monitoring data.
+
+## Best Practices
+
+1. **Start Non-Production**: Verify experiment scripts in test environments first
+2. **Small Scope, Low Impact**: Initially only affect a small amount of resources
+3. **Set Safety Guardrails**: Configure automatic termination conditions to prevent fault spread
+4. **Monitor Key Metrics**: Define criteria for experiment success/failure
+5. **Document Learnings**: Record discovered issues and improvement measures
+
+## Security Considerations
+
+- **Be Cautious in Production**: Production environment experiments require strict approval
+- **Time Windows**: Execute experiments during business off-peak hours
+- **Rollback Plans**: Prepare manual or automatic recovery measures
+- **Team Notifications**: Ensure relevant teams know about experiment plans
+
+## Related Resources
+
+- [Harness Chaos Engineering Official Documentation](https://developer.harness.io/docs/chaos-engineering/)
+- [ChaosHub Fault Library](https://hub.litmuschaos.io/)

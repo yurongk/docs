@@ -1,0 +1,78 @@
+---
+title: Feature Flags
+description: Learn about Harness Feature Flags module for controlling feature releases without redeployment
+---
+
+# Feature Flags
+
+The Harness Feature Flags module allows you to control feature toggles without redeploying code. This makes progressive releases, A/B testing, and quick rollbacks possible.
+
+## Core Features
+
+### Flexible Flag Management
+- **Multiple Targeting Rules**: Dynamically control based on users, user groups, percentage, environment, etc.
+- **SDK Support**: Client SDKs for multiple programming languages
+- **Real-Time Updates**: Flag changes take effect immediately without restarting the application
+
+### Release Control
+- **Progressive Rollout**: Start with internal users and gradually expand
+- **Environment Isolation**: Set independent flag states for different environments
+- **Kill Switch**: Immediately disable features when problems are found without rolling back code
+
+### Integration Capabilities
+- **Pipeline Integration**: Manage feature flags in CI/CD pipelines
+- **SDK Integration**: Seamless integration with frontend, backend, and mobile applications
+- **Analytics Integration**: Connect with major analytics platforms
+
+## Use Cases
+
+| Scenario | Description |
+|----------|-------------|
+| Progressive Release | Start with 1% of users, observe data, then expand |
+| A/B Testing | Compare the effects of different feature versions |
+| Feature Toggles | Control feature release timing through flags |
+| Incident Handling | Quickly disable features when issues are found |
+| Beta Testing | Open new features to specific user groups |
+
+## Getting Started
+
+### 1. Create Feature Flag
+Create a new flag in Harness Feature Flags and define its initial state.
+
+### 2. Install SDK
+Select and install the appropriate SDK based on your tech stack:
+- JavaScript / TypeScript
+- Java
+- Python
+- Go
+- .NET
+- Ruby
+- Swift / iOS
+- Android
+
+### 3. Integrate in Code
+```javascript
+// Initialize SDK
+const cf = new CFClient('YOUR_API_KEY');
+
+// Check feature flag status
+if (await cf.value('my-feature-flag', false)) {
+  // Enable new feature
+  showNewFeature();
+}
+```
+
+### 4. Configure Targeting Rules
+Set flag states for different user groups in the Harness console.
+
+## Best Practices
+
+1. **Naming Convention**: Use clear naming conventions (e.g., `enable-new-payment-flow`)
+2. **Flag Cleanup**: Remove deprecated flags in a timely manner
+3. **Least Privilege**: Limit who can modify production environment flags
+4. **Monitor Flags**: Configure usage rate monitoring for critical flags
+
+## Related Resources
+
+- [Harness Feature Flags Official Documentation](https://developer.harness.io/docs/feature-flags/)
+- [Feature Flags SDK](https://developer.harness.io/docs/feature-flags/ff-sdks/)

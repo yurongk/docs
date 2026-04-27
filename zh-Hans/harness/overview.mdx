@@ -1,0 +1,57 @@
+---
+title: Harness 平台概述
+description: 了解 Harness 软件交付平台的十二大模块及其核心能力
+---
+
+# Harness 软件交付平台概述
+
+Harness 是一个现代化的软件交付平台，提供从代码构建到生产部署的完整生命周期管理。本文档详细介绍 Harness 平台的十二大核心模块，帮助您了解每个模块的功能定位与适用场景。
+
+## 平台架构
+
+Harness Platform 为所有模块提供共享的基础设施，包括：
+
+- **统一身份认证与授权**：基于角色的访问控制（RBAC）、单点登录（SSO）
+- **密钥管理**：安全的凭证和密钥存储
+- **委托代理（Delegate）**：在您的基础设施中运行的代理服务
+- **治理与合规**：通过 Open Policy Agent（OPA）实现策略执行
+- **审计追踪**：完整的操作审计日志
+
+## 十二大核心模块
+
+| 模块 | 功能概述 | 适用角色 |
+|------|----------|----------|
+| [持续集成 (CI)](./continuous-integration) | 快速构建、测试和推送代码 | 开发工程师 |
+| [持续交付与 GitOps (CD)](./continuous-delivery) | 自动化部署到任意环境 | DevOps 工程师 |
+| [功能标志 (Feature Flags)](./feature-flags) | 无需重新部署即可控制功能发布 | 产品经理、开发工程师 |
+| [功能管理与实验 (FME)](./feature-management) | A/B 测试与数据驱动决策 | 产品经理、数据分析师 |
+| [安全测试编排 (STO)](./security-testing) | 在 CI/CD 中集成安全扫描 | 安全工程师 |
+| [云成本管理 (CCM)](./cloud-cost) | 优化云资源支出 | 财务团队、DevOps |
+| [混沌工程 (CE)](./chaos-engineering) | 通过故障注入提升系统韧性 | SRE 工程师 |
+| [服务可靠性管理 (SRM)](./reliability) | 主动监控与事故管理 | SRE 工程师 |
+| [基础设施即代码管理 (IaCM)](./infrastructure-code) | 基础设施的版本控制与策略治理 | 平台工程师 |
+| [错误追踪 (CET)](./error-tracking) | 实时应用错误监控与根因分析 | 开发工程师 |
+| [发布编排](./release-orchestration) | 跨团队、跨服务的发布协调 | 发布经理 |
+| [软件供应链安全 (SSCA)](./software-supply-chain) | 确保软件供应链的完整性与合规 | 安全工程师、合规团队 |
+
+## 模块集成优势
+
+Harness 的核心优势在于各模块之间的深度集成：
+
+- **统一的流水线编排**：CI、CD、STO 等模块可以在同一条流水线中协同工作
+- **共享的基础设施**：无需为每个模块单独配置基础设施
+- **跨模块的可视化**：统一的监控面板覆盖所有模块
+- **AI 驱动的洞察**：Harness AI 为所有模块提供智能建议
+
+## 快速开始
+
+1. 访问 [Harness 开发者门户](https://developer.harness.io)
+2. 创建免费账户
+3. 选择您需要使用的模块
+4. 按照对应模块的文档开始配置
+
+## 相关资源
+
+- [Harness 官方文档](https://developer.harness.io/docs/)
+- [Harness 社区](https://community.harness.io/)
+- [Harness GitHub](https://github.com/harness)

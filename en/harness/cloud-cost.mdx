@@ -1,0 +1,95 @@
+---
+title: Cloud Cost Management (CCM)
+description: Learn about Harness CCM module for optimizing cloud resource spending
+---
+
+# Cloud Cost Management (CCM)
+
+The Harness Cloud Cost Management (CCM) module provides complete visibility into cloud resource costs, helping teams identify waste, optimize spending, and achieve cost control.
+
+## Core Features
+
+### Cost Visibility
+- **Multi-Cloud Support**: Unified monitoring of AWS, Azure, GCP, and other cloud platform costs
+- **Hourly Granularity**: Get hour-level resource consumption data
+- **Resource Perspective**: Understand costs of Kubernetes namespaces, workloads, nodes, pods, and labels
+- **Cost Breakdown**: Distinguish between utilized, idle, and unallocated costs
+
+### Cost Optimization
+- **AutoStopping Rules**: Automatically stop idle resources
+- **Smart Recommendations**: AI-powered analysis to provide cost optimization suggestions
+- **Budget Alerts**: Set budget thresholds and receive automatic alerts when exceeded
+
+### Cost Governance
+- **Policy Enforcement**: Enforce cost control policies through OPA
+- **Cost Allocation**: Allocate cloud costs to departments, projects, or teams
+- **Trend Analysis**: Analyze cost change trends and predict future spending
+
+## Use Cases
+
+| Pain Point | CCM Solution |
+|------------|-------------|
+| Lack of Cost Visibility | Unified cost dashboard with real-time view of environment spending |
+| Resource Waste | AutoStopping automatically stops idle resources |
+| Cost Overruns | Budget alerts and anomaly detection |
+| Unclear Allocation | Cost allocation to teams or projects |
+
+## Getting Started
+
+### 1. Connect Cloud Account
+Configure cloud account connectors in Harness CCM.
+
+### 2. Enable Cost Visibility
+Set up data collectors to start gathering cost data.
+
+### 3. Configure Budget
+Set monthly budgets for projects or environments.
+
+### 4. Set Alerts
+Configure cost anomaly alert rules.
+
+### 5. View Dashboard
+Monitor and analyze spending through the cost dashboard.
+
+## Cost Breakdown Model
+
+CCM uses the following dimensions to break down costs:
+
+```
+Total Cost = Utilized Cost + Idle Cost + Unallocated Cost
+```
+
+| Type | Description |
+|------|-------------|
+| Utilized Cost | Cost of resources actually used by workloads |
+| Idle Cost | Cost of allocated but underutilized resources |
+| Unallocated Cost | Cost that cannot be attributed to specific workloads |
+
+## AutoStopping Rules
+
+AutoStopping is a core CCM feature that automatically manages resource lifecycles:
+
+### Based on Idle Time
+- Automatically stop resources after N minutes of idleness
+- Automatically start when users access
+
+### Based on Schedule
+- Automatically start/stop resources on schedule
+- Supports work time and non-work time rules
+
+### Smart Mode
+- Combines idle detection with schedules
+- Optimal balance between cost and user experience
+
+## Best Practices
+
+1. **Start Small**: Monitor non-production environments first to become familiar with cost data
+2. **Set Budgets**: Set reasonable budgets for each environment
+3. **Enable AutoStopping**: Enable auto-stop for dev/test environments
+4. **Regular Review**: Check cost reports weekly to identify optimization opportunities
+5. **Team Awareness**: Make cost data transparent to teams to improve cost awareness
+
+## Related Resources
+
+- [Harness CCM Official Documentation](https://developer.harness.io/docs/cloud-cost-management/)
+- [CCM Quick Start](https://developer.harness.io/docs/cloud-cost-management/get-started/overview/)

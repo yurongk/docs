@@ -1,0 +1,96 @@
+---
+title: 功能标志 (Feature Flags)
+description: 了解 Harness Feature Flags 模块，无需重新部署即可控制功能发布
+---
+
+# 功能标志 (Feature Flags)
+
+Harness 功能标志 (Feature Flags) 模块允许您在不重新部署代码的情况下，控制功能的开启与关闭。这使得渐进式发布、A/B 测试和快速回滚成为可能。
+
+## 核心功能
+
+### 灵活的标志管理
+- **多种 Targeting 规则**：按用户、用户组、百分比、环境等条件动态控制
+- **SDK 支持**：支持多种编程语言的客户端 SDK
+- **实时更新**：标志变更即时生效，无需重启应用
+
+### 发布控制
+- **渐进式发布**：从内部用户开始，逐步扩大覆盖范围
+- **环境隔离**：为不同环境设置独立的标志状态
+- **撤销功能**：发现问题可立即关闭功能，无需回滚代码
+
+### 集成能力
+- **流水线集成**：在 CI/CD 流水线中管理功能标志
+- **SDK 集成**：与前端、后端、移动端应用无缝集成
+- **分析集成**：与主流分析平台对接
+
+## 适用场景
+
+| 场景 | 说明 |
+|------|------|
+| 渐进式发布 | 先向 1% 用户开放，观察数据后再扩大 |
+| A/B 测试 | 对比不同功能版本的效果 |
+| 特性切换 | 通过标志控制功能上线时间 |
+| 事故处理 | 发现问题时快速关闭功能 |
+| beta 测试 | 向特定用户群体开放新功能 |
+
+## 快速开始
+
+### 1. 创建功能标志
+在 Harness Feature Flags 中创建一个新的标志，定义其初始状态。
+
+### 2. 安装 SDK
+根据您的技术栈选择并安装对应的 SDK：
+- JavaScript / TypeScript
+- Java
+- Python
+- Go
+- .NET
+- Ruby
+- Swift / iOS
+- Android
+
+### 3. 在代码中集成
+```javascript
+// 初始化 SDK
+const cf = new CFClient('YOUR_API_KEY');
+
+// 检查功能标志状态
+if (await cf.value('my-feature-flag', false)) {
+  // 启用新功能
+  showNewFeature();
+}
+```
+
+### 4. 配置 Targeting 规则
+在 Harness 控制台中设置不同用户群体的标志状态。
+
+## 与 CI/CD 集成
+
+功能标志可以与 CI/CD 流水线深度集成：
+
+```yaml
+stages:
+  - deploy:
+      flags:
+        - name: new-checkout
+          state: enabled
+```
+
+### 常见集成模式
+
+1. **部署后启用**：应用部署完成后，通过流水线开启标志
+2. **渐进式切换**：部署时保持关闭，由人工或自动规则逐步开启
+3. **自动化回滚**：检测到异常时自动关闭标志并触发告警
+
+## 最佳实践
+
+1. **命名规范**：使用清晰的命名约定（如 `enable-new-payment-flow`）
+2. **标志清理**：功能稳定后及时移除废弃标志
+3. **最小权限**：限制谁可以修改生产环境标志
+4. **监控标志**：为关键标志配置使用率监控
+
+## 相关资源
+
+- [Harness Feature Flags 官方文档](https://developer.harness.io/docs/feature-flags/)
+- [Feature Flags SDK](https://developer.harness.io/docs/feature-flags/ff-sdks/)

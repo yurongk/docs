@@ -1,0 +1,100 @@
+---
+title: Infrastructure as Code Management (IaCM)
+description: Learn about Harness IaCM module for version control and policy governance of infrastructure
+---
+
+# Infrastructure as Code Management (IaCM)
+
+The Harness Infrastructure as Code Management (IaCM) module helps teams define, version control, and govern cloud infrastructure in a declarative manner.
+
+## Core Features
+
+### Infrastructure Management
+- **Terraform Support**: Full support for Terraform workflows
+- **Terragrunt Support**: Manage complex Terraform module structures
+- **Multi-Cloud Support**: AWS, Azure, GCP, and other major cloud platforms
+- **Blueprint Library**: Pre-built infrastructure templates to accelerate configuration
+
+### Version Control
+- **Git Integration**: All infrastructure changes managed through Git
+- **Change History**: Complete audit trail
+- **Rollback Capability**: Easily rollback to previous versions
+- **Code Review**: Changes reviewed through PR workflow
+
+### Policy Governance
+- **OPA Integration**: Enforce infrastructure security policies
+- **Compliance Checking**: Ensure infrastructure meets industry standards
+- **Drift Detection**: Identify deviations between actual and desired state
+- **Auto Remediation**: Automatically fix infrastructure drift
+
+### Module Registry
+- **Modular Management**: Register and reuse infrastructure modules
+- **Version Management**: Manage different versions of modules
+- **Governance Rules**: Set usage policies for modules
+
+## Use Cases
+
+| Scenario | Description |
+|----------|-------------|
+| Infrastructure Standardization | Unified infrastructure configuration across teams through blueprints |
+| Compliance Governance | Ensure infrastructure meets security policies |
+| Drift Management | Auto-detect and fix configuration drift |
+| Cost Optimization | Identify unused resources |
+
+## Getting Started
+
+### 1. Connect Infrastructure
+Configure cloud account and infrastructure connectors.
+
+### 2. Create/Import Infrastructure
+- Create new Terraform configuration
+- Or import existing Terraform state
+
+### 3. Define Infrastructure
+Define resources using Terraform HCL:
+
+```hcl
+resource "aws_instance" "app_server" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t3.micro"
+  
+  tags = {
+    Name        = "app-server"
+    Environment = "production"
+    ManagedBy   = "Harness"
+  }
+}
+```
+
+### 4. Configure Triggers
+Set conditions for triggering infrastructure changes.
+
+### 5. Execute Plan
+Review change preview and execute apply when confirmed.
+
+## Drift Detection
+
+IaCM provides automatic drift detection:
+
+```
+Desired State → Actual State → Drift Detection → Auto Remediation
+```
+
+| Feature | Description |
+|---------|-------------|
+| Scheduled Detection | Execute drift detection on schedule |
+| Manual Detection | Trigger detection anytime |
+| Auto Remediation | Automatically fix detected drift |
+
+## Best Practices
+
+1. **Modular Design**: Create reusable Terraform modules
+2. **State Management**: Use remote state storage for team collaboration
+3. **Change Review**: All changes through PR workflow
+4. **Policy First**: Define policies before creating resources
+5. **Monitor Drift**: Regularly check infrastructure state
+
+## Related Resources
+
+- [Harness IaCM Official Documentation](https://developer.harness.io/docs/infrastructure-as-code-management/)
+- [Terraform Best Practices](https://developer.hashicorp.com/terraform/tutorials)
