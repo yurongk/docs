@@ -52,7 +52,8 @@
               "pages": [
                 "index",
                 "schedule-trigger",
-                "lark-trigger"
+                "lark-trigger",
+                "wecom-trigger"
               ]
             }
           ]
