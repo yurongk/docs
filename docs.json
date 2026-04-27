@@ -999,7 +999,8 @@
                     "pages": [
                       "zh-Hans/ai/plugin/trigger/index",
                       "zh-Hans/ai/plugin/trigger/schedule-trigger",
-                      "zh-Hans/ai/plugin/trigger/lark-trigger"
+                      "zh-Hans/ai/plugin/trigger/lark-trigger",
+                      "zh-Hans/ai/plugin/trigger/wecom-trigger"
                     ]
                   },
                   {
