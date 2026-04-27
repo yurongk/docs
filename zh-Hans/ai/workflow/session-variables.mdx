@@ -17,13 +17,28 @@ sidebar_position: 3
 
 系统变量是由平台提供的预定义变量，如用户语言、时区、邮箱等，这些用户信息可以在用户设置里进行修改。
 
-系统变量：
+常用系统变量：
 
-| 系统变量名称   | 描述                     |
-|---------------|--------------------------|
-| `sys.language`  | 系统使用的语言           |
-| `sys.user_email`    | 用户的电子邮件地址       |
-| `sys.timezone` | 用户所在的时区           |
+| 系统变量名称 | 描述 |
+|-------------|------|
+| `sys.language` | 系统使用的语言 |
+| `sys.user_email` | 用户的电子邮件地址 |
+| `sys.timezone` | 用户所在的时区 |
+| `sys.date` | 当前日期 |
+| `sys.datetime` | 当前本地时间 |
+| `sys.workspace_path` | 当前共享 workspace 目录路径 |
+| `sys.workspace_url` | 当前共享 workspace 目录 URL |
+| `sys.thread_id` | 当前会话线程 ID，可在提示词中用于自定义路径或隔离策略 |
+
+### Workspace Directory 规则
+
+`sys.workspace_path` 和 `sys.workspace_url` 始终指向 Xpert runtime 与 sandbox 实际使用的共享 workspace 根目录：
+
+- project 场景使用共享目录 `/project/<projectId>/`
+- 非 project 场景使用共享目录 `/user/<userId>/`
+- 默认不再额外拼接 conversation 级子目录
+
+如果你的提示词或工作流需要按线程进一步做隔离，可以显式使用 `sys.thread_id` 自己决定路径规则。
 
 ### 会话变量
 **会话变量** 作为数字专家内所有智能体共享的状态变量，实现了信息在各智能体之间的传递和演进。用户可以在数字专家工作室的菜单按钮中找到“变量”按钮打开会话变量面板进行添加。

@@ -17,7 +17,9 @@
     "semantic-model": "Semantic Model",
     "story-dashboard": "Story Dashboard",
     "website-features": "Website Features",
-    "widget": "Widget"
+    "widget": "Widget",
+    "harness": "Harness",
+    "overview": "Overview"
   },
   "zh-Hans": {
     "ai": "AI",
@@ -61,6 +63,8 @@
     "lark": "飞书",
     "skill": "技能",
     "trigger": "触发器",
-    "built-in": "内置"
+    "built-in": "内置",
+    "harness": "Harness",
+    "overview": "概述"
   }
 }

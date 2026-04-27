@@ -1,0 +1,113 @@
+---
+title: Software Supply Chain Assurance (SSCA)
+description: Learn about Harness SSCA module for ensuring software supply chain integrity and compliance
+---
+
+# Software Supply Chain Assurance (SSCA)
+
+The Harness Software Supply Chain Assurance (SSCA) module helps organizations ensure the security and integrity of the entire software supply chain from building to deployment.
+
+## Core Features
+
+### Supply Chain Visibility
+- **Dependency Graph**: Visualize software component dependency relationships
+- **SBOM Generation**: Generate standardized Software Bill of Materials (SBOM)
+- **Provenance Tracking**: Track each component's source and version
+- **Change Tracking**: Record all changes in the supply chain
+
+### Integrity Assurance
+- **Signature Verification**: Verify signatures of container images and artifacts
+- **Policy Enforcement**: Enforce supply chain security policies
+- **Gate Control**: Verify integrity at critical checkpoints
+- **Anomaly Detection**: Identify suspicious supply chain activities
+
+### Compliance Support
+- **Industry Standards**: Compliance with SLSA, NIST SSDF, and other standards
+- **Framework Mapping**: Map security measures to compliance frameworks
+- **Audit Reports**: Generate reports compliant with regulatory requirements
+- **Continuous Monitoring**: Continuously assess supply chain compliance status
+
+## Supply Chain Security Levels
+
+SSCA follows the SLSA (Supply chain Levels for Software Artifacts) framework:
+
+| Level | Requirements | SSCA Support |
+|-------|-------------|--------------|
+| L1 | Build process is recorded | ✅ Complete build logs |
+| L2 | Build source is trusted | ✅ Provenance verification |
+| L3 | Prevent unauthorized modification | ✅ Signatures and policies |
+| L4 | Prevent privilege escalation | ✅ Complete audit trail |
+
+## Use Cases
+
+| Scenario | SSCA Features |
+|----------|--------------|
+| Container Security | Image signing and verification |
+| Dependency Security | Third-party component vulnerability scanning |
+| Compliance Audit | Generate compliance reports |
+| Provenance Proof | Prove software provenance |
+
+## Getting Started
+
+### 1. Configure Supply Chain Policy
+Define supply chain security policies:
+
+```yaml
+policy:
+  - name: require-signature
+    resource: container-image
+    condition: signature.valid == true
+  - name: no-critical-vulns
+    resource: artifact
+    condition: vulnerabilities.critical == 0
+```
+
+### 2. Integrate Build Pipeline
+Integrate SSCA checks in CI pipelines.
+
+### 3. Generate SBOM
+Generate standardized bill of materials for software:
+
+```json
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "components": [
+    {
+      "type": "library",
+      "name": "lodash",
+      "version": "4.17.21"
+    }
+  ]
+}
+```
+
+### 4. Verify Supply Chain
+Verify supply chain integrity before deployment.
+
+### 5. Generate Compliance Reports
+Export supply chain reports compliant with regulatory requirements.
+
+## Compliance Frameworks
+
+SSCA supports mapping to multiple compliance frameworks:
+
+| Framework | Description |
+|-----------|-------------|
+| SLSA | Software Supply Chain Security Levels |
+| NIST SSDF | Secure Software Development Framework |
+| EO 14028 | US Executive Order 14028 |
+| PCI-DSS | Payment Card Industry Data Security Standard |
+
+## Best Practices
+
+1. **Minimize Dependencies**: Only depend on necessary components
+2. **Verify Provenance**: Verify the provenance of all third-party components
+3. **Sign Everything**: Sign all build artifacts
+4. **Continuous Monitoring**: Continuously monitor vulnerabilities in dependencies
+5. **Document**: Maintain complete records of supply chain activities
+
+## Related Resources
+
+- [Harness SSCA Official Documentation](https://developer.harness.io/docs/category/software-supply-chain)
+- [SLSA Framework](https://slsa.dev/)
