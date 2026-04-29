@@ -3,7 +3,7 @@ title: Environment Variable Explanation
 sidebar_position: 9
 ---
 
-System parameters can be controlled through environment variables. For the community Docker deployment, use `docker/.env.example` as the reference; if you are already inside the `docker/` directory, run `cp .env.example .env` and then adjust the values as needed.
+System parameters can be controlled through environment variables. For the community Docker deployment, use `docker/env.example` as the reference; if you are already inside the `docker/` directory, run `cp env.example .env` and then adjust the values as needed.
 
 Some parameter explanations are as follows:
 
@@ -101,7 +101,7 @@ AI_DEFAULT_SKILL_REPOSITORIES={"repositories":[{"name":"anthropics/skills","prov
 Notes:
 
 - `PLUGINS` is read during service startup, so API restart is required after changes.
-- `AI_DEFAULT_SKILL_REPOSITORIES` also accepts a raw JSON array, but the wrapped `repositories` format from `docker/.env.example` is recommended for future extensibility.
+- `AI_DEFAULT_SKILL_REPOSITORIES` also accepts a raw JSON array, but the wrapped `repositories` format from `docker/env.example` is recommended for future extensibility.
 - The `provider` field in `AI_DEFAULT_SKILL_REPOSITORIES` must match a supported skill repository provider, such as `github` or `clawhub`.
 - Invalid JSON is ignored and a warning is logged.
 - These default repositories are only auto-registered for newly created tenants. Existing tenants need manual registration and sync through the skill repository APIs.

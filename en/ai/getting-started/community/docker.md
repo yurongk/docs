@@ -30,7 +30,7 @@ cd docker
 2. Copy the environment configuration file
 
 ```bash
-cp .env.example .env
+cp env.example .env
 ```
 
 3. Start the Docker containers
@@ -133,8 +133,8 @@ docker compose up -d
 
 ### Sync Environment Variable Configuration (Important)
 
-- If the `.env.example` file has been updated, be sure to modify your local `.env` file accordingly.
-- Check and adjust the configuration items in the `.env` file as needed to ensure they match your actual environment. You may need to add any new variables from `.env.example` to your `.env` file and update any changed values.
+- If the `env.example` file has been updated, be sure to modify your local `.env` file accordingly.
+- Check and adjust the configuration items in the `.env` file as needed to ensure they match your actual environment. You may need to add any new variables from `env.example` to your `.env` file and update any changed values.
 
 ## Read More
 

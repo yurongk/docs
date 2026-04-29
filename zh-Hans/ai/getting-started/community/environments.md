@@ -3,7 +3,7 @@ title: 环境变量说明
 sidebar_position: 9
 ---
 
-可以通过环境变量对系统各项参数进行控制。社区版 Docker 部署以 `docker/.env.example` 为参考；如果已经进入 `docker/` 目录，执行 `cp .env.example .env` 并按需修改即可。
+可以通过环境变量对系统各项参数进行控制。社区版 Docker 部署以 `docker/env.example` 为参考；如果已经进入 `docker/` 目录，执行 `cp env.example .env` 并按需修改即可。
 
 部分参数说明如下：
 
@@ -101,7 +101,7 @@ AI_DEFAULT_SKILL_REPOSITORIES={"repositories":[{"name":"anthropics/skills","prov
 补充说明：
 
 - `PLUGINS` 在服务启动阶段读取，修改后需要重启 API 服务。
-- `AI_DEFAULT_SKILL_REPOSITORIES` 也支持直接传 JSON 数组，但推荐与 `docker/.env.example` 一样使用 `repositories` 包装结构，便于扩展。
+- `AI_DEFAULT_SKILL_REPOSITORIES` 也支持直接传 JSON 数组，但推荐与 `docker/env.example` 一样使用 `repositories` 包装结构，便于扩展。
 - `AI_DEFAULT_SKILL_REPOSITORIES` 中的 `provider` 需要填写系统支持的技能仓库提供方，例如 `github` 或 `clawhub`。
 - 如果 JSON 格式不合法，系统会记录告警并忽略该配置。
 - 这组默认技能仓库仅在“新租户创建”时自动注册；已有租户如需补充，请通过技能仓库接口手动注册并同步。

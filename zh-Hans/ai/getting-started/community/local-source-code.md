@@ -25,7 +25,7 @@ cd xpert
 
 ```bash
 cd docker
-cp .env.example .env
+cp env.example .env
 docker compose -f docker-compose.infra.yml up -d
 ```
 
@@ -43,12 +43,12 @@ docker compose -f docker-compose.infra.yml --profile milvus up -d
 
 进入项目根目录：
 
-- 安装 [NodeJs](https://nodejs.org/en/download) LTS 版本或更高版本，例如 18.x。
-- 安装 [Yarn](https://github.com/yarnpkg/yarn)（如果您还没有）使用命令 `npm i -g yarn`。
-- 使用命令 `yarn bootstrap` 安装 NPM 包并引导解决方案。
-- 将 [`.env.local`](./.env.local) 文件复制到 `.env` 并调整文件中的设置以用于本地运行。
+- 安装 [NodeJs](https://nodejs.org/en/download) LTS 版本或更高版本，例如 20.x。
+- 安装 [pnpm](https://pnpm.io/installation)（如果您还没有）使用命令 `npm i -g pnpm`。
+- 使用命令 `pnpm bootstrap` 安装 NPM 包并引导解决方案。
+- 将 [`env.local`](./env.local) 文件复制到 `.env` 并调整文件中的设置以用于本地运行。
 
-- 分别使用 `yarn start:api` 和 `yarn start:cloud` 运行 API 和 UI 服务。
+- 分别使用 `pnpm start:api` 和 `pnpm start:cloud` 运行 API 和 UI 服务。
 - 在浏览器中打开 XpertAI UI http://localhost:4200（API 运行在 http://localhost:3000/api）。
 - [启动向导](../onboarding/)...
 - 享受吧！
@@ -57,12 +57,12 @@ docker compose -f docker-compose.infra.yml --profile milvus up -d
 
 如果您希望在检测到目录中的文件更改时自动重启节点应用程序，请使用以下两个命令启动服务器：
 
-- `yarn start:api:dev`
-- `yarn start:cloud`
+- `pnpm start:api:dev`
+- `pnpm start:cloud`
 
 ## 使用 OLAP 引擎
 
 如果您想使用带有 OLAP 引擎的 Xpert 数据分析平台，请运行以下命令：
 
 - 安装 Java 运行时和 Maven。
-- `yarn start:olap`
+- `pnpm start:olap`
