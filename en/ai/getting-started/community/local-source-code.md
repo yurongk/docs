@@ -25,7 +25,7 @@ Before enabling business services, we need to deploy PostgreSQL/Redis (if not av
 
 ```bash
 cd docker
-cp .env.example .env
+cp env.example .env
 docker compose -f docker-compose.infra.yml up -d
 ```
 
@@ -43,12 +43,12 @@ docker compose -f docker-compose.infra.yml --profile milvus up -d
 
 Navigate to the project root directory:
 
-- Install the [NodeJs](https://nodejs.org/en/download) LTS version or higher, e.g., 18.x.
-- Install [Yarn](https://github.com/yarnpkg/yarn) (if not already installed) using the command `npm i -g yarn`.
-- Use the command `yarn bootstrap` to install NPM packages and bootstrap the solution.
-- Copy the [`.env.local`](./.env.local) file to `.env` and adjust the settings in the file for local execution.
+- Install the [NodeJs](https://nodejs.org/en/download) LTS version or higher, e.g., 20.x.
+- Install [pnpm](https://pnpm.io/installation) (if not already installed) using the command `npm i -g pnpm`.
+- Use the command `pnpm bootstrap` to install NPM packages and bootstrap the solution.
+- Copy the [`env.local`](./env.local) file to `.env` and adjust the settings in the file for local execution.
 
-- Run the API and UI services using `yarn start:api` and `yarn start:cloud`, respectively.
+- Run the API and UI services using `pnpm start:api` and `pnpm start:cloud`, respectively.
 - Open the XpertAI UI in a browser at http://localhost:4200 (the API runs at http://localhost:3000/api).
 - [Start the onboarding wizard](../onboarding/)...
 - Enjoy!
@@ -57,12 +57,12 @@ Navigate to the project root directory:
 
 If you want the Node application to automatically restart when file changes are detected in the directory, start the server with the following two commands:
 
-- `yarn start:api:dev`
-- `yarn start:cloud`
+- `pnpm start:api:dev`
+- `pnpm start:cloud`
 
 ## Using the OLAP Engine
 
 If you want to use the Xpert data analysis platform with the OLAP engine, run the following commands:
 
 - Install the Java runtime and Maven.
-- `yarn start:olap`
+- `pnpm start:olap`
