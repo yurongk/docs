@@ -366,7 +366,11 @@
                       "en/ai/chatkit/chatkit-widgets",
                       "en/ai/chatkit/chatkit-tool",
                       "en/ai/chatkit/chatkit-effect",
-                      "en/ai/chatkit/chatkit-actions"
+                      "en/ai/chatkit/chatkit-actions",
+                      "en/ai/chatkit/chatkit-pet",
+                      "en/ai/chatkit/chatkit-plan-mode",
+                      "en/ai/chatkit/chatkit-runtime-capabilities",
+                      "en/ai/chatkit/chatkit-prompt-workflows"
                     ]
                   },
                   {
@@ -704,34 +708,6 @@
                 ]
               }
             ]
-          },
-          {
-            "product": "Harness",
-            "tabs": [
-              {
-                "tab": "Overview",
-                "groups": [
-                  {
-                    "group": "Default",
-                    "pages": [
-                      "en/harness/overview",
-                      "en/harness/continuous-integration",
-                      "en/harness/continuous-delivery",
-                      "en/harness/feature-flags",
-                      "en/harness/feature-management",
-                      "en/harness/security-testing",
-                      "en/harness/cloud-cost",
-                      "en/harness/chaos-engineering",
-                      "en/harness/reliability",
-                      "en/harness/infrastructure-code",
-                      "en/harness/error-tracking",
-                      "en/harness/release-orchestration",
-                      "en/harness/software-supply-chain"
-                    ]
-                  }
-                ]
-              }
-            ]
           }
         ]
       },
@@ -1059,7 +1035,11 @@
                       "zh-Hans/ai/chatkit/chatkit-widgets",
                       "zh-Hans/ai/chatkit/chatkit-tool",
                       "zh-Hans/ai/chatkit/chatkit-effect",
-                      "zh-Hans/ai/chatkit/chatkit-actions"
+                      "zh-Hans/ai/chatkit/chatkit-actions",
+                      "zh-Hans/ai/chatkit/chatkit-pet",
+                      "zh-Hans/ai/chatkit/chatkit-plan-mode",
+                      "zh-Hans/ai/chatkit/chatkit-runtime-capabilities",
+                      "zh-Hans/ai/chatkit/chatkit-prompt-workflows"
                     ]
                   },
                   {
@@ -1391,34 +1371,6 @@
                     "group": "飞书",
                     "pages": [
                       "zh-Hans/code/web/lark/index"
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "product": "Harness",
-            "tabs": [
-              {
-                "tab": "概述",
-                "groups": [
-                  {
-                    "group": "默认",
-                    "pages": [
-                      "zh-Hans/harness/overview",
-                      "zh-Hans/harness/continuous-integration",
-                      "zh-Hans/harness/continuous-delivery",
-                      "zh-Hans/harness/feature-flags",
-                      "zh-Hans/harness/feature-management",
-                      "zh-Hans/harness/security-testing",
-                      "zh-Hans/harness/cloud-cost",
-                      "zh-Hans/harness/chaos-engineering",
-                      "zh-Hans/harness/reliability",
-                      "zh-Hans/harness/infrastructure-code",
-                      "zh-Hans/harness/error-tracking",
-                      "zh-Hans/harness/release-orchestration",
-                      "zh-Hans/harness/software-supply-chain"
                     ]
                   }
                 ]

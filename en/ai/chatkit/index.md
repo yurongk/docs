@@ -11,6 +11,8 @@ ChatKit is the fastest way to build agentic chat experiences. Whether you are cr
 
 With embeddable UI widgets, customizable prompts, tool calling, file attachments, and chain-of-thought visualization, you can build an AI agent without reinventing the chat interface.
 
+ChatKit also includes product-level interaction patterns such as Plan Mode, runtime Skills and Plugins, Prompt Workflows, and Pet, so teams can expose richer assistant behavior without rebuilding the composer from scratch.
+
 ## Overview
 
 Embed ChatKit in your frontend, customize the look and feel, and let users connect to backends hosted and extended through XpertAI Agent Builder. A dev server is required.
@@ -115,4 +117,14 @@ export function MyChat() {
 
 ## Build and iterate
 
-See the theming, widgets, and actions docs to understand how ChatKit works. Explore these resources to test chat behavior, iterate on prompts, and add widgets and tools.
+See these resources to customize ChatKit and extend the chat experience:
+
+- [Themes and Customization](./chatkit-themes)
+- [Widgets](./chatkit-widgets)
+- [Client Tools](./chatkit-tool)
+- [Client Effects](./chatkit-effect)
+- [Actions](./chatkit-actions)
+- [Pet](./chatkit-pet)
+- [Plan Mode](./chatkit-plan-mode)
+- [Skills and Plugins](./chatkit-runtime-capabilities)
+- [Prompt Workflows](./chatkit-prompt-workflows)

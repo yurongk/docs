@@ -9,6 +9,8 @@ ChatKit 是构建智能代理型聊天体验的最佳方式。无论你是在打
 
 使用 ChatKit 的可嵌入 UI 小组件、可定制提示、工具调用支持、文件附件以及链路推理可视化功能，你无需重新发明聊天界面即可构建智能代理。
 
+ChatKit 还内置了计划模式、运行时技能和插件、Prompt Workflows、Pet 等产品交互能力，方便团队在不重写 composer 的前提下暴露更丰富的 assistant 行为。
+
 ## 概述
 
 将 ChatKit 嵌入你的前端，自定义外观与体验，并让用户通过 XpertAI Agent Builder 托管和扩展后端。
@@ -98,3 +100,7 @@ export function MyChat() {
 - [客户端工具](./chatkit-tool)
 - [客户端副作用](./chatkit-effect)
 - [动作](./chatkit-actions)
+- [Pet](./chatkit-pet)
+- [计划模式](./chatkit-plan-mode)
+- [技能和插件](./chatkit-runtime-capabilities)
+- [Prompt Workflows](./chatkit-prompt-workflows)
