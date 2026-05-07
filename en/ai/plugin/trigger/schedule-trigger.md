@@ -42,5 +42,5 @@ Schedule Trigger uses `bootstrap.mode = replay_publish`:
 ## Related features
 
 - Trigger node overview: [Workflow Trigger](../../workflow/trigger/)
-- Multi-channel access for Digital Expert: [Digital Expert](../../digital-expert/digital-expert/)
+- Multi-channel access for Digital Expert: [Digital Expert](../../agent/agent/)
 - Trigger plugin overview: [Trigger Plugin](./)

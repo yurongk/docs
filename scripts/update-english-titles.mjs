@@ -31,10 +31,10 @@ const TITLE_MAPPING = {
   "内置中间件": "Built-in Middleware",
   "自定义中间件": "Custom Middleware",
   
-  // Digital Expert
+  // Agent
   "对话日志": "Conversation Logs",
   "开发接口": "Development API",
-  "数字专家": "Digital Expert",
+  "数字专家": "Agent",
   "嵌入网页": "Embed Webpage",
   "增强功能": "Enhanced Features",
   "环境变量": "Environment Variables",
@@ -275,4 +275,3 @@ main().catch((err) => {
   console.error(err);
   process.exit(1);
 });
-

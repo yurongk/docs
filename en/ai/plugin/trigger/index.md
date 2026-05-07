@@ -24,5 +24,5 @@ Trigger plugins typically implement the following capabilities:
 ## Related features
 
 - Workflow trigger concepts and node description: [Trigger](../../workflow/trigger/)
-- Multi-entry access for Digital Expert: [Digital Expert](../../digital-expert/digital-expert/)
+- Multi-entry access for Digital Expert: [Digital Expert](../../agent/agent/)
 - Plugin system overview: [Plugin Overview](../overview/)

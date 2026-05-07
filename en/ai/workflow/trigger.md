@@ -42,5 +42,5 @@ A list of parameters for defining a pre-input form for the digital expert conver
 
 ## Related docs
 
-- How a Digital Expert connects to different conversation channels via triggers: [Chat Channels](../digital-expert/chat-channels/)
+- How a Digital Expert connects to different conversation channels via triggers: [Chat Channels](../agent/chat-channels/)
 - Trigger plugin implementation details (including Lark and Schedule): [Plugin Trigger](../plugin/trigger/)

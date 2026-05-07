@@ -29,9 +29,9 @@ const MARKDOWN_EXTS = new Set([".md", ".mdx"]);
 const PAIRS = {
   // ===== AI =====
   middleware: { srcRel: "current/ai/middleware", dstRel: "en/ai/agent-middleware" },
-  assistant: { srcRel: "current/ai/copilot", dstRel: "en/ai/ai-assistant" },
-  conversation: { srcRel: "current/ai/chat", dstRel: "en/ai/conversation" },
-  digitalExpert: { srcRel: "current/ai/xpert", dstRel: "en/ai/digital-expert" },
+  assistant: { srcRel: "current/ai/copilot", dstRel: "en/ai/agent/ai-assistant" },
+  conversation: { srcRel: "current/ai/chat", dstRel: "en/ai/agent/conversation" },
+  digitalExpert: { srcRel: "current/ai/xpert", dstRel: "en/ai/agent" },
   knowledge: { srcRel: "current/ai/knowledge", dstRel: "en/ai/knowledge-base" },
   toolset: { srcRel: "current/ai/tool", dstRel: "en/ai/toolset" },
   troubleshooting: { srcRel: "current/ai/troubleshooting", dstRel: "en/ai/troubleshooting" },
@@ -344,5 +344,4 @@ main().catch((err) => {
   console.error(err);
   process.exit(1);
 });
-
 

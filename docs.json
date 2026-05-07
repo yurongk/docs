@@ -118,44 +118,49 @@
                 ]
               },
               {
-                "tab": "Digital Expert",
+                "tab": "Agent",
                 "groups": [
                   {
                     "group": "Default",
                     "pages": [
-                      "en/ai/digital-expert/digital-expert",
-                      "en/ai/digital-expert/multi-agent-architecture",
-                      "en/ai/digital-expert/expert-configuration",
-                      "en/ai/digital-expert/human-ai-collaboration",
-                      "en/ai/digital-expert/long-term-memory",
-                      "en/ai/digital-expert/environment-variables",
-                      "en/ai/digital-expert/enhanced-features",
-                      "en/ai/digital-expert/release-version",
-                      "en/ai/digital-expert/embed-webpage",
-                      "en/ai/digital-expert/conversation-logs",
-                      "en/ai/digital-expert/development-api",
-                      "en/ai/digital-expert/monitoring-dashboard",
-                      "en/ai/digital-expert/chat-channels",
-                      "en/ai/digital-expert/supervised-architecture",
-                      "en/ai/digital-expert/swarm-architecture"
+                      "en/ai/agent/agent",
+                      "en/ai/agent/multi-agent-architecture",
+                      "en/ai/agent/expert-configuration",
+                      "en/ai/agent/human-ai-collaboration",
+                      "en/ai/agent/long-term-memory",
+                      "en/ai/agent/environment-variables",
+                      "en/ai/agent/enhanced-features",
+                      "en/ai/agent/release-version",
+                      "en/ai/agent/embed-webpage",
+                      "en/ai/agent/conversation-logs",
+                      "en/ai/agent/development-api",
+                      "en/ai/agent/monitoring-dashboard",
+                      "en/ai/agent/chat-channels",
+                      "en/ai/agent/supervised-architecture",
+                      "en/ai/agent/swarm-architecture"
                     ]
                   },
                   {
                     "group": "Sandbox",
                     "pages": [
-                      "en/ai/digital-expert/sandbox/index"
+                      "en/ai/agent/sandbox/index"
                     ]
-                  }
-                ]
-              },
-              {
-                "tab": "Conversation",
-                "groups": [
+                  },
                   {
-                    "group": "Default",
+                    "group": "Conversation",
                     "pages": [
-                      "en/ai/conversation/conversation",
-                      "en/ai/conversation/projects"
+                      "en/ai/agent/conversation/conversation",
+                      "en/ai/agent/conversation/projects"
+                    ]
+                  },
+                  {
+                    "group": "AI Assistant",
+                    "pages": [
+                      "en/ai/agent/ai-assistant/index",
+                      "en/ai/agent/ai-assistant/settings",
+                      "en/ai/agent/ai-assistant/command",
+                      "en/ai/agent/ai-assistant/roles",
+                      "en/ai/agent/ai-assistant/configure-ai-assistant"
                     ]
                   }
                 ]
@@ -287,21 +292,6 @@
                 ]
               },
               {
-                "tab": "AI Assistant",
-                "groups": [
-                  {
-                    "group": "Default",
-                    "pages": [
-                      "en/ai/ai-assistant/index",
-                      "en/ai/ai-assistant/settings",
-                      "en/ai/ai-assistant/command",
-                      "en/ai/ai-assistant/roles",
-                      "en/ai/ai-assistant/configure-ai-assistant"
-                    ]
-                  }
-                ]
-              },
-              {
                 "tab": "Agent Middleware",
                 "groups": [
                   {
@@ -410,14 +400,14 @@
                 ]
               },
               {
-                "tab": "Permissions",
+                "tab": "System",
                 "groups": [
                   {
-                    "group": "Default",
+                    "group": "Permissions",
                     "pages": [
-                      "en/ai/permissions/control-sources-and-defaults",
-                      "en/ai/permissions/feature-permission-role-matrix",
-                      "en/ai/permissions/switch-function-mapping"
+                      "en/ai/system/permissions/control-sources-and-defaults",
+                      "en/ai/system/permissions/feature-permission-role-matrix",
+                      "en/ai/system/permissions/switch-function-mapping"
                     ]
                   }
                 ]
@@ -787,50 +777,60 @@
                 ]
               },
               {
-                "tab": "数字专家",
+                "tab": "智能体",
                 "groups": [
                   {
                     "group": "默认",
                     "pages": [
-                      "zh-Hans/ai/digital-expert/digital-expert",
-                      "zh-Hans/ai/digital-expert/multi-agent-architecture",
-                      "zh-Hans/ai/digital-expert/expert-configuration",
-                      "zh-Hans/ai/digital-expert/human-ai-collaboration",
-                      "zh-Hans/ai/digital-expert/long-term-memory",
-                      "zh-Hans/ai/digital-expert/environment-variables",
-                      "zh-Hans/ai/digital-expert/enhanced-features",
-                      "zh-Hans/ai/digital-expert/release-version",
-                      "zh-Hans/ai/digital-expert/embed-webpage",
-                      "zh-Hans/ai/digital-expert/conversation-logs",
-                      "zh-Hans/ai/digital-expert/development-api",
-                      "zh-Hans/ai/digital-expert/monitoring-dashboard",
-                      "zh-Hans/ai/digital-expert/chat-channels",
-                      "zh-Hans/ai/digital-expert/supervised-architecture",
-                      "zh-Hans/ai/digital-expert/swarm-architecture"
-                    ]
-                  },
-                  {
-                    "group": "技能",
-                    "pages": [
-                      "zh-Hans/ai/digital-expert/skill/index"
+                      "zh-Hans/ai/agent/agent",
+                      "zh-Hans/ai/agent/multi-agent-architecture",
+                      "zh-Hans/ai/agent/expert-configuration",
+                      "zh-Hans/ai/agent/human-ai-collaboration",
+                      "zh-Hans/ai/agent/long-term-memory",
+                      "zh-Hans/ai/agent/environment-variables",
+                      "zh-Hans/ai/agent/enhanced-features",
+                      "zh-Hans/ai/agent/release-version",
+                      "zh-Hans/ai/agent/embed-webpage",
+                      "zh-Hans/ai/agent/conversation-logs",
+                      "zh-Hans/ai/agent/development-api",
+                      "zh-Hans/ai/agent/monitoring-dashboard",
+                      "zh-Hans/ai/agent/chat-channels",
+                      "zh-Hans/ai/agent/supervised-architecture",
+                      "zh-Hans/ai/agent/swarm-architecture"
                     ]
                   },
                   {
                     "group": "沙箱",
                     "pages": [
-                      "zh-Hans/ai/digital-expert/sandbox/index"
+                      "zh-Hans/ai/agent/sandbox/index"
+                    ]
+                  },
+                  {
+                    "group": "对话",
+                    "pages": [
+                      "zh-Hans/ai/agent/conversation/conversation",
+                      "zh-Hans/ai/agent/conversation/projects"
+                    ]
+                  },
+                  {
+                    "group": "AI 助手",
+                    "pages": [
+                      "zh-Hans/ai/agent/ai-assistant/configure-ai-provider",
+                      "zh-Hans/ai/agent/ai-assistant/command",
+                      "zh-Hans/ai/agent/ai-assistant/role",
+                      "zh-Hans/ai/agent/ai-assistant/configure-ai-assistant",
+                      "zh-Hans/ai/agent/ai-assistant/ai-assitant"
                     ]
                   }
                 ]
               },
               {
-                "tab": "对话",
+                "tab": "技能",
                 "groups": [
                   {
                     "group": "默认",
                     "pages": [
-                      "zh-Hans/ai/conversation/conversation",
-                      "zh-Hans/ai/conversation/projects"
+                      "zh-Hans/ai/skill/index"
                     ]
                   }
                 ]
@@ -924,7 +924,7 @@
                     "group": "默认",
                     "pages": [
                       "zh-Hans/ai/workflow/agent",
-                      "zh-Hans/ai/workflow/external-digital-expert",
+                      "zh-Hans/ai/workflow/external-agent",
                       "zh-Hans/ai/workflow/session-variables",
                       "zh-Hans/ai/workflow/error-handling",
                       "zh-Hans/ai/workflow/execution-endpoint",
@@ -957,21 +957,6 @@
                       "zh-Hans/ai/workflow/database-delete",
                       "zh-Hans/ai/workflow/agent-middleware",
                       "zh-Hans/ai/workflow/logical-branch-routing"
-                    ]
-                  }
-                ]
-              },
-              {
-                "tab": "AI 助手",
-                "groups": [
-                  {
-                    "group": "默认",
-                    "pages": [
-                      "zh-Hans/ai/ai-assistant/configure-ai-provider",
-                      "zh-Hans/ai/ai-assistant/command",
-                      "zh-Hans/ai/ai-assistant/role",
-                      "zh-Hans/ai/ai-assistant/configure-ai-assistant",
-                      "zh-Hans/ai/ai-assistant/ai-assitant"
                     ]
                   }
                 ]
@@ -1091,14 +1076,14 @@
                 ]
               },
               {
-                "tab": "权限矩阵",
+                "tab": "系统",
                 "groups": [
                   {
-                    "group": "默认",
+                    "group": "权限矩阵",
                     "pages": [
-                      "zh-Hans/ai/permissions/control-sources-and-defaults",
-                      "zh-Hans/ai/permissions/feature-permission-role-matrix",
-                      "zh-Hans/ai/permissions/switch-function-mapping"
+                      "zh-Hans/ai/system/permissions/control-sources-and-defaults",
+                      "zh-Hans/ai/system/permissions/feature-permission-role-matrix",
+                      "zh-Hans/ai/system/permissions/switch-function-mapping"
                     ]
                   }
                 ]

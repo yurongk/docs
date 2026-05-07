@@ -27,7 +27,7 @@ All three assistant types are configured from **Settings / Assistants**, but the
 
 Before you start, make sure the following items are ready:
 
-- You have completed AI provider setup in [Configure AI Provider](./configure-ai-provider/);
+- You have completed AI provider setup in [Configure AI Provider](./settings/);
 - You have created a digital expert that can be used as an assistant;
 - That digital expert has already been **published**;
 - If you want the Workspace Assistant to help create or edit digital experts, it is recommended to prepare a dedicated **authoring assistant** digital expert;
@@ -113,7 +113,7 @@ If you want the Workspace Assistant to help create or edit digital experts, it i
 Common approaches include:
 
 - Create a new digital expert based on the platform's **authoring assistant** template;
-- Or create a dedicated digital expert for digital-expert authoring based on a similar YAML DSL template;
+- Or create a dedicated agent for agent authoring based on a similar YAML DSL template;
 - Publish it first, then bind it to the Workspace Assistant in **Settings / Assistants**.
 
 ## Tenant Default And Organization Override
@@ -224,6 +224,6 @@ Because most of these changes are first applied to the **draft**. To make the up
 ## Related Docs
 
 - [🤖 AI Copilot](./index/)
-- [Configure AI Provider](./configure-ai-provider/)
-- [Digital Expert](../digital-expert/digital-expert/)
-- [Expert Configuration](../digital-expert/expert-configuration/)
+- [Configure AI Provider](./settings/)
+- [Digital Expert](../agent/)
+- [Expert Configuration](../expert-configuration/)

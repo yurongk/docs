@@ -42,6 +42,6 @@ This approach is suitable for triggers continuously driven by external events an
 ## Related features
 
 - Trigger node overview: [Workflow Trigger](../../workflow/trigger/)
-- Multi-channel access for Digital Expert: [Digital Expert](../../digital-expert/digital-expert/)
+- Multi-channel access for Digital Expert: [Digital Expert](../../agent/agent/)
 - Lark plugin and integration background: [Lark Plugin Docs](../lark/)
 - Source code: [xpert-plugins / lark integration](https://github.com/xpert-ai/xpert-plugins/tree/main/xpertai/integrations/lark)
