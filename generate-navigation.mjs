@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 
-/* ===================== 基础配置 ===================== */
+/* ===================== Base configuration ===================== */
 
 const MARKDOWN_EXTS = new Set([".md", ".mdx"]);
 const IGNORE_DIR_NAMES = new Set([
@@ -17,11 +17,13 @@ const DEFAULT_GROUP_NAME_BY_LANGUAGE = {
   en: "Default",
   "zh-Hans": "默认",
 };
+const DEFAULT_GROUP_SLUG = "__default__";
+const EMPTY_MAP = new Map();
 
 /**
- * ⭐ 页面标题映射（用于更新英文版本的 MDX 文件中的 title）
- * key = 中文标题
- * value = 英文标题
+ * ⭐ Page title mapping (used to update the title in English MDX files)
+ * key = Chinese title
+ * value = English title
  */
 const PAGE_TITLE_MAPPING = {
   // Agent Middleware
@@ -99,116 +101,38 @@ const PAGE_TITLE_MAPPING = {
 };
 
 /**
- * ⭐ 多语言展示名映射（核心）
- * key = 目录名（slug）
- * value = 在对应语言下的展示名
+ * ⭐ Multilingual display name overrides (core)
+ * loaded from JSON config file
  */
-const DISPLAY_NAME_OVERRIDES = {
-  en: {
-    ai: "AI",
-    "agent-middleware": "Agent Middleware",
-    "ai-assistant": "AI Assistant",
-    conversation: "Conversation",
-    "digital-expert": "Digital Expert",
-    "knowledge-base": "Knowledge Base",
-    "plugin-development": "Plugin Development",
-    toolset: "Toolset",
-    troubleshooting: "Troubleshooting",
-    tutorial: "Tutorial",
-    workflow: "Workflow",
-    // Bi 产品
-    bi: "BI",
-    "indicator-management": "Indicator Management",
-    "semantic-model": "Semantic Model",
-    "story-dashboard": "Story Dashboard",
-    "website-features": "Website Features",
-    widget: "Widget",
-  },
-
-  "zh-Hans": {
-    ai: "AI",
-    "agent-middleware": "智能体中间件",
-    "ai-assistant": "AI 助手",
-    conversation: "对话",
-    "digital-expert": "数字专家",
-    "knowledge-base": "知识库",
-    "plugin-development": "插件开发",
-    toolset: "工具集",
-    troubleshooting: "故障排查",
-    tutorial: "教程",
-    workflow: "工作流",
-    // Bi 产品
-    bi: "BI",
-    "indicator-management": "指标管理",
-    "semantic-model": "语义模型",
-    "story-dashboard": "故事看板",
-    "website-features": "网站功能",
-    widget: "微件",
-    // Group 名称映射（目录名）
-    "create-knowledge-base-via-pipeline": "通过流水线创建知识库",
-    "bi-toolset": "BI 工具集",
-    "chatbi-toolset": "ChatBI 工具集",
-    "mcp-tools": "MCP 工具",
-    "virtual-environment": "虚拟环境",
-    "feishu-document-example": "飞书文档示例",
-    errors: "错误",
-    "analysis-card": "分析卡片",
-    "analysis-table": "分析表格",
-    "filter-bar": "筛选栏",
-    "input-controller": "输入控制器",
-    "dimension-designer": "维度设计器",
-    "multidimensional-dataset-designer": "多维数据集设计器",
-  },
-};
+const DISPLAY_NAME_OVERRIDES_FILE = new URL(
+  "./display-name-overrides.json",
+  import.meta.url
+);
+let DISPLAY_NAME_OVERRIDES = {};
 
 /**
- * ⭐ Tab 顺序配置（核心）
- * key = 产品目录名（slug）
- * value = tab 目录名（slug）数组，按显示顺序排列
- * 
- * 如果某个 tab 不在配置中，会按字母顺序排在最后
- * 新增 tab 时，只需在此配置中添加即可控制顺序
+ * ⭐ Navigation order tree configuration (core)
+ * loaded from JSON config file
+ *
+ * Schema:
+ * products[].slug
+ * products[].tabs[].slug
+ * products[].tabs[].groups[].slug (use "__default__" for tab root pages)
+ * products[].tabs[].groups[].pages[] (tab-relative path without extension)
  */
-const TAB_ORDER_BY_PRODUCT = {
-  ai: [
-    "digital-expert",
-    "conversation",
-    "knowledge-base",
-    "toolset",
-    "workflow",
-    "ai-assistant",
-    "agent-middleware",
-    "plugin-development",
-    "chatkit",
-    "troubleshooting",
-    "tutorial",
-  ],
-  bi: [
-    "semantic-model",
-    "indicator-management",
-    "story-dashboard",
-    "widget",
-    "website-features",
-  ],
+const NAVIGATION_ORDER_TREE_FILE = new URL(
+  "./navigation-order-tree.json",
+  import.meta.url
+);
+let NAVIGATION_ORDER_INDEXES = {
+  productOrderMap: EMPTY_MAP,
+  tabOrderMapByProduct: EMPTY_MAP,
+  groupOrderMapByProductTab: EMPTY_MAP,
+  pageOrderMapByProductTabGroup: EMPTY_MAP,
 };
 
-/* ===================== Navbar 多语言映射 ===================== */
+/* ===================== Navbar multilingual mapping ===================== */
 
-// 语言节点内的 navbar（数组格式）
-const NAVBAR_ARRAY_BY_LANGUAGE = {
-  en: [
-    { label: "GitHub", href: "https://github.com/xpert-ai/xpert" },
-    { label: "Support", href: "mailto:service@xpertai.cn" },
-    { label: "Try XpertAI", href: "https://app.xpertai.cn/" },
-  ],
-  "zh-Hans": [
-    { label: "GitHub", href: "https://github.com/xpert-ai/xpert" },
-    { label: "支持", href: "mailto:service@xpertai.cn" },
-    { label: "试用 XpertAI", href: "https://app.xpertai.cn/" },
-  ],
-};
-
-// 顶层 navbar（对象格式）——避免 main() 里引用未定义变量导致崩溃
 const NAVBAR_BY_LANGUAGE = {
   en: {
     links: [
@@ -217,8 +141,8 @@ const NAVBAR_BY_LANGUAGE = {
     ],
     primary: {
       type: "button",
-      label: "Try Chat-Kit",
-      href: "https://xpertai.cn/docs/ai/",
+      label: "Try XpertAI",
+      href: "https://app.xpertai.cn/",
     },
   },
   "zh-Hans": {
@@ -228,15 +152,15 @@ const NAVBAR_BY_LANGUAGE = {
     ],
     primary: {
       type: "button",
-      label: "试用 Chat-Kit",
-      href: "https://xpertai.cn/zh-Hans/docs/ai/",
+      label: "试用 XpertAI",
+      href: "https://app.xpertai.cn/",
     },
   },
 };
 
 
 
-/* ===================== 工具函数 ===================== */
+/* ===================== Utility functions ===================== */
 
 function parseArgs(argv) {
   const args = {
@@ -277,14 +201,14 @@ function pagePathFromFile(contentRootAbs, fileAbs) {
 }
 
 /**
- * 检测文本中是否包含中文
+ * Check if text contains Chinese characters
  */
 function containsChinese(text) {
   return /[\u4e00-\u9fa5]/.test(text);
 }
 
 /**
- * 解析 frontmatter 中的 title
+ * Parse title from frontmatter
  */
 function parseFrontmatterTitle(content) {
   if (!content.startsWith("---")) {
@@ -302,7 +226,7 @@ function parseFrontmatterTitle(content) {
 }
 
 /**
- * 解析 frontmatter 中的 sidebar_position
+ * Parse sidebar_position from frontmatter
  */
 function parseFrontmatterSidebarPosition(content) {
   if (!content.startsWith("---")) {
@@ -325,7 +249,7 @@ function parseFrontmatterSidebarPosition(content) {
 }
 
 /**
- * 根据文件名生成英文标题
+ * Generate an English title from filename
  */
 function generateEnglishTitleFromFilename(filePath) {
   const basename = path.basename(filePath, path.extname(filePath));
@@ -336,7 +260,7 @@ function generateEnglishTitleFromFilename(filePath) {
 }
 
 /**
- * 更新 frontmatter 中的 title
+ * Update title in frontmatter
  */
 function updateFrontmatterTitle(content, newTitle) {
   if (!content.startsWith("---")) {
@@ -360,7 +284,7 @@ function updateFrontmatterTitle(content, newTitle) {
 }
 
 /**
- * 更新英文版本的 MDX 文件中的 title（如果包含中文）
+ * Update English MDX file title if it contains Chinese
  */
 async function updateEnglishPageTitle(filePath, updateTitles) {
   if (!updateTitles || !filePath.includes("/en/")) {
@@ -375,10 +299,10 @@ async function updateEnglishPageTitle(filePath, updateTitles) {
       return { updated: false };
     }
 
-    // 查找映射表
+    // lookup mapping
     let newTitle = PAGE_TITLE_MAPPING[currentTitle];
 
-    // 如果映射表中没有，根据文件名生成
+    // fallback: generate from filename if not in mapping
     if (!newTitle) {
       newTitle = generateEnglishTitleFromFilename(filePath);
     }
@@ -388,13 +312,13 @@ async function updateEnglishPageTitle(filePath, updateTitles) {
 
     return { updated: true, oldTitle: currentTitle, newTitle };
   } catch (error) {
-    console.warn(`⚠️  更新文件标题失败: ${filePath}`, error.message);
+    console.warn(`⚠️ Failed to update file title: ${filePath}`, error.message);
     return { updated: false, error: error.message };
   }
 }
 
 /**
- * ⭐ 语言感知展示名
+ * ⭐ Language-aware display name
  */
 function toDisplayName(slug, language) {
   if (!slug) return slug;
@@ -402,12 +326,265 @@ function toDisplayName(slug, language) {
   const override = DISPLAY_NAME_OVERRIDES?.[language]?.[slug];
   if (override) return override;
 
-  // fallback：英文自动 Title Case
+  // fallback: Title Case from slug
   return slug
     .split(/[-_]+/g)
     .filter(Boolean)
     .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
     .join(" ");
+}
+
+function normalizeStringArray(value) {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item) => typeof item === "string" && item.length > 0);
+}
+
+function findNamedItem(items, key, value) {
+  if (!Array.isArray(items) || typeof value !== "string" || !value) {
+    return null;
+  }
+
+  return items.find((item) => item?.[key] === value) ?? null;
+}
+
+function mergeGroupsWithExistingConfig(generatedGroups, existingGroups) {
+  const mergedGroups = [];
+  const usedGroupNames = new Set();
+
+  for (const generatedGroup of generatedGroups) {
+    const existingGroup = findNamedItem(
+      existingGroups,
+      "group",
+      generatedGroup?.group
+    );
+
+    if (existingGroup?.group) {
+      usedGroupNames.add(existingGroup.group);
+      mergedGroups.push({
+        ...existingGroup,
+        ...generatedGroup,
+      });
+      continue;
+    }
+
+    mergedGroups.push(generatedGroup);
+  }
+
+  for (const existingGroup of existingGroups ?? []) {
+    const groupName = existingGroup?.group;
+    if (typeof groupName !== "string" || !groupName) continue;
+    if (usedGroupNames.has(groupName)) continue;
+    mergedGroups.push(existingGroup);
+  }
+
+  return mergedGroups;
+}
+
+function mergeTabsWithExistingConfig(generatedTabs, existingTabs) {
+  const mergedTabs = [];
+  const usedTabNames = new Set();
+
+  for (const generatedTab of generatedTabs) {
+    const existingTab = findNamedItem(existingTabs, "tab", generatedTab?.tab);
+    const mergedGroups = mergeGroupsWithExistingConfig(
+      generatedTab?.groups ?? [],
+      existingTab?.groups ?? []
+    );
+
+    if (existingTab?.tab) {
+      usedTabNames.add(existingTab.tab);
+      mergedTabs.push({
+        ...existingTab,
+        ...generatedTab,
+        groups: mergedGroups,
+      });
+      continue;
+    }
+
+    mergedTabs.push({
+      ...generatedTab,
+      groups: mergedGroups,
+    });
+  }
+
+  for (const existingTab of existingTabs ?? []) {
+    const tabName = existingTab?.tab;
+    if (typeof tabName !== "string" || !tabName) continue;
+    if (usedTabNames.has(tabName)) continue;
+    mergedTabs.push(existingTab);
+  }
+
+  return mergedTabs;
+}
+
+function mergeProductsWithExistingConfig(generatedProducts, existingProducts) {
+  const mergedProducts = [];
+  const usedProductNames = new Set();
+
+  for (const generatedProduct of generatedProducts) {
+    const existingProduct = findNamedItem(
+      existingProducts,
+      "product",
+      generatedProduct?.product
+    );
+    const mergedTabs = mergeTabsWithExistingConfig(
+      generatedProduct?.tabs ?? [],
+      existingProduct?.tabs ?? []
+    );
+
+    if (existingProduct?.product) {
+      usedProductNames.add(existingProduct.product);
+      mergedProducts.push({
+        ...existingProduct,
+        ...generatedProduct,
+        tabs: mergedTabs,
+      });
+      continue;
+    }
+
+    mergedProducts.push({
+      ...generatedProduct,
+      tabs: mergedTabs,
+    });
+  }
+
+  for (const existingProduct of existingProducts ?? []) {
+    const productName = existingProduct?.product;
+    if (typeof productName !== "string" || !productName) continue;
+    if (usedProductNames.has(productName)) continue;
+    mergedProducts.push(existingProduct);
+  }
+
+  return mergedProducts;
+}
+
+function buildNavigationOrderIndexes(orderTree) {
+  const products = Array.isArray(orderTree?.products)
+    ? orderTree.products
+    : [];
+
+  const productOrderMap = new Map();
+  const tabOrderMapByProduct = new Map();
+  const groupOrderMapByProductTab = new Map();
+  const pageOrderMapByProductTabGroup = new Map();
+
+  products.forEach((productNode, productIndex) => {
+    const productSlug = productNode?.slug;
+    if (typeof productSlug !== "string" || !productSlug) return;
+
+    if (!productOrderMap.has(productSlug)) {
+      productOrderMap.set(productSlug, productIndex);
+    }
+
+    const tabs = Array.isArray(productNode.tabs) ? productNode.tabs : [];
+    const tabOrderMap = new Map();
+    const groupOrderMapByTab = new Map();
+    const pageOrderMapByTabGroup = new Map();
+
+    tabs.forEach((tabNode, tabIndex) => {
+      const tabSlug = tabNode?.slug;
+      if (typeof tabSlug !== "string" || !tabSlug) return;
+
+      if (!tabOrderMap.has(tabSlug)) {
+        tabOrderMap.set(tabSlug, tabIndex);
+      }
+
+      const groups = Array.isArray(tabNode.groups) ? tabNode.groups : [];
+      const groupOrderMap = new Map();
+      const pageOrderMapByGroup = new Map();
+
+      groups.forEach((groupNode, groupIndex) => {
+        const groupSlug = groupNode?.slug;
+        if (typeof groupSlug !== "string" || !groupSlug) return;
+
+        if (!groupOrderMap.has(groupSlug)) {
+          groupOrderMap.set(groupSlug, groupIndex);
+        }
+
+        const pages = normalizeStringArray(groupNode.pages);
+        const pageOrderMap = new Map();
+        pages.forEach((pageSlug, pageIndex) => {
+          if (!pageOrderMap.has(pageSlug)) {
+            pageOrderMap.set(pageSlug, pageIndex);
+          }
+
+          // Support group-relative page slugs (e.g. "schedule-trigger")
+          // in addition to tab-relative slugs (e.g. "trigger/schedule-trigger").
+          // This makes pages[] under a group intuitive while keeping backward compatibility.
+          if (
+            groupSlug !== DEFAULT_GROUP_SLUG &&
+            !pageSlug.startsWith(`${groupSlug}/`)
+          ) {
+            const tabRelativePageSlug = `${groupSlug}/${pageSlug}`;
+            if (!pageOrderMap.has(tabRelativePageSlug)) {
+              pageOrderMap.set(tabRelativePageSlug, pageIndex);
+            }
+          }
+        });
+
+        pageOrderMapByGroup.set(groupSlug, pageOrderMap);
+      });
+
+      groupOrderMapByTab.set(tabSlug, groupOrderMap);
+      pageOrderMapByTabGroup.set(tabSlug, pageOrderMapByGroup);
+    });
+
+    tabOrderMapByProduct.set(productSlug, tabOrderMap);
+    groupOrderMapByProductTab.set(productSlug, groupOrderMapByTab);
+    pageOrderMapByProductTabGroup.set(productSlug, pageOrderMapByTabGroup);
+  });
+
+  return {
+    productOrderMap,
+    tabOrderMapByProduct,
+    groupOrderMapByProductTab,
+    pageOrderMapByProductTabGroup,
+  };
+}
+
+function getTabOrderMap(productSlug) {
+  return (
+    NAVIGATION_ORDER_INDEXES.tabOrderMapByProduct.get(productSlug) ?? EMPTY_MAP
+  );
+}
+
+function getGroupOrderMap(productSlug, tabSlug) {
+  const byTab =
+    NAVIGATION_ORDER_INDEXES.groupOrderMapByProductTab.get(productSlug) ??
+    EMPTY_MAP;
+  return byTab.get(tabSlug) ?? EMPTY_MAP;
+}
+
+function getPageOrderMap(productSlug, tabSlug, groupSlug) {
+  const byTab =
+    NAVIGATION_ORDER_INDEXES.pageOrderMapByProductTabGroup.get(productSlug) ??
+    EMPTY_MAP;
+  const byGroup = byTab.get(tabSlug) ?? EMPTY_MAP;
+  return byGroup.get(groupSlug) ?? EMPTY_MAP;
+}
+
+function sortByConfiguredOrder(
+  items,
+  getOrderKey,
+  orderMap,
+  fallbackCompare = null
+) {
+  return [...items].sort((a, b) => {
+    const orderA = orderMap.get(getOrderKey(a));
+    const orderB = orderMap.get(getOrderKey(b));
+
+    if (orderA !== undefined && orderB !== undefined) return orderA - orderB;
+    if (orderA !== undefined) return -1;
+    if (orderB !== undefined) return 1;
+
+    return fallbackCompare ? fallbackCompare(a, b) : 0;
+  });
+}
+
+function toTabRelativePagePath(pagePath, language, productSlug, tabSlug) {
+  const prefix = `${language}/${productSlug}/${tabSlug}/`;
+  if (!pagePath.startsWith(prefix)) return pagePath;
+  return pagePath.slice(prefix.length);
 }
 
 async function listDir(dirAbs) {
@@ -422,22 +599,22 @@ async function listDir(dirAbs) {
 }
 
 /**
- * ⭐ 页面排序函数
- * 排序规则（优先级从高到低）：
- * 1. index 文件排在最前面
- * 2. 有 sidebar_position 的按数值排序（数字越小越靠前）
- * 3. 其他按路径字母顺序排序
+ * ⭐ Page sorting function
+ * Sorting rules (priority high -> low):
+ * 1. index files first
+ * 2. files with sidebar_position sorted by number (smaller first)
+ * 3. others sorted alphabetically by path
  */
 async function sortPages(pages, contentRootAbs) {
   const isIndex = (p) => p.endsWith("/index");
   
-  // 读取每个页面的 sidebar_position
+  // read sidebar_position for each page
   const pagePositions = new Map();
   for (const pagePath of pages) {
     const filePath = path.join(contentRootAbs, pagePath + ".mdx");
     let altPath = path.join(contentRootAbs, pagePath + ".md");
     
-    // 尝试读取 .mdx 或 .md 文件
+    // try .mdx or .md
     let content = null;
     try {
       content = await fs.readFile(filePath, "utf8");
@@ -445,7 +622,7 @@ async function sortPages(pages, contentRootAbs) {
       try {
         content = await fs.readFile(altPath, "utf8");
       } catch {
-        // 文件不存在，跳过
+        // file not found, skip
       }
     }
     
@@ -458,21 +635,21 @@ async function sortPages(pages, contentRootAbs) {
   }
   
   return [...pages].sort((a, b) => {
-    // 1. index 文件优先
+    // 1. index files first
     if (isIndex(a) && !isIndex(b)) return -1;
     if (!isIndex(a) && isIndex(b)) return 1;
     
-    // 2. 有 sidebar_position 的按数值排序
+    // 2. sidebar_position numeric order
     const posA = pagePositions.get(a);
     const posB = pagePositions.get(b);
     
     if (posA !== undefined && posB !== undefined) {
       return posA - posB;
     }
-    if (posA !== undefined) return -1; // A 有 position，排在前面
-    if (posB !== undefined) return 1;  // B 有 position，排在前面
+    if (posA !== undefined) return -1; // A has position -> earlier
+    if (posB !== undefined) return 1;  // B has position -> earlier
     
-    // 3. 其他按字母顺序
+    // 3. alphabetic fallback
     return a.localeCompare(b);
   });
 }
@@ -495,7 +672,7 @@ async function collectPagesRecursively(dirAbs, contentRootAbs, updateTitles = fa
         const pagePath = pagePathFromFile(contentRootAbs, full);
         pages.push(pagePath);
         
-        // 如果启用了更新标题功能，更新英文版本的 title
+        // If updateTitles enabled, update English page title
         if (updateTitles) {
           await updateEnglishPageTitle(full, updateTitles);
         }
@@ -506,19 +683,35 @@ async function collectPagesRecursively(dirAbs, contentRootAbs, updateTitles = fa
   return sortPages(pages, contentRootAbs);
 }
 
-/* ===================== 核心逻辑 ===================== */
+/* ===================== Core logic ===================== */
 
 async function buildNavigationForLanguage(language, docs, contentRootAbs, updateTitles = false) {
   const langAbs = path.join(contentRootAbs, language);
   const products = [];
+  const existingLanguageConfig =
+    docs.navigation?.languages?.find((l) => l.language === language) ?? {};
+  const existingProducts = Array.isArray(existingLanguageConfig.products)
+    ? existingLanguageConfig.products
+    : [];
 
   const productDirs = (await listDir(langAbs)).filter((e) => e.isDirectory());
+  const productOrderMap = NAVIGATION_ORDER_INDEXES.productOrderMap;
+  productDirs.sort((a, b) => {
+    const orderA = productOrderMap.get(a.name);
+    const orderB = productOrderMap.get(b.name);
+
+    if (orderA !== undefined && orderB !== undefined) return orderA - orderB;
+    if (orderA !== undefined) return -1;
+    if (orderB !== undefined) return 1;
+    return a.name.localeCompare(b.name);
+  });
 
   for (const productDir of productDirs) {
     const productSlug = productDir.name;
     const productAbs = path.join(langAbs, productSlug);
 
     const productName = toDisplayName(productSlug, language);
+    const tabOrderMap = getTabOrderMap(productSlug);
     const tabs = [];
 
     const tabDirs = (await listDir(productAbs)).filter((e) =>
@@ -530,6 +723,9 @@ async function buildNavigationForLanguage(language, docs, contentRootAbs, update
       const tabAbs = path.join(productAbs, tabSlug);
 
       const tabName = toDisplayName(tabSlug, language);
+      const groupOrderMap = getGroupOrderMap(productSlug, tabSlug);
+      const toPageOrderKey = (pagePath) =>
+        toTabRelativePagePath(pagePath, language, productSlug, tabSlug);
       const groups = [];
       const defaultPages = [];
 
@@ -539,13 +735,25 @@ async function buildNavigationForLanguage(language, docs, contentRootAbs, update
         const childAbs = path.join(tabAbs, child.name);
 
         if (child.isDirectory()) {
-          const groupName = toDisplayName(child.name, language);
+          const groupSlug = child.name;
+          const groupName = toDisplayName(groupSlug, language);
           const pages = await collectPagesRecursively(
             childAbs,
             contentRootAbs,
             updateTitles
           );
-          if (pages.length) groups.push({ group: groupName, pages });
+          if (pages.length) {
+            const orderedPages = sortByConfiguredOrder(
+              pages,
+              toPageOrderKey,
+              getPageOrderMap(productSlug, tabSlug, groupSlug)
+            );
+            groups.push({
+              group: groupName,
+              groupSlug,
+              pages: orderedPages,
+            });
+          }
         } else if (
           child.isFile() &&
           MARKDOWN_EXTS.has(path.extname(child.name).toLowerCase())
@@ -553,7 +761,7 @@ async function buildNavigationForLanguage(language, docs, contentRootAbs, update
           const filePath = pagePathFromFile(contentRootAbs, childAbs);
           defaultPages.push(filePath);
           
-          // 如果启用了更新标题功能，更新英文版本的 title
+          // If updateTitles enabled, update English page title
           if (updateTitles) {
             await updateEnglishPageTitle(childAbs, updateTitles);
           }
@@ -565,54 +773,68 @@ async function buildNavigationForLanguage(language, docs, contentRootAbs, update
       const tabNode = { tab: tabName, tabSlug: tabSlug, groups: [] };
 
       if (defaultPages.length) {
+        const sortedDefaultPages = await sortPages(defaultPages, contentRootAbs);
+        const orderedDefaultPages = sortByConfiguredOrder(
+          sortedDefaultPages,
+          toPageOrderKey,
+          getPageOrderMap(productSlug, tabSlug, DEFAULT_GROUP_SLUG)
+        );
         tabNode.groups.push({
+          groupSlug: DEFAULT_GROUP_SLUG,
           group:
             DEFAULT_GROUP_NAME_BY_LANGUAGE[language] ?? "Default",
-          pages: await sortPages(defaultPages, contentRootAbs),
+          pages: orderedDefaultPages,
         });
       }
 
-      tabNode.groups.push(
-        ...groups.sort((a, b) =>
-          a.group.localeCompare(b.group)
-        )
+      const sortedNonDefaultGroups = sortByConfiguredOrder(
+        groups.sort((a, b) => a.group.localeCompare(b.group)),
+        (group) => group.groupSlug,
+        groupOrderMap
       );
+      tabNode.groups.push(...sortedNonDefaultGroups);
+
+      // Keep default group first unless __default__ is explicitly configured.
+      if (groupOrderMap.has(DEFAULT_GROUP_SLUG)) {
+        tabNode.groups = sortByConfiguredOrder(
+          tabNode.groups,
+          (group) => group.groupSlug,
+          groupOrderMap
+        );
+      }
 
       tabs.push(tabNode);
     }
 
-    // ⭐ 根据配置对 tabs 进行排序
+    // ⭐ Sort tabs according to configuration
     if (tabs.length) {
-      const tabOrder = TAB_ORDER_BY_PRODUCT[productSlug] || [];
-      
-      // 创建一个映射，将 tab slug 映射到其配置顺序
-      const tabOrderMap = new Map();
-      tabOrder.forEach((slug, index) => {
-        tabOrderMap.set(slug, index);
-      });
-
       tabs.sort((a, b) => {
         const orderA = tabOrderMap.get(a.tabSlug);
         const orderB = tabOrderMap.get(b.tabSlug);
         
-        // 如果两个都在配置中，按配置顺序排序
+        // if both configured, sort by configured order
         if (orderA !== undefined && orderB !== undefined) {
           return orderA - orderB;
         }
-        // 如果只有 A 在配置中，A 排在前面
+        // if only A configured, A first
         if (orderA !== undefined) {
           return -1;
         }
-        // 如果只有 B 在配置中，B 排在前面
+        // if only B configured, B first
         if (orderB !== undefined) {
           return 1;
         }
-        // 如果都不在配置中，按字母顺序排序
+        // otherwise alphabetic by slug
         return a.tabSlug.localeCompare(b.tabSlug);
       });
       
-      // 排序后移除 tabSlug，只保留 tab（显示名）用于输出
-      tabs.forEach(tab => delete tab.tabSlug);
+      // After sorting, remove internal slugs and keep display names for output
+      tabs.forEach((tab) => {
+        delete tab.tabSlug;
+        tab.groups.forEach((group) => {
+          delete group.groupSlug;
+        });
+      });
 
       products.push({
         product: productName,
@@ -621,16 +843,17 @@ async function buildNavigationForLanguage(language, docs, contentRootAbs, update
     }
   }
 
-  // 获取现有配置（如果有），但排除 products 和 navbar，这些由脚本生成
-  const existingConfig = docs.navigation?.languages?.find((l) => l.language === language) ?? {};
+  // Get existing config (if any), but exclude products and navbar which are generated by the script
+  const mergedProducts = mergeProductsWithExistingConfig(products, existingProducts);
+  const existingConfig = existingLanguageConfig;
   const { products: _, navbar: __, ...restConfig } = existingConfig;
   
   return {
-    ...restConfig, // 保留其他配置（如 default）
+    ...restConfig, // keep other config (e.g., default)
     language,
-    // 为每个语言添加对应的 navbar（数组格式）
-    navbar: NAVBAR_ARRAY_BY_LANGUAGE[language] ?? NAVBAR_ARRAY_BY_LANGUAGE.en,
-    products, // 新生成的 products，确保使用最新的显示名
+    // add per-language navbar (object format required by Mintlify schema)
+    navbar: NAVBAR_BY_LANGUAGE[language] ?? NAVBAR_BY_LANGUAGE.en,
+    products: mergedProducts, // generated pages + preserved manual navigation config
   };
 }
 
@@ -654,6 +877,12 @@ async function main() {
   const docsAbs = path.resolve(args.docs);
   const contentRootAbs = path.resolve(args.contentRoot);
 
+  DISPLAY_NAME_OVERRIDES = JSON.parse(
+    await fs.readFile(DISPLAY_NAME_OVERRIDES_FILE, "utf8")
+  );
+  NAVIGATION_ORDER_INDEXES = buildNavigationOrderIndexes(
+    JSON.parse(await fs.readFile(NAVIGATION_ORDER_TREE_FILE, "utf8"))
+  );
   const docs = JSON.parse(await fs.readFile(docsAbs, "utf8"));
   const languages = await resolveLanguages({
     docs,
@@ -676,8 +905,8 @@ async function main() {
   docs.navigation ??= {};
   docs.navigation.languages = languageNodes;
 
-  // 注意：navbar 已在每个语言节点中配置，如果 Mintlify 不支持，
-  // 则使用全局 navbar（默认语言的）
+  // Note: navbar is configured per-language; if Mintlify doesn't support it,
+  // fall back to global navbar (default language)
   if (!docs.navbar) {
     const defaultLang =
       languageNodes.find((l) => l.default)?.language ??
@@ -686,10 +915,10 @@ async function main() {
     docs.navbar = NAVBAR_BY_LANGUAGE[defaultLang] ?? NAVBAR_BY_LANGUAGE.en;
   }
 
-  // ⭐ 站点自定义样式入口（用于字体/侧边栏强调等）
-  // 如果 docs.json 已配置 css，则不覆盖
+  // ⭐ Site custom CSS entry (for fonts/sidebar emphasis etc)
+  // If docs.json already configures css, do not override
   if (!docs.css) {
-    // 注意：本项目静态资源路径是 /public/xxx（例如 /public/styles.css）
+    // Note: this project's static assets path is /public/xxx (e.g., /public/styles.css)
     docs.css = "/public/styles.css";
   }
 

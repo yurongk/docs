@@ -16,17 +16,17 @@ The Xpert agent interface follows the [Agent Protocol](https://langchain-ai.gith
 
 The XpertAI intelligent agent platform can be interacted with via the [LangGraph SDK](https://docs.langchain.com/langgraph-platform/sdk) (`@langchain/langgraph-sdk` (JS/TS SDK) / langgraph-sdk Python SDK). This SDK encapsulates the core capabilities for communicating with the LangGraph REST API, making it easy to manage core components such as assistants, threads, runs, and persistent storage (store).
 
-:::info
+<Info>
 Reference code: [XpertAI SDK Examples](https://github.com/xpert-ai/xpertai-sdk)
-:::
+</Info>
 
 ### 1. Installation
 
 Ensure that the Node.js environment is installed, then install the SDK in your project:
 
 ```bash
-# Install with yarn
-yarn add @langchain/langgraph-sdk
+# Install with pnpm
+pnpm add @langchain/langgraph-sdk
 # Or install with npm
 npm install @langchain/langgraph-sdk
 ```
@@ -41,7 +41,7 @@ In JavaScript/TypeScript, you can create a `Client` instance as follows:
 import { Client } from "@langchain/langgraph-sdk";
 
 const client = new Client({
-  apiUrl: "https://api.mtda.cloud/api/ai/", // Your baseUrl of XpertAI server.
+  apiUrl: "https://api.xpertai.cn/api/ai/", // Your baseUrl of XpertAI server.
   apiKey: "your-api-key", // API Key of xpert
 })
 ```

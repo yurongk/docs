@@ -1,0 +1,41 @@
+---
+title: Change Sets
+sidebar_position: 3
+tags:
+  - AI
+  - Agent
+  - Code
+---
+
+Change sets are snapshots of file changes captured during task execution. Each sync produces a new change set so you can review progress over time.
+
+## What a change set includes
+
+- File change list
+- Unified and split diffs
+- Line additions and deletions
+- Optional pull request metadata
+
+## Diff views
+
+You can review changes with:
+
+- Split diff: side-by-side view
+- Unified diff: single stream view
+
+Use the view toggle on the task page to switch formats.
+
+## Copy helpers
+
+From the task header menu you can:
+
+- Copy patch
+- Copy git apply
+
+These are useful for applying changes locally or sharing them with teammates.
+
+## Tips for reviews
+
+- Focus on the latest change set first.
+- Validate high-impact files before opening a PR.
+- Use additions/deletions to understand scope quickly.

@@ -1,0 +1,96 @@
+---
+title: Code Xpert
+sidebar_position: 1
+tags:
+  - AI
+  - Agent
+  - Code
+---
+
+CodeXpert 是面向工程团队的智能编码平台，融合对话式协作与任务化工作流。你可以创建任务、观察执行过程、查看文件变更，并一键生成或打开 PR。
+
+![Code Xpert](/public/img/code/code-xpert-arch.png)
+
+编码智能体系统采用分层解耦架构：
+- **[CodeXpert](https://code.xpertai.cn/) Web 与 CodeXpert Server** 构成前后端系统，负责用户交互与会话管理；
+- 核心的 **[XpertAI Agent Server](https://app.xpertai.cn/)** 作为智能体编排平台，调度编码智能体、管理线程上下文并调用 **LLM（第三方或本地大模型）** 进行推理与代码生成；
+- 所有代码执行与测试任务均在隔离的 **[Sandbox](/zh-Hans/ai/digital-expert/sandbox) 沙箱环境** 中安全运行；
+- 同时系统可连接 **GitHub 及其他代码仓库平台** 实现代码拉取、提交与 PR 交互，形成从智能推理、代码生成、安全执行到仓库协作的完整闭环架构。
+
+## 你可以做什么
+
+- 创建包含指令与附件的编码任务
+- 在专属环境中执行任务并查看终端输出
+- 查看变更集、文件 diff 与增删行统计
+- 基于最新变更创建或打开 PR
+- 归档已完成任务，保持列表清爽
+
+## 核心概念
+
+### 任务
+任务是工作单元，包含：
+
+- 指令与状态
+- 仓库与分支上下文
+- 变更集与文件 diff
+- 执行环境的终端输出
+
+![Start Tasks](/public/img/code/start-task.png)
+
+### 变更集
+每次同步都会生成变更集，包含：
+
+- 文件变更列表
+- 统一/分栏 diff
+- 新增与删除行统计
+- 可选的 PR 信息
+
+### 环境
+环境定义任务的运行方式，包括：
+
+- 仓库连接与默认分支
+- 安装脚本与预装依赖
+- 网络访问与运行参数
+
+## 典型流程
+
+1. 连接仓库并选择分支
+2. 创建任务并写明清晰目标
+3. 观察执行进度与终端输出
+4. 查看 diff 并确认影响范围
+5. 创建 PR 或继续迭代
+
+## 关键页面
+
+### 任务页
+任务页集成了：
+
+- 任务头部信息（仓库、分支、变更统计）
+- 对话面板用于迭代指令
+- 终端输出与执行日志
+- 文件 diff（分栏/统一）
+- PR 操作与复制辅助
+
+### 设置
+在设置中配置：
+
+- 环境（运行时、安装、缓存）
+- 连接器（仓库访问）
+- 代码审查偏好
+- 使用量统计
+
+![Usage](/public/img/code/token-usage.png)
+
+## Git Provider 配置
+
+- [GitHub 配置](/zh-Hans/code/web/git/github)
+- [GitLab 配置](/zh-Hans/code/web/git/gitlab)
+- [Gitee 配置](/zh-Hans/code/web/git/gitee)
+- [云效 Codeup 配置](/zh-Hans/code/web/git/codeup)
+
+## 最佳实践
+
+- 指令包含目标与约束，避免歧义
+- 关键节点后同步，形成清晰变更集
+- PR 前用 diff 复核影响范围
+- 完成后归档任务以聚焦当前工作

@@ -13,11 +13,13 @@ BPC Model:
 
 ![Middle Shadow](./consolidation-model.png)
 
-:::tip Environment
+<Tip>
+**Environment**
+
 
 System environment used in this article: Personal Edition account
 
-:::
+</Tip>
 
 ## How to Create Dashboards Based on SAP BPC System
 
@@ -92,13 +94,15 @@ Based on different management methods of different companies, core indicators ca
 
 In this case, the gross profit margin formula remains unchanged, what changes are different dimension members. This way we can define the gross profit margin formula in the semantic model. Add a calculated measure member for gross profit margin in [Semantic Model #Create Calculated Member](../../../models/mdx-modeling/semantic-enhancement-for-third-party-olap-cube#create-calculated-member), and select this measure when defining indicators, then add different filter conditions (dimension member restrictions) for different detail indicators.
 
-:::tip Solve Order
+<Tip>
+**Solve Order**
+
 
 When defining calculated measure members, pay attention to the Solve Order property setting, which relates to the priority order of different operations in the calculation process and affects the final result.
 
 --- [MDX Data Manipulation - Understanding Pass Order and Solve Order](https://learn.microsoft.com/en-us/analysis-services/multidimensional-models/mdx/mdx-data-manipulation-understanding-pass-order-and-solve-order?view=asallproducts-allversions)
 
-:::
+</Tip>
 
 ## Calendar Dimension
 

@@ -1,0 +1,55 @@
+---
+title: Gitee Configuration
+sidebar_position: 3
+tag: "gitee"
+---
+
+`Gitee` supports two authentication methods in the current backend implementation: `OAUTH_WEB` and `PAT`.
+
+## Backend Prerequisites
+
+Common configuration:
+
+- `GIT_CREDENTIALS_KEY`: Used to encrypt and save connection credentials.
+- `BACKEND_PUBLIC_URL` or `PUBLIC_API_URL`: Used to generate the `Webhook URL` displayed on the page.
+- `FRONTEND_URL`: The address to redirect to after OAuth completion.
+
+Required for OAuth method:
+
+- `GITEE_CLIENT_ID`
+- `GITEE_CLIENT_SECRET`
+- `GITEE_REDIRECT_URI` (e.g., `http://localhost:3001/v1/git/connections/callback/gitee`)
+
+Optional for OAuth method:
+
+- `GITEE_SCOPES`
+- `CODE_XPERT_MENTION` (default `@xpert-ai`, used as a keyword to trigger issues)
+
+If using only the `PAT` method, Gitee OAuth-related variables are not required.
+
+## Web Configuration Steps
+
+### Method 1: OAuth Web
+
+1. Open `Settings -> Connectors` (`/settings/connectors`).
+2. Select `Provider = Gitee`, `Auth method = OAUTH_WEB`.
+3. Copy the `Webhook URL` from the page.
+4. Click `Start Connection` to redirect to Gitee authorization and complete the authorization.
+5. After redirecting back, the connection will appear in the `Existing Connections` list.
+
+### Method 2: PAT
+
+1. Select `Provider = Gitee`, `Auth method = PAT`.
+2. A `Personal Access Token` field will appear (required).
+3. Fill in the token and click `Submit Connection`.
+
+## Webhook Configuration Recommendations
+
+- Enter the `Webhook URL` provided by the page in the Gitee repository webhook settings.
+- For issue events, the comment review process is triggered only when the content includes `@xpert-ai` (or the `CODE_XPERT_MENTION` configuration value).
+
+## Frequently Asked Questions
+
+- `Missing GITEE_CLIENT_ID or GITEE_REDIRECT_URI`: Missing required OAuth environment variables.
+- `Missing Gitee OAuth config`: Usually caused by `GITEE_CLIENT_SECRET` not being configured.
+

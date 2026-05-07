@@ -105,4 +105,4 @@ Through this mechanism, the **Subflow** node achieves data decoupling and reuse 
 
 ## 📘 Example Digital Expert: Smart HR Assistant
 
-In the employee onboarding automation scenario, a subflow node is used to build a clear, automated onboarding workflow. Refer to the template [Smart HR Assistant](https://app.mtda.cloud/explore?search=Smart%20HR%20Assistant).
+In the employee onboarding automation scenario, a subflow node is used to build a clear, automated onboarding workflow. Refer to the template [Smart HR Assistant](https://app.xpertai.cn/explore?search=Smart%20HR%20Assistant).

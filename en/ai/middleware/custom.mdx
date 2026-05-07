@@ -1,0 +1,232 @@
+---
+title: Custom Middleware
+sidebar_position: 3
+---
+
+This document introduces the Xpert Agent middleware capabilities and its plugin-based implementation approach, comparable to LangChain Middleware (refer to official documentation: overview, built-in). Through middleware, you can insert cross-cutting logic (logging, caching, rate limiting, security, prompt governance, etc.) at key nodes in the Agent lifecycle without modifying core orchestration logic.
+
+## Core Concepts
+
+- **Strategy / Provider**: Each middleware implements an `IAgentMiddlewareStrategy`, marked with `@AgentMiddlewareStrategy('<provider>')` and registered to `AgentMiddlewareRegistry` (plugin-sdk).
+- **Middleware Instance**: The `AgentMiddleware` object returned by `createMiddleware`, containing state Schema, context Schema, optional tools, and lifecycle hooks.
+- **Node-based Integration**: Connect `WorkflowNodeTypeEnum.MIDDLEWARE` nodes to Agents in the workflow graph. At runtime, they are loaded and executed in connection order via `getAgentMiddlewares`.
+- **Configuration & Metadata**: `TAgentMiddlewareMeta` describes name, i18n labels, icon, description, and configuration Schema. The UI renders configuration panels accordingly.
+
+## Lifecycle Hooks & Capabilities
+
+| Hook | Trigger Timing | Typical Use Cases |
+| --- | --- | --- |
+| `beforeAgent` | Before Agent starts, triggered once | Initialize state, inject system prompts, fetch external context |
+| `beforeModel` | Before each model call | Dynamically assemble messages/tools, truncate or compress context |
+| `afterModel` | After model returns, before tool execution | Adjust tool call parameters, record logs/metrics |
+| `afterAgent` | After Agent completes | Persist results, cleanup resources |
+| `wrapModelCall` | Wraps model invocation | Custom retry, caching, prompt protection, model switching |
+| `wrapToolCall` | Wraps tool invocation | Authentication, rate limiting, result post-processing, return `Command` for flow control |
+
+Additionally, you can declare:
+
+- `stateSchema`: Persistable middleware state (Zod object/optional/with defaults).
+- `contextSchema`: Runtime-only readable context, not persisted.
+- `tools`: Dynamically injected `DynamicStructuredTool` list.
+- `JumpToTarget`: Return `jumpTo` in hooks to control jumps (e.g., `model`, `tools`, `end`).
+
+### StateSchema Deep Dive
+
+#### What is StateSchema?
+
+`StateSchema` is a runtime state validation schema defined using the [Zod](https://zod.dev/) library. It defines the state data structure that needs to be maintained and transmitted during middleware execution.
+
+#### Zod Introduction
+
+Zod is a TypeScript-first data validation library:
+
+```typescript
+import { z } from 'zod'
+
+// Define schema
+const schema = z.object({
+  fieldName: z.type().method()
+})
+
+// Validate data
+const validData = schema.parse(unknownData)
+```
+
+#### StateSchema Example: SkillsMiddleware
+
+The SkillsMiddleware's stateSchema is defined as follows:
+
+```typescript
+readonly stateSchema = z.object({
+  selectedSkillIds: z.array(z.string()).optional(),
+  selectedSkillWorkspaceId: z.string().optional()
+})
+```
+
+**Field Description**
+
+| Field Name | Type | Required | Description |
+|------|------|------|------|
+| `selectedSkillIds` | `string[]` | No | List of runtime-selected skill IDs for dynamically configuring enabled skills |
+| `selectedSkillWorkspaceId` | `string` | No | Workspace ID of the skills, allowing skills to be loaded from different workspaces |
+
+**Use Cases**
+
+1. **Runtime Dynamic Skill Selection**: During Agent execution, dynamically select which skills to enable based on user input or context
+
+2. **Workspace Isolation**: Support loading skills from different workspaces, enabling multi-tenancy and workspace isolation
+
+3. **State Persistence**: Maintain user skill selection history for later queries and recovery
+
+**State Resolution Flow**
+
+In SkillsMiddleware, state is resolved through the `resolveRuntimeSkillSelection()` method:
+
+```typescript
+private resolveRuntimeSkillSelection(state: Record<string, unknown>): {
+  skillIds: string[]
+  workspaceId: string
+  hasRuntimeSelection: boolean
+}
+```
+
+The flow includes:
+
+1. Read `selectedSkillIds` and `selectedSkillWorkspaceId` from current state and initial state
+2. Sanitize and normalize data using `sanitizeSkillIds()` and `sanitizeWorkspaceId()`
+3. Prioritize current state values, fallback to initial state
+4. Return resolution results and whether runtime selection exists
+
+#### StateSchema Definition Best Practices
+
+1. **Use `optional()`**: For optional fields, explicitly mark them as optional
+   ```typescript
+   fieldName: z.string().optional()
+   ```
+
+2. **Type Matching**: Ensure defined types match actual data types in use
+
+3. **Validation & Cleanup**: Validate and clean state data before use
+
+4. **Documentation**: Add detailed comments explaining each state field
+
+#### Why StateSchema Matters
+
+**Advantages**
+
+- **Type Safety**: Check state data types at compile time
+- **Runtime Validation**: Validate state data completeness and correctness at execution
+- **Auto Transformation**: Automatically transform and clean state data
+- **IDE Support**: Better code completion and type hints
+
+**Application Scenarios**
+
+- Maintain middleware runtime configuration
+- Share state across middleware chain
+- Implement stateful complex logic
+- Support conditional execution and dynamic behavior
+
+## Writing a Middleware
+
+1) **Define Strategy & Metadata**
+
+```ts
+@Injectable()
+@AgentMiddlewareStrategy('rateLimitMiddleware')
+export class RateLimitMiddleware implements IAgentMiddlewareStrategy<RateLimitOptions> {
+  readonly meta: TAgentMiddlewareMeta = {
+    name: 'rateLimitMiddleware',
+    label: { en_US: 'Rate Limit Middleware', zh_Hans: '限流中间件' },
+    description: { en_US: 'Protect LLM calls with quotas', zh_Hans: '为模型调用增加配额保护' },
+    configSchema: { /* JSON Schema for frontend form rendering */ }
+  };
+```
+
+2) **Implement `createMiddleware`**
+
+```ts
+  createMiddleware(options: RateLimitOptions, ctx: IAgentMiddlewareContext): AgentMiddleware {
+    const quota = options.quota ?? 100;
+    return {
+      name: 'rateLimitMiddleware',
+      stateSchema: z.object({ used: z.number().default(0) }),
+      beforeModel: async (state, runtime) => {
+        if ((state.used ?? 0) >= quota) {
+          return { jumpTo: 'end', messages: state.messages };
+        }
+        return { used: (state.used ?? 0) + 1 };
+      },
+      wrapToolCall: async (request, handler) => handler(request),
+    };
+  }
+}
+```
+
+3) **Register as Plugin Module**
+
+```ts
+@XpertServerPlugin({
+  imports: [CqrsModule],
+  providers: [RateLimitMiddleware],
+})
+export class MyAgentMiddlewareModule {}
+```
+
+4) **Runtime Integration**
+
+- During development/deployment, add the plugin to [plugin environment variables](/docs/plugin/install).
+- In the workflow editor, add middleware nodes to the Agent and configure order (execution order can be adjusted by arrangement).
+
+## Middleware Lifecycle
+
+### Initialization Phase
+
+```
+Constructor → Dependency Injection → createMiddleware() → Return AgentMiddleware
+```
+
+### Execution Phase
+
+```
+Request with State → wrapModelCall() → [Custom Logic] → Model Call → Response
+```
+
+## Related Type Definitions
+
+```typescript
+interface IAgentMiddlewareStrategy<TOptions> {
+  readonly meta: TAgentMiddlewareMeta
+  readonly stateSchema: ZodSchema
+  createMiddleware(options: TOptions, context: IAgentMiddlewareContext): Promise<AgentMiddleware>
+}
+
+interface AgentMiddleware {
+  name: string
+  stateSchema: ZodSchema
+  tools?: Tool[]
+  wrapModelCall?: (request: any, handler: (req: any) => Promise<any>) => Promise<any>
+}
+```
+
+## Built-in Examples
+
+- **SummarizationMiddleware**  
+  Detects conversation length in `beforeModel`, triggers compression and replaces historical messages; supports triggering by token/message count or context ratio, and records compression to execution trace via `WrapWorkflowNodeExecutionCommand`.
+- **todoListMiddleware**
+  Injects `write_todos` tool, and appends system prompts in `wrapModelCall` to guide LLM in planning complex tasks. Tool returns `Command` to update Agent state.
+
+## Best Practices
+
+- Implement only necessary hooks, keep them idempotent, avoid heavy blocking operations within hooks.
+- Use `stateSchema` to strictly declare persistent data, preventing state interference between different middleware/Agents.
+- In `wrapModelCall`/`wrapToolCall`, prioritize calling the passed `handler` to ensure default chain works, then add custom logic.
+- For ratio-triggered logic, rely on model `profile.maxInputTokens`; fallback to absolute token limits when unavailable (see Summarization example).
+- Following LangChain Middleware approach: decompose cross-cutting concerns like logging, auditing, caching, rate limiting, and gradual model switching into independent middleware, composing them by connection order.
+
+Through this approach, you can seamlessly migrate LangChain's Middleware model into Xpert's plugin system, reusing existing orchestration, workflow, and UI configuration capabilities.
+
+## Reference Resources
+
+- [Zod Documentation](https://zod.dev/)
+- [Agent Middleware Overview](./index.mdx)
+- [SkillsMiddleware Implementation](https://github.com/langgenius/xpert/tree/main/packages/server-ai/src/skill-package/plugins/skills-middleware)

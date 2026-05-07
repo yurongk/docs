@@ -1,0 +1,57 @@
+---
+title: Gitee 配置
+sidebar_position: 3
+tags:
+  - AI
+  - Agent
+  - Code
+---
+
+`Gitee` 在当前后端实现中支持 `OAUTH_WEB` 与 `PAT` 两种认证方式。
+
+## 后端前置配置
+
+通用配置：
+
+- `GIT_CREDENTIALS_KEY`：用于加密保存连接凭据。
+- `BACKEND_PUBLIC_URL` 或 `PUBLIC_API_URL`：用于生成页面展示的 `Webhook URL`。
+- `FRONTEND_URL`：OAuth 完成后回跳到 Web 的地址。
+
+OAuth 方式必需：
+
+- `GITEE_CLIENT_ID`
+- `GITEE_CLIENT_SECRET`
+- `GITEE_REDIRECT_URI`（例如：`http://localhost:3001/v1/git/connections/callback/gitee`）
+
+OAuth 方式可选：
+
+- `GITEE_SCOPES`
+- `CODE_XPERT_MENTION`（默认 `@xpert-ai`，用于 issue 触发关键字）
+
+如果仅使用 `PAT` 方式，可不配置 Gitee OAuth 相关变量。
+
+## Web 端配置步骤
+
+### 方式一：OAuth Web
+
+1. 打开 `设置 -> 连接器`（`/settings/connectors`）。
+2. 选择 `Provider = Gitee`，`Auth method = OAUTH_WEB`。
+3. 复制页面中的 `Webhook URL`。
+4. 点击 `开始连接`，跳转 Gitee 授权页并完成授权。
+5. 回跳后连接会出现在 `已有连接` 列表中。
+
+### 方式二：PAT
+
+1. 选择 `Provider = Gitee`，`Auth method = PAT`。
+2. 页面会出现 `Personal Access Token` 字段（必填）。
+3. 填写后点击 `提交连接`。
+
+## Webhook 配置建议
+
+- 在 Gitee 仓库 Webhook 设置中填入页面提供的 `Webhook URL`。
+- Issue 事件中，只有内容包含 `@xpert-ai`（或 `CODE_XPERT_MENTION` 配置值）时，才会触发对应的评论审查流程。
+
+## 常见问题
+
+- `Missing GITEE_CLIENT_ID or GITEE_REDIRECT_URI`：缺少 OAuth 必需环境变量。
+- `Missing Gitee OAuth config`：通常是 `GITEE_CLIENT_SECRET` 未配置。

@@ -34,13 +34,15 @@ Xpert Agent is optimized for the characteristics of different platforms, such as
 
 To publish to Feishu, you need to create an enterprise self-built application and configure the following conditions:
 
-:::tip Prerequisites
+<Tip>
+**Prerequisites**
+
 - **Add bot capabilities**
 - **Send events to the developer server**
 - Add event `im.message.receive_v1`
 - **Send callbacks to the developer server**
 - Add callback `card.action.trigger`
 - Enable permissions `im:message.p2p_msg:readonly`, `im:message.group_at_msg:readonly`, `im:message`, `im:message:send_as_bot`
-:::
+</Tip>
 
 **Developer server** uses the `Webhook URL` generated during deployment.

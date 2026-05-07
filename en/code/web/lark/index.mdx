@@ -1,0 +1,76 @@
+---
+title: Building a Code Notification Bot (MyCoder)
+sidebar_position: 3
+tag: "bot"
+---
+
+## I. Creating and Configuring the Application
+
+1. **Create an Enterprise Self-built Application**
+   - Log in to [Feishu Developer Console](https://open.feishu.cn/app)
+   - Click "Create Enterprise Self-built Application", enter the application name "MyCoder" and description, then complete creation
+
+2. **Add Bot Capability**
+   - In the application details page under **Application Capabilities** > **Add Application Capability**, find the **Bot** card and click **Add**
+   - Refer to [Bot Capability](https://go.feishu.cn/s/6dFbxHpwQ02) documentation to complete basic configuration
+
+3. **Apply for API Permissions**
+   - On the **Development Configuration** > **Permission Management** page, enable the following permissions for the application:
+     - `im:message.p2p_msg:readonly` (Read single-chat messages from users to the bot)
+     - `im:message.group_at_msg:readonly` (Receive @bot message events in group chats)
+     - `im:message:send_as_bot` (Send messages as the application)
+     - `contact:contact.base:readonly` (Get basic contact information)
+     - `contact:user.base:readonly` (Get basic user information from contacts)
+
+4. **Subscribe to Message Receiving Events**
+   - On the **Events and Callbacks** > **Event Configuration** page:
+     - Select **Send events to developer server** (currently only this method is supported) and enter the `Webhook URL` created when setting up the application
+     ![Webhook configuration](</public/img/code/edit-integration.png>)
+     - Add **Receive Message Events** (`im.message.receive_v1`)
+   - On the **Events and Callbacks** > **Callback Configuration** page, enter the `Webhook URL`:
+     - Enable subscription method: **Send callbacks to developer server**
+     - Add callback **Card interaction passthrough** (`card.action.trigger`)
+
+## II. Publishing the Application
+
+1. **Configure Availability Scope**
+   - Create a version on the **Application Publishing** > **Version Management and Publishing** page
+   - Set the application availability scope (e.g., specify departments or visible to all), refer to [Configure Application Availability Scope](https://go.feishu.cn/s/63g3FAPNE01)
+
+2. **Publish and Go Live**
+   - Submit the version for review and wait for enterprise admin approval
+   - Testing environment can use [Testing Enterprise Features](https://go.feishu.cn/s/6hRFcubyk04) for publication without review
+
+## III. Configuring Notification Users
+
+When tasks run automatically in the backend and need to notify users, you can edit notification users on the integration provider page, select the users to notify, and save.
+
+![Integration providers configuration](</public/img/code/integration-providers.png>)
+
+Set the Feishu integration to active and configure notification users
+
+![Select notification users](</public/img/code/select-notification-user.png>)
+
+When the system needs to notify users, the Feishu integration automatically sends notification messages. Users can then reply to the notification message, and the Feishu integration will send the user's reply to the backend, which can process accordingly.
+
+## IV. Testing the Bot
+
+1. **Add Bot to Group Chat**
+   - Search for "MyCoder" bot in the Feishu client group settings and add it
+
+2. **Run Coding or Review Tasks**
+   - Trigger backend automatic coding or review tasks to ensure the Feishu integration can send notification messages to users
+
+3. **Reply to Notification Messages**
+   - Single chat: Reply directly to the notification message from the bot
+   - Group chat: @mention the bot and send a message to verify the reply functionality
+
+### Key Documentation References
+
+- [Bot Overview](https://go.feishu.cn/s/6aRonz2AA04)
+- [Send Message API](https://go.feishu.cn/s/61BYfgpwE01)
+- [Reply Message API](https://go.feishu.cn/s/61BYfeQRw0s)
+- [Event Subscription Process](https://go.feishu.cn/s/5_sDxkQ3802)
+- [Configure Application Availability Scope](https://go.feishu.cn/s/63g3FAPNE01)
+
+By following the above steps, you can build a bot application capable of automatically receiving notification messages.

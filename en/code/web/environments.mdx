@@ -1,0 +1,34 @@
+---
+title: Environments
+sidebar_position: 4
+tags:
+  - AI
+  - Agent
+  - Code
+---
+
+Environments define how CodeXpert runs your tasks. They determine repository access, setup steps, and runtime behavior.
+
+## What an environment controls
+
+- Repository connection and default branch
+- Setup scripts and preinstalled packages
+- Network access and runtime settings
+
+## Repository context
+
+Each environment links to a repository and branch. This provides:
+
+- Repo identity for tasks
+- A consistent base branch
+- Reusable settings across tasks
+
+## Setup and dependencies
+
+Use setup scripts to install dependencies and configure tools. Keep scripts idempotent so repeated runs are safe.
+
+## Operational tips
+
+- Create one environment per repo for clarity.
+- Keep setup scripts short and explicit.
+- Update preinstalled packages when you change project tooling.

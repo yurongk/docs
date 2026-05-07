@@ -1,0 +1,45 @@
+---
+title: GitHub Configuration
+sidebar_position: 1
+tags:
+    - AI
+    - Agent
+    - Code
+---
+
+`GitHub` currently only supports the `APP_INSTALLATION` authentication method (GitHub App installation) in the backend implementation.
+
+## Backend Prerequisite Configuration (Required for Local Deployment Only)
+
+At minimum, configure the following environment variables for the API service:
+
+- `GIT_CREDENTIALS_KEY`: Used to encrypt and store connection credentials.
+- `BACKEND_PUBLIC_URL` or `PUBLIC_API_URL`: Used to generate the `Webhook URL` for display.
+- `FRONTEND_URL`: The URL to redirect to after GitHub installation is completed.
+- `GITHUB_APP_SLUG`: The slug of the GitHub App (used to generate installation and management pages).
+- `GITHUB_APP_ID`
+- `GITHUB_APP_PRIVATE_KEY`
+
+Optional:
+
+- `GITHUB_WEBHOOK_SECRET`: If configured, the backend will verify the GitHub Webhook signature.
+
+## Web Configuration Steps
+
+1. Open `Settings -> Connectors -> Git` (`/settings/connectors?tab=git`).
+2. Select `GitHub` as the `Provider`.
+3. The `Auth method` will be `APP_INSTALLATION`.
+4. Click `Start Connection` to jump to the GitHub App installation page.
+5. After completing the installation and authorizing repositories on GitHub, the page will automatically return to the connectors page, and the connection will appear in the `Existing Connections` list.
+
+## GitHub App Recommendations
+
+- In the GitHub App's Webhook settings, enter the `Webhook URL` copied from the previous step (required for local deployment only).
+- If you set `GITHUB_WEBHOOK_SECRET`, the Webhook Secret in the GitHub App must match.
+- Recommended events to enable: `pull_request`, `issue_comment`, `issues` (corresponding to current backend processing logic).
+
+## Common Issues
+
+- `Missing GITHUB_APP_ID or GITHUB_APP_PRIVATE_KEY`: Check the GitHub App environment variables.
+- The displayed Webhook address is `localhost`: Set `BACKEND_PUBLIC_URL` (or `PUBLIC_API_URL`) to an externally accessible address.
+- No redirect to frontend after installation: Check if `FRONTEND_URL` is correct.

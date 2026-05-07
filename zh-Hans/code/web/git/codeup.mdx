@@ -1,0 +1,39 @@
+---
+title: 云效 Codeup 配置
+sidebar_position: 4
+tags:
+  - AI
+  - Agent
+  - Code
+---
+
+`云效 Codeup` 在当前后端实现中仅支持 `PAT` 认证方式。
+
+## 后端前置配置
+
+必需：
+
+- `GIT_CREDENTIALS_KEY`：用于加密保存连接凭据。
+- `BACKEND_PUBLIC_URL` 或 `PUBLIC_API_URL`：用于生成页面展示的 `Webhook URL`。
+
+Codeup provider 本身不依赖 OAuth 环境变量。
+
+## Web 端配置步骤
+
+1. 打开 `设置 -> 连接器`（`/settings/connectors`）。
+2. 选择 `Provider = 云效`，`Auth method` 会是 `PAT`。
+3. 页面会出现 2 个字段：
+   - `企业标识 (Organization ID)`（必填）
+   - `个人访问令牌 (Personal Access Token)`（必填）
+4. 填写后点击 `提交连接`，连接成功后会出现在 `已有连接`。
+
+## Organization ID 获取方式
+
+- 可从云效控制台 URL 中获取：
+  - `https://devops.aliyun.com/{organizationId}/...`
+- 后续点击连接卡片中的“管理连接”，系统会基于该 `organizationId` 打开个人令牌管理页。
+
+## Token 与 Webhook 建议
+
+- Token 需要具备至少可读取仓库/分支与创建合并请求相关权限，否则会在仓库读取或创建变更请求时报错。
+- 将连接器页面展示的 `Webhook URL` 配置到 Codeup 仓库 webhook 中，可用于接收事件回调。

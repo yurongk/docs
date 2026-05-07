@@ -1,0 +1,98 @@
+---
+title: 敏感词过滤中间件教程
+sidebar_position: 4
+---
+
+本教程对应 `xpert-plugins` 中的 `@xpert-ai/plugin-sensitive-filter`，用于在智能体输入与输出阶段执行敏感内容过滤。
+
+## 适用场景
+
+- 过滤身份证、手机号、银行卡等隐私信息
+- 对高风险文本直接拦截（block）
+- 对可修复文本自动改写（rewrite）
+
+## 安装与启用
+
+1. 在宿主项目安装插件包：
+
+```bash
+npm install @xpert-ai/plugin-sensitive-filter
+```
+
+2. 在环境变量中启用插件（多插件用逗号分隔）：
+
+```bash
+PLUGINS=@xpert-ai/plugin-sensitive-filter
+```
+
+3. 参考 [插件发布与使用](/zh-Hans/ai/plugin/publish-and-use) 完成宿主加载。
+
+## 运行机制
+
+- `beforeAgent`：处理用户输入（可改写或拦截）
+- `wrapModelCall`：处理模型输出（可改写或拦截）
+- `afterAgent`：写入审计快照
+
+## 配置模式
+
+该中间件有两种互斥模式：
+
+- `rule`：规则匹配（`keyword` / `regex`）
+- `llm`：自然语言策略判定（命中后内部按 rewrite 策略处理）
+
+### Rule 模式最小配置
+
+```json
+{
+  "mode": "rule",
+  "caseSensitive": false,
+  "normalize": true,
+  "rules": [
+    {
+      "id": "rule-1",
+      "pattern": "身份证",
+      "type": "keyword",
+      "scope": "both",
+      "severity": "high",
+      "action": "block",
+      "replacementText": "内容包含敏感信息，已拦截。"
+    }
+  ]
+}
+```
+
+`rule` 模式下每条规则至少需要：
+`pattern`、`type`、`scope`、`severity`、`action`。
+
+### LLM 模式最小配置
+
+```json
+{
+  "mode": "llm",
+  "llm": {
+    "model": {
+      "provider": "openai",
+      "model": "gpt-4o-mini"
+    },
+    "scope": "both",
+    "rulePrompt": "如果内容包含身份证、手机号、银行卡或家庭住址，请改写为隐私安全回复。",
+    "rewriteFallbackText": "[已过滤]",
+    "timeoutMs": 3000
+  }
+}
+```
+
+`llm` 模式运行时必填：
+`model`、`scope`、`rulePrompt`。
+
+## 联调建议
+
+1. 先用 `rule` 模式验证命中链路，确认拦截/改写行为正确。
+2. 再切到 `llm` 模式验证语义判定效果。
+3. 检查审计记录中输入/输出阶段是否都有命中信息。
+
+## 常见问题
+
+- `rule` 模式无效果：通常是规则字段不完整，或 `scope` 与触发阶段不匹配。
+- `llm` 模式无效果：先确认 `model`、`scope`、`rulePrompt` 都已配置。
+- LLM 命中后结果异常：优先查看审计中错误策略痕迹（如 `llm-error`）以定位模型判定失败原因。

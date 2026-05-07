@@ -1,0 +1,37 @@
+---
+title: Codeup Configuration
+sidebar_position: 4
+tag: "codeup"
+---
+
+`Codeup` currently supports only `PAT` authentication in the backend implementation.
+
+## Backend Prerequisites
+
+Required:
+
+- `GIT_CREDENTIALS_KEY`: Used to encrypt and store connection credentials.
+- `BACKEND_PUBLIC_URL` or `PUBLIC_API_URL`: Used to generate the `Webhook URL` displayed on the page.
+
+The Codeup provider itself does not depend on OAuth environment variables.
+
+## Web Configuration Steps
+
+1. Open `Settings -> Connectors` (`/settings/connectors`).
+2. Select `Provider = Codeup`, `Auth method` will be `PAT`.
+3. The page will display 2 fields:
+  - `Organization ID` (required)
+  - `Personal Access Token` (required)
+4. Fill in the fields and click `Submit Connection`. Once connected successfully, it will appear in `Connected`.
+
+## How to Get Organization ID
+
+- You can obtain it from the Codeup console URL:
+  - `https://devops.aliyun.com/{organizationId}/...`
+- Click "Manage Connection" on the connection card, and the system will open the personal token management page based on that `organizationId`.
+
+## Token and Webhook Recommendations
+
+- The token must have at least permissions to read repositories/branches and create merge requests. Otherwise, errors will occur when reading repositories or creating change requests.
+- Configure the `Webhook URL` displayed on the connector page to the Codeup repository webhook to receive event callbacks.
+

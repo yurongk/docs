@@ -1,0 +1,61 @@
+---
+title: GitLab 配置
+sidebar_position: 2
+tags:
+  - AI
+  - Agent
+  - Code
+---
+
+`GitLab` 在当前后端实现中支持两种认证方式：`OAUTH_WEB` 与 `PAT`，并支持自建 GitLab 实例。
+
+## 后端前置配置
+
+通用配置：
+
+- `GIT_CREDENTIALS_KEY`：用于加密保存连接凭据。
+- `BACKEND_PUBLIC_URL` 或 `PUBLIC_API_URL`：用于生成页面展示的 `Webhook URL`。
+- `FRONTEND_URL`：OAuth 完成后回跳到 Web 的地址。
+
+OAuth 方式必需：
+
+- `GITLAB_CLIENT_ID`
+- `GITLAB_CLIENT_SECRET`
+- `GITLAB_REDIRECT_URI`（例如：`http://localhost:3001/v1/git/connections/callback/gitlab`）
+
+OAuth 方式可选：
+
+- `GITLAB_SCOPES`（默认 `read_api`）
+- `GITLAB_BASE_URL`（默认 `https://gitlab.com`）
+- `GITLAB_OAUTH_AUTHORIZE_URL`（默认 `GITLAB_BASE_URL + /oauth/authorize`）
+
+如果你只使用 `PAT` 方式，可不配置 GitLab OAuth 相关变量。
+
+## Web 端配置步骤
+
+### 方式一：OAuth Web
+
+1. 打开 `设置 -> 连接器`（`/settings/connectors`）。
+2. 选择 `Provider = GitLab`，`Auth method = OAUTH_WEB`。
+3. 可选填写 `GitLab 实例地址`（`baseUrl`）。留空时使用 `GITLAB_BASE_URL`，若也未配置则默认 `https://gitlab.com`。
+4. 点击 `开始连接`，跳转 GitLab 授权页。
+5. 授权完成后自动回到连接器页，连接出现在 `已有连接` 列表中。
+
+### 方式二：PAT
+
+1. 选择 `Provider = GitLab`，`Auth method = PAT`。
+2. 页面会出现表单字段：
+   - `GitLab Base URL`（可选）
+   - `Personal Access Token`（必填）
+3. 填写后点击 `提交连接` 完成绑定。
+
+## 自建 GitLab 注意事项
+
+- `baseUrl` 必须包含协议，非标准端口需要带端口号（例如 `http://gitlab.company.local:2222`）。
+- GitLab OAuth 应用中的回调地址必须与 `GITLAB_REDIRECT_URI` 完全一致。
+- 用户在 Web 页面填写的 `baseUrl` 会覆盖后端默认值，仅影响当前连接。
+
+## Webhook 说明
+
+- 页面会显示 GitLab 的 `Webhook URL`。
+- 当前版本后端尚未实现 GitLab provider 的 webhook 事件处理器，因此 webhook 不影响连接、仓库读取与合并请求创建能力。

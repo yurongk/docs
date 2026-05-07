@@ -1,0 +1,47 @@
+---
+title: 飞书触发器
+sidebar_position: 21
+---
+
+`Lark Trigger` 用于将飞书消息事件接入数字专家工作流，实现“在飞书中发消息，数字专家在 Xpert 中执行”的触发链路。
+
+## 适用场景
+
+- 在飞书群聊或单聊中 @ 机器人触发数字专家
+- 将企业 IM 作为数字专家统一入口
+- 需要将外部消息事件映射为工作流输入
+
+## 关键配置
+
+Lark Trigger 的核心配置包括：
+
+- `enabled`：是否启用触发器
+- `integrationId`：飞书集成实例 ID（必填）
+
+发布前会校验：
+
+1. 是否选择了有效的飞书集成；
+2. 当前集成是否已绑定到其他数字专家（避免冲突）。
+
+## 运行机制
+
+1. **publish 阶段**：写入 `integrationId -> xpertId` 绑定关系，并注册内存回调。
+2. **消息到达阶段**：按 `integrationId` 找到已绑定数字专家。
+3. **回调可用时**：直接构建 handoff 消息并推进当前流程。
+4. **回调不可用时（例如重启后）**：进入持久化分发队列，保证消息不丢失。
+
+## 启动恢复策略
+
+Lark Trigger 使用 `bootstrap.mode = skip`：
+
+- 启动时不重放 `publish`；
+- 依赖持久化绑定和外部消息驱动恢复运行。
+
+这种方式适合由外部事件持续驱动的触发器，避免重复注册。
+
+## 关联功能
+
+- 触发器节点总览： [工作流触发器](../../workflow/trigger/)
+- 数字专家多 Channel 接入： [数字专家](../../digital-expert/digital-expert/)
+- 飞书插件与接入背景： [Lark 插件文档](../lark/)
+- 源码地址： [xpert-plugins / lark integration](https://github.com/xpert-ai/xpert-plugins/tree/main/xpertai/integrations/lark)

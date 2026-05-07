@@ -1,0 +1,45 @@
+---
+title: GitHub 配置
+sidebar_position: 1
+tags:
+  - AI
+  - Agent
+  - Code
+---
+
+`GitHub` 在当前后端实现中仅支持 `APP_INSTALLATION` 认证方式（GitHub App 安装）。
+
+## 后端前置配置(本地部署才需要)
+
+在 API 服务环境变量中至少配置：
+
+- `GIT_CREDENTIALS_KEY`：用于加密保存连接凭据。
+- `BACKEND_PUBLIC_URL` 或 `PUBLIC_API_URL`：用于生成页面展示的 `Webhook URL`。
+- `FRONTEND_URL`：GitHub 安装完成后回跳到 Web 的地址。
+- `GITHUB_APP_SLUG`：GitHub App 的 slug（用于生成安装页和管理页）。
+- `GITHUB_APP_ID`
+- `GITHUB_APP_PRIVATE_KEY`
+
+可选：
+
+- `GITHUB_WEBHOOK_SECRET`：如果配置，则后端会校验 GitHub Webhook 签名。
+
+## Web 端配置步骤
+
+1. 打开 `设置 -> 连接器 -> Git`（`/settings/connectors?tab=git`）。
+2. 在 `Provider` 选择 `GitHub`。
+3. `Auth method` 会是 `APP_INSTALLATION`。
+4. 点击 `开始连接`，跳转到 GitHub App 安装页。
+5. 在 GitHub 完成安装并授权仓库后，页面会自动回到连接器页，连接将出现在 `已有连接` 列表中。
+
+## GitHub App 侧建议
+
+- 在 GitHub App 的 Webhook 设置中填入上一步复制的 `Webhook URL` (本地部署才需要)。
+- 如果你设置了 `GITHUB_WEBHOOK_SECRET`，GitHub App 中的 Webhook Secret 需要保持一致。
+- 建议开启事件：`pull_request`、`issue_comment`、`issues`（对应当前后端处理逻辑）。
+
+## 常见问题
+
+- `Missing GITHUB_APP_ID or GITHUB_APP_PRIVATE_KEY`：检查 GitHub App 环境变量。
+- 页面显示的 Webhook 地址是 `localhost`：请设置 `BACKEND_PUBLIC_URL`（或 `PUBLIC_API_URL`）为外网可访问地址。
+- 安装后没有返回前端：检查 `FRONTEND_URL` 是否正确。

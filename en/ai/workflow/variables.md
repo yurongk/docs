@@ -16,13 +16,28 @@ sidebar_position: 3
 ### System Variables  
 System variables are predefined variables provided by the platform, such as user language, timezone, email, etc. These can be modified in the user settings.
 
-System Variables:
+Common system variables:
 
-| System Variable Name | Description                |
-|----------------------|----------------------------|
-| `sys.language`         | The language used by the system |
-| `sys.user_email`       | The user's email address   |
-| `sys.timezone`        | The user's timezone        |
+| System Variable Name | Description |
+|----------------------|-------------|
+| `sys.language` | The language used by the system |
+| `sys.user_email` | The user's email address |
+| `sys.timezone` | The user's timezone |
+| `sys.date` | The current date |
+| `sys.datetime` | The current local datetime |
+| `sys.workspace_path` | The current shared workspace directory path |
+| `sys.workspace_url` | The current shared workspace directory URL |
+| `sys.thread_id` | The current thread ID, available for custom path or isolation strategies in prompts |
+
+### Workspace Directory Rules
+
+`sys.workspace_path` and `sys.workspace_url` always point to the shared workspace root used by the Xpert runtime and sandbox:
+
+- Project runs use the shared project directory: `/project/<projectId>/`
+- Non-project runs use the shared user directory: `/user/<userId>/`
+- A conversation-specific subdirectory is no longer added by default
+
+If you need special per-thread path isolation, use `sys.thread_id` in your prompt or workflow logic to derive it explicitly.
 
 ### Conversation Variables  
 **Conversation Variables** are shared state variables among all agents within a digital expert, enabling the transfer and evolution of information between agents. Users can find the "Variables" button in the Digital Expert Studio's menu to open the session variable panel and add variables.

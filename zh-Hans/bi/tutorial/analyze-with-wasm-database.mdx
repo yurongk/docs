@@ -11,7 +11,7 @@ sidebar_position: 20
 
 无需数据源配置， 直接在语义模型管理界面点击 [新建 WASM 模型](../../models/sql-modeling/wasm-model/) 按钮， 输入名称即可进行创建。
 
-假设你已经拿到了可以访问的数据文件链接（如 https://app.mtda.cloud/assets/data/topSubscribed.csv 数据来源于 [Most Subscribed 1000 Youtube Channels](https://www.kaggle.com/datasets/themrityunjaypathak/most-subscribed-1000-youtube-channels) ）, 点击新建表参考下图方式创建表
+假设你已经拿到了可以访问的数据文件链接（如 https://app.xpertai.cn/assets/data/topSubscribed.csv 数据来源于 [Most Subscribed 1000 Youtube Channels](https://www.kaggle.com/datasets/themrityunjaypathak/most-subscribed-1000-youtube-channels) ）, 点击新建表参考下图方式创建表
 
 ![Middle Shadow](./create-table.png)
 
@@ -40,7 +40,7 @@ INSERT INTO topSubscribed SELECT Rank, "Youtube Channel",
     TRY_CAST(REPLACE("Video Count", ',', '') AS decimal(20, 0)) AS "Video Count",
     Category,
     Started
-FROM 'https://app.mtda.cloud/assets/data/topSubscribed.csv';
+FROM 'https://app.xpertai.cn/assets/data/topSubscribed.csv';
 ```
 
 可以执行上述脚本验证逻辑正确性，点击数据表区域的刷新元数据获取物理表可验证。
@@ -83,4 +83,4 @@ FROM 'https://app.mtda.cloud/assets/data/topSubscribed.csv';
 
 ## 示例
 
-<iframe src="https://app.mtda.cloud/public/story/96ad959f-75b7-4792-80f0-30ea3101d970" width="100%" height="700px" frameBorder="0" scrolling="no" allowFullScreen> </iframe>
+<iframe src="https://app.xpertai.cn/public/story/96ad959f-75b7-4792-80f0-30ea3101d970" width="100%" height="700px" frameBorder="0" scrolling="no" allowFullScreen> </iframe>

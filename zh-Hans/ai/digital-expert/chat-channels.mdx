@@ -1,0 +1,36 @@
+---
+title: 对话渠道
+sidebar_position: 14
+tags:
+  - AI
+  - Xpert
+  - Trigger
+---
+
+本篇说明数字专家如何通过触发器接入不同对话渠道，并复用同一套智能体工作流能力。
+
+## 支持的对话渠道
+
+数字专家除了在平台内对话界面直接使用，还可以通过不同渠道的 Trigger 进入同一套工作流：
+
+- **平台内聊天渠道（Chat Trigger）**：用户在平台本身的聊天窗口输入问题后触发流程。
+- **[定时渠道（Schedule Trigger）](../plugin/trigger/schedule-trigger/)**：系统按 Cron 定时触发数字专家执行固定任务（如日报汇总、巡检提醒）。
+- **[飞书渠道（Lark Trigger）](../plugin/trigger/lark-trigger/)**：用户在飞书中发送消息，由飞书触发器路由到对应数字专家。
+
+## 接入原则
+
+三种渠道共享同一份数字专家配置：
+
+- 智能体编排
+- 工具集与工具授权
+- 知识库与检索逻辑
+
+差异主要在于触发时机和输入来源，而不是工作流执行核心。
+
+## 关联文档
+
+- 触发器节点总览： [工作流触发器](../workflow/trigger/)
+- Trigger 插件实现（Lark / Schedule）： [插件 Trigger 实现](../plugin/trigger/)
+- 数字专家主文档： [数字专家](./digital-expert/)
+- 工具集说明： [工具集](../toolset/)
+- 知识库说明： [知识库](../knowledge-base/)

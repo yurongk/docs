@@ -33,8 +33,7 @@
   "footer": {
     "socials": {
       "x": "https://xpertai.cn/",
-      "github": "https://github.com/xpert-ai/xpert",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "github": "https://github.com/xpert-ai/xpert"
     }
   },
   "navbar": {
@@ -59,24 +58,65 @@
       {
         "language": "en",
         "default": true,
-        "navbar": [
-          {
-            "label": "GitHub",
-            "href": "https://github.com/xpert-ai/xpert"
-          },
-          {
-            "label": "Support",
-            "href": "mailto:service@xpertai.cn"
-          },
-          {
+        "navbar": {
+          "links": [
+            {
+              "label": "GitHub",
+              "href": "https://github.com/xpert-ai/xpert"
+            },
+            {
+              "label": "Support",
+              "href": "mailto:service@xpertai.cn"
+            }
+          ],
+          "primary": {
+            "type": "button",
             "label": "Try XpertAI",
             "href": "https://app.xpertai.cn/"
           }
-        ],
+        },
         "products": [
           {
             "product": "AI",
             "tabs": [
+              {
+                "tab": "Getting Started",
+                "groups": [
+                  {
+                    "group": "Community",
+                    "pages": [
+                      "en/ai/getting-started/community/index",
+                      "en/ai/getting-started/community/docker",
+                      "en/ai/getting-started/community/local-source-code",
+                      "en/ai/getting-started/community/environments",
+                      "en/ai/getting-started/community/faqs"
+                    ]
+                  },
+                  {
+                    "group": "Onboarding",
+                    "pages": [
+                      "en/ai/getting-started/onboarding/index"
+                    ]
+                  },
+                  {
+                    "group": "Cloud",
+                    "pages": [
+                      "en/ai/getting-started/cloud/index"
+                    ]
+                  },
+                  {
+                    "group": "Enterprise",
+                    "pages": [
+                      "en/ai/getting-started/enterprise/docker/index",
+                      "en/ai/getting-started/enterprise/k8s/index",
+                      "en/ai/getting-started/enterprise/k8s/backups",
+                      "en/ai/getting-started/enterprise/docker/with-doris",
+                      "en/ai/getting-started/enterprise/docker/with-starrocks",
+                      "en/ai/getting-started/enterprise/ssl"
+                    ]
+                  }
+                ]
+              },
               {
                 "tab": "Digital Expert",
                 "groups": [
@@ -95,8 +135,15 @@
                       "en/ai/digital-expert/conversation-logs",
                       "en/ai/digital-expert/development-api",
                       "en/ai/digital-expert/monitoring-dashboard",
+                      "en/ai/digital-expert/chat-channels",
                       "en/ai/digital-expert/supervised-architecture",
                       "en/ai/digital-expert/swarm-architecture"
+                    ]
+                  },
+                  {
+                    "group": "Sandbox",
+                    "pages": [
+                      "en/ai/digital-expert/sandbox/index"
                     ]
                   }
                 ]
@@ -119,7 +166,7 @@
                   {
                     "group": "Default",
                     "pages": [
-                      "en/ai/knowledge-base/knowledge-base-features",
+                      "en/ai/knowledge-base/index",
                       "en/ai/knowledge-base/maintain-documents",
                       "en/ai/knowledge-base/api",
                       "en/ai/knowledge-base/connect-external-knowledge-base",
@@ -151,7 +198,8 @@
                       "en/ai/toolset/scheduled-tasks",
                       "en/ai/toolset/feishu",
                       "en/ai/toolset/dingtalk",
-                      "en/ai/toolset/planning-tasks"
+                      "en/ai/toolset/planning-tasks",
+                      "en/ai/toolset/coding-expert"
                     ]
                   },
                   {
@@ -247,7 +295,8 @@
                       "en/ai/ai-assistant/index",
                       "en/ai/ai-assistant/settings",
                       "en/ai/ai-assistant/command",
-                      "en/ai/ai-assistant/roles"
+                      "en/ai/ai-assistant/roles",
+                      "en/ai/ai-assistant/configure-ai-assistant"
                     ]
                   }
                 ]
@@ -258,35 +307,50 @@
                   {
                     "group": "Default",
                     "pages": [
-                      "en/ai/agent-middleware/built-in",
-                      "en/ai/agent-middleware/custom",
-                      "en/ai/agent-middleware/agent-middleware"
+                      "en/ai/middleware/index",
+                      "en/ai/middleware/custom"
+                    ]
+                  },
+                  {
+                    "group": "Built In",
+                    "pages": [
+                      "en/ai/middleware/built-in/index",
+                      "en/ai/middleware/built-in/sensitive-filter",
+                      "en/ai/middleware/built-in/agent-behavior-monitor"
                     ]
                   }
                 ]
               },
               {
-                "tab": "Plugin Development",
+                "tab": "Plugin",
                 "groups": [
                   {
                     "group": "Default",
                     "pages": [
-                      "en/ai/plugin-development/index",
-                      "en/ai/plugin-development/overview",
-                      "en/ai/plugin-development/concepts",
-                      "en/ai/plugin-development/develop",
-                      "en/ai/plugin-development/install",
-                      "en/ai/plugin-development/permissions",
-                      "en/ai/plugin-development/schema"
+                      "en/ai/plugin/index",
+                      "en/ai/plugin/overview",
+                      "en/ai/plugin/concepts",
+                      "en/ai/plugin/develop",
+                      "en/ai/plugin/install",
+                      "en/ai/plugin/permissions",
+                      "en/ai/plugin/schema"
+                    ]
+                  },
+                  {
+                    "group": "Trigger",
+                    "pages": [
+                      "en/ai/plugin/trigger/index",
+                      "en/ai/plugin/trigger/schedule-trigger",
+                      "en/ai/plugin/trigger/lark-trigger"
                     ]
                   },
                   {
                     "group": "Feishu Document Example",
                     "pages": [
-                      "en/ai/plugin-development/feishu-document-example/index",
-                      "en/ai/plugin-development/feishu-document-example/integration",
-                      "en/ai/plugin-development/feishu-document-example/source",
-                      "en/ai/plugin-development/feishu-document-example/transformer"
+                      "en/ai/plugin/feishu-document-example/index",
+                      "en/ai/plugin/feishu-document-example/integration",
+                      "en/ai/plugin/feishu-document-example/source",
+                      "en/ai/plugin/feishu-document-example/transformer"
                     ]
                   }
                 ]
@@ -302,7 +366,17 @@
                       "en/ai/chatkit/chatkit-widgets",
                       "en/ai/chatkit/chatkit-tool",
                       "en/ai/chatkit/chatkit-effect",
-                      "en/ai/chatkit/chatkit-actions"
+                      "en/ai/chatkit/chatkit-actions",
+                      "en/ai/chatkit/chatkit-pet",
+                      "en/ai/chatkit/chatkit-plan-mode",
+                      "en/ai/chatkit/chatkit-runtime-capabilities",
+                      "en/ai/chatkit/chatkit-prompt-workflows"
+                    ]
+                  },
+                  {
+                    "group": "SDK",
+                    "pages": [
+                      "en/ai/chatkit/sdk/integrate-xpertai-api"
                     ]
                   }
                 ]
@@ -345,6 +419,18 @@
                       "en/ai/permissions/feature-permission-role-matrix",
                       "en/ai/permissions/switch-function-mapping"
                     ]
+                  }
+                ]
+              },
+              {
+                "tab": "OpenAPI",
+                "groups": [
+                  {
+                    "group": "AI",
+                    "openapi": {
+                      "source": "api/openapi.ai.json",
+                      "directory": "en/api-reference"
+                    }
                   }
                 ]
               }
@@ -595,29 +681,111 @@
                 ]
               }
             ]
+          },
+          {
+            "product": "Code",
+            "tabs": [
+              {
+                "tab": "Web",
+                "groups": [
+                  {
+                    "group": "Default",
+                    "pages": [
+                      "en/code/web/index",
+                      "en/code/web/tasks",
+                      "en/code/web/change-sets",
+                      "en/code/web/environments"
+                    ]
+                  },
+                  {
+                    "group": "Guides",
+                    "pages": [
+                      "en/code/web/guides/system-logger"
+                    ]
+                  },
+                  {
+                    "group": "Git",
+                    "pages": [
+                      "en/code/web/git/github",
+                      "en/code/web/git/gitlab",
+                      "en/code/web/git/gitee",
+                      "en/code/web/git/codeup"
+                    ]
+                  },
+                  {
+                    "group": "Lark",
+                    "pages": [
+                      "en/code/web/lark/index"
+                    ]
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
       {
         "language": "zh-Hans",
-        "navbar": [
-          {
-            "label": "GitHub",
-            "href": "https://github.com/xpert-ai/xpert"
-          },
-          {
-            "label": "支持",
-            "href": "mailto:service@xpertai.cn"
-          },
-          {
+        "navbar": {
+          "links": [
+            {
+              "label": "GitHub",
+              "href": "https://github.com/xpert-ai/xpert"
+            },
+            {
+              "label": "支持",
+              "href": "mailto:service@xpertai.cn"
+            }
+          ],
+          "primary": {
+            "type": "button",
             "label": "试用 XpertAI",
             "href": "https://app.xpertai.cn/"
           }
-        ],
+        },
         "products": [
           {
             "product": "AI",
             "tabs": [
+              {
+                "tab": "快速开始",
+                "groups": [
+                  {
+                    "group": "社区",
+                    "pages": [
+                      "zh-Hans/ai/getting-started/community/index",
+                      "zh-Hans/ai/getting-started/community/docker",
+                      "zh-Hans/ai/getting-started/community/local-source-code",
+                      "zh-Hans/ai/getting-started/community/environments",
+                      "zh-Hans/ai/getting-started/community/faqs"
+                    ]
+                  },
+                  {
+                    "group": "入门指南",
+                    "pages": [
+                      "zh-Hans/ai/getting-started/onboarding/index"
+                    ]
+                  },
+                  {
+                    "group": "云服务",
+                    "pages": [
+                      "zh-Hans/ai/getting-started/cloud/index"
+                    ]
+                  },
+                  {
+                    "group": "企业版",
+                    "pages": [
+                      "zh-Hans/ai/getting-started/enterprise/docker/index",
+                      "zh-Hans/ai/getting-started/enterprise/k8s/index",
+                      "zh-Hans/ai/getting-started/enterprise/pro/index",
+                      "zh-Hans/ai/getting-started/enterprise/k8s/backups",
+                      "zh-Hans/ai/getting-started/enterprise/docker/with-doris",
+                      "zh-Hans/ai/getting-started/enterprise/docker/with-starrocks",
+                      "zh-Hans/ai/getting-started/enterprise/ssl"
+                    ]
+                  }
+                ]
+              },
               {
                 "tab": "数字专家",
                 "groups": [
@@ -636,8 +804,21 @@
                       "zh-Hans/ai/digital-expert/conversation-logs",
                       "zh-Hans/ai/digital-expert/development-api",
                       "zh-Hans/ai/digital-expert/monitoring-dashboard",
+                      "zh-Hans/ai/digital-expert/chat-channels",
                       "zh-Hans/ai/digital-expert/supervised-architecture",
                       "zh-Hans/ai/digital-expert/swarm-architecture"
+                    ]
+                  },
+                  {
+                    "group": "技能",
+                    "pages": [
+                      "zh-Hans/ai/digital-expert/skill/index"
+                    ]
+                  },
+                  {
+                    "group": "沙箱",
+                    "pages": [
+                      "zh-Hans/ai/digital-expert/sandbox/index"
                     ]
                   }
                 ]
@@ -660,7 +841,7 @@
                   {
                     "group": "默认",
                     "pages": [
-                      "zh-Hans/ai/knowledge-base/knowledge-base-features",
+                      "zh-Hans/ai/knowledge-base/index",
                       "zh-Hans/ai/knowledge-base/maintain-documents",
                       "zh-Hans/ai/knowledge-base/api",
                       "zh-Hans/ai/knowledge-base/connect-external-knowledge-base",
@@ -692,7 +873,8 @@
                       "zh-Hans/ai/toolset/scheduled-tasks",
                       "zh-Hans/ai/toolset/feishu",
                       "zh-Hans/ai/toolset/dingtalk",
-                      "zh-Hans/ai/toolset/planning-tasks"
+                      "zh-Hans/ai/toolset/planning-tasks",
+                      "zh-Hans/ai/toolset/coding-expert"
                     ]
                   },
                   {
@@ -788,6 +970,7 @@
                       "zh-Hans/ai/ai-assistant/configure-ai-provider",
                       "zh-Hans/ai/ai-assistant/command",
                       "zh-Hans/ai/ai-assistant/role",
+                      "zh-Hans/ai/ai-assistant/configure-ai-assistant",
                       "zh-Hans/ai/ai-assistant/ai-assitant"
                     ]
                   }
@@ -799,35 +982,57 @@
                   {
                     "group": "默认",
                     "pages": [
-                      "zh-Hans/ai/agent-middleware/built-in",
-                      "zh-Hans/ai/agent-middleware/custom",
-                      "zh-Hans/ai/agent-middleware/agent-middleware"
+                      "zh-Hans/ai/middleware/index",
+                      "zh-Hans/ai/middleware/custom"
+                    ]
+                  },
+                  {
+                    "group": "内置",
+                    "pages": [
+                      "zh-Hans/ai/middleware/built-in/index",
+                      "zh-Hans/ai/middleware/built-in/sensitive-filter",
+                      "zh-Hans/ai/middleware/built-in/agent-behavior-monitor"
                     ]
                   }
                 ]
               },
               {
-                "tab": "插件开发",
+                "tab": "插件",
                 "groups": [
                   {
                     "group": "默认",
                     "pages": [
-                      "zh-Hans/ai/plugin-development/overview",
-                      "zh-Hans/ai/plugin-development/core-concepts",
-                      "zh-Hans/ai/plugin-development/development-steps",
-                      "zh-Hans/ai/plugin-development/publish-and-use",
-                      "zh-Hans/ai/plugin-development/permission-design-guide",
-                      "zh-Hans/ai/plugin-development/schema-ui-extension",
-                      "zh-Hans/ai/plugin-development/plugin-development"
+                      "zh-Hans/ai/plugin/overview",
+                      "zh-Hans/ai/plugin/core-concepts",
+                      "zh-Hans/ai/plugin/development-steps",
+                      "zh-Hans/ai/plugin/publish-and-use",
+                      "zh-Hans/ai/plugin/permission-design-guide",
+                      "zh-Hans/ai/plugin/schema-ui-extension",
+                      "zh-Hans/ai/plugin/plugin-development"
+                    ]
+                  },
+                  {
+                    "group": "触发器",
+                    "pages": [
+                      "zh-Hans/ai/plugin/trigger/index",
+                      "zh-Hans/ai/plugin/trigger/schedule-trigger",
+                      "zh-Hans/ai/plugin/trigger/lark-trigger",
+                      "zh-Hans/ai/plugin/trigger/wecom-trigger"
+                    ]
+                  },
+                  {
+                    "group": "飞书",
+                    "pages": [
+                      "zh-Hans/ai/plugin/lark/index"
                     ]
                   },
                   {
                     "group": "飞书文档示例",
                     "pages": [
-                      "zh-Hans/ai/plugin-development/feishu-document-example/feishu-document-example",
-                      "zh-Hans/ai/plugin-development/feishu-document-example/feishu-system-integration",
-                      "zh-Hans/ai/plugin-development/feishu-document-example/feishu-document-source-strategy",
-                      "zh-Hans/ai/plugin-development/feishu-document-example/feishu-document-conversion-strategy"
+                      "zh-Hans/ai/plugin/feishu-document-example/feishu-document-example",
+                      "zh-Hans/ai/plugin/feishu-document-example/feishu-system-integration",
+                      "zh-Hans/ai/plugin/feishu-document-example/feishu-document-source-strategy",
+                      "zh-Hans/ai/plugin/feishu-document-example/feishu-document-conversion-strategy"
                     ]
                   }
                 ]
@@ -843,7 +1048,17 @@
                       "zh-Hans/ai/chatkit/chatkit-widgets",
                       "zh-Hans/ai/chatkit/chatkit-tool",
                       "zh-Hans/ai/chatkit/chatkit-effect",
-                      "zh-Hans/ai/chatkit/chatkit-actions"
+                      "zh-Hans/ai/chatkit/chatkit-actions",
+                      "zh-Hans/ai/chatkit/chatkit-pet",
+                      "zh-Hans/ai/chatkit/chatkit-plan-mode",
+                      "zh-Hans/ai/chatkit/chatkit-runtime-capabilities",
+                      "zh-Hans/ai/chatkit/chatkit-prompt-workflows"
+                    ]
+                  },
+                  {
+                    "group": "SDK",
+                    "pages": [
+                      "zh-Hans/ai/chatkit/sdk/integrate-xpertai-api"
                     ]
                   }
                 ]
@@ -885,6 +1100,18 @@
                       "zh-Hans/ai/permissions/feature-permission-role-matrix",
                       "zh-Hans/ai/permissions/switch-function-mapping"
                     ]
+                  }
+                ]
+              },
+              {
+                "tab": "OpenAPI",
+                "groups": [
+                  {
+                    "group": "AI",
+                    "openapi": {
+                      "source": "api/openapi.ai.json",
+                      "directory": "zh-Hans/api-reference"
+                    }
                   }
                 ]
               }
@@ -1135,17 +1362,52 @@
                 ]
               }
             ]
+          },
+          {
+            "product": "Code",
+            "tabs": [
+              {
+                "tab": "Web",
+                "groups": [
+                  {
+                    "group": "默认",
+                    "pages": [
+                      "zh-Hans/code/web/index",
+                      "zh-Hans/code/web/tasks",
+                      "zh-Hans/code/web/change-sets",
+                      "zh-Hans/code/web/environments"
+                    ]
+                  },
+                  {
+                    "group": "指南",
+                    "pages": [
+                      "zh-Hans/code/web/guides/system-logger"
+                    ]
+                  },
+                  {
+                    "group": "Git",
+                    "pages": [
+                      "zh-Hans/code/web/git/github",
+                      "zh-Hans/code/web/git/gitlab",
+                      "zh-Hans/code/web/git/gitee",
+                      "zh-Hans/code/web/git/codeup"
+                    ]
+                  },
+                  {
+                    "group": "飞书",
+                    "pages": [
+                      "zh-Hans/code/web/lark/index"
+                    ]
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
     ],
     "global": {
       "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://xpertai.cn/docs/",
-          "icon": "book-open-cover"
-        },
         {
           "anchor": "Blog",
           "href": "https://xpertai.cn/blog/",

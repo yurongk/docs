@@ -1,0 +1,59 @@
+---
+title: 集成 StarRocks
+sidebar_position: 2
+---
+
+将 Xpert 分析云与 StarRocks 集群一起部署在 Docker Cluster 中可以快速搭建一个数据分析平台。
+
+## 准备工作
+
+需在宿主机执行如下命令
+
+```
+sysctl -w vm.max_map_count=2000000
+```
+
+## 安装部署
+
+请下载我们提供的安装脚本
+
+```bash
+git clone https://github.com/meta-d/installer.git
+```
+
+然后在 docker 目录下，首先配置环境变量文件 `.env`
+
+```bash
+cd installer/docker
+cp env.tmpl .env
+```
+
+- 将 **INSTALLATION_MODE** 值设置为 **with-starrocks**
+- 其他密码字段可重新设置
+
+最后执行以下命令启动服务：
+```bash
+docker-compose -f docker-compose-with-starrocks.yml up -d
+```
+
+服务启动完成后访问 [http://localhost/](http://localhost/) 即可看到XpertAI的登录页面。
+
+## 1 FE x 1 BE
+
+在单节点上部署一个前端服务和一个后端服务，这种部署方式适合小规模的数据分析场景。
+
+下载 installer 项目代码， 在 docker 目录下执行以下命令启动服务：
+
+```bash
+docker-compose -f docker-compose-with-doris.yml up -d
+```
+
+## 3 FE x 3 BE
+
+在单节点上部署三个前端服务和三个后端服务和一个负载均衡反向代理服务，这种部署方式适合大规模的数据分析场景。 服务个数和网络结构可以根据实际情况进行调整。
+
+下载 installer 项目代码， 在 docker 目录下执行以下命令启动服务：
+
+```bash
+docker-compose -f docker-compose-with-doris-fe3xbe3.yml up -d
+```

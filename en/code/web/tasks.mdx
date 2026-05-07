@@ -1,0 +1,57 @@
+---
+title: Tasks
+sidebar_position: 2
+tags:
+  - AI
+  - Agent
+  - Code
+---
+
+Tasks are the unit of work in CodeXpert. Each task captures the instruction, execution context, terminal output, and resulting change sets.
+
+## Create a task
+
+When you start a task, you provide:
+
+- A clear instruction (goal + constraints)
+- Repository and branch context
+- Optional attachments or references
+
+CodeXpert creates a task and begins execution in the selected environment.
+
+## Task lifecycle
+
+A task moves through these states:
+
+- `queued`: waiting to start
+- `running`: actively executing
+- `idle`: ready for follow-up actions
+- `failed`: execution stopped with an error
+- `archived`: moved out of active view
+
+## What a task records
+
+Each task includes:
+
+- Instruction, status, and timestamps
+- Repository and branch context
+- Terminal output from the sandbox
+- One or more change sets
+
+## Pull request actions
+
+From the latest change set you can:
+
+- Create a pull request
+- Open the existing pull request
+- Copy a patch or git apply command
+
+## Archive tasks
+
+Archive tasks after review to keep your active list focused. You can still open archived tasks later for reference.
+
+## Best practices
+
+- Write instructions as a short goal plus constraints.
+- Sync after major steps to capture clean change sets.
+- Review diffs before opening a pull request.

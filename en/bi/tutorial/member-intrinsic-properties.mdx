@@ -4,11 +4,11 @@
 
 MDX (Multidimensional Expressions) is a query language for multidimensional data. It uses the concept of "members" to reference data. Members are elements within multidimensional data, such as dimension members or measure members.
 
-:::info
+<Info>
 
 **Member properties** are attributes of dimension members that provide additional information, which you might not want to analyze directly. In other words, member properties are attributes that, while containing valuable information, are not ideal candidates for dimensions. For example, in a standard address, you might want to use country, state, city, and even postal code as dimensions, but a specific address (e.g., 1 Meadow Drive) doesn't have much meaning as a dimension value due to its granularity. Such addresses are ideal candidates for member properties. These properties are still stored in the dimension table alongside standard dimension values. Member properties must have a one-to-one relationship with the members.
 
-:::
+</Info>
 
 In MDX, members have many intrinsic properties known as **Intrinsic Member Properties**. The most common of these is the member name, which is the unique identifier of the member. Other important properties include the parent member, which indicates the parent level member of the current member, and the depth of the member, which shows the level of the member within the dimension hierarchy. Additionally, child members are a property that includes all related child members of the current member.
 

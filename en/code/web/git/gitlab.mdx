@@ -1,0 +1,58 @@
+---
+title: GitLab Configuration
+sidebar_position: 2
+tag: "gitlab"
+---
+
+`GitLab` in the current backend implementation supports two authentication methods: `OAUTH_WEB` and `PAT`, and also supports self-hosted GitLab instances.
+
+## Backend Prerequisites
+
+General Configuration:
+
+- `GIT_CREDENTIALS_KEY`: Used to encrypt and save connection credentials.
+- `BACKEND_PUBLIC_URL` or `PUBLIC_API_URL`: Used to generate the `Webhook URL` displayed on the page.
+- `FRONTEND_URL`: The address to redirect to after OAuth completion.
+
+Required for OAuth:
+
+- `GITLAB_CLIENT_ID`
+- `GITLAB_CLIENT_SECRET`
+- `GITLAB_REDIRECT_URI` (e.g., `http://localhost:3001/v1/git/connections/callback/gitlab`)
+
+Optional for OAuth:
+
+- `GITLAB_SCOPES` (default `read_api`)
+- `GITLAB_BASE_URL` (default `https://gitlab.com`)
+- `GITLAB_OAUTH_AUTHORIZE_URL` (default `GITLAB_BASE_URL + /oauth/authorize`)
+
+If you only use the `PAT` method, GitLab OAuth-related variables are not required.
+
+## Web Configuration Steps
+
+### Method 1: OAuth Web
+
+1. Open `Settings -> Connectors` (`/settings/connectors`).
+2. Select `Provider = GitLab`, `Auth method = OAUTH_WEB`.
+3. Optionally enter the `GitLab instance URL` (`baseUrl`). If left empty, `GITLAB_BASE_URL` is used; if also not configured, defaults to `https://gitlab.com`.
+4. Click `Start Connection` to redirect to the GitLab authorization page.
+5. After authorization, you are automatically returned to the connectors page, and the connection appears in the `Existing Connections` list.
+
+### Method 2: PAT
+
+1. Select `Provider = GitLab`, `Auth method = PAT`.
+2. The page displays a form with fields:
+  - `GitLab Base URL` (optional)
+  - `Personal Access Token` (required)
+3. Fill in and click `Submit Connection` to complete the binding.
+
+## Self-Hosted GitLab Notes
+
+- `baseUrl` must include the protocol; non-standard ports require the port number (e.g., `http://gitlab.company.local:2222`).
+- The callback URL in the GitLab OAuth application must exactly match `GITLAB_REDIRECT_URI`.
+- The `baseUrl` entered by users on the Web page overrides the backend default and only affects the current connection.
+
+## Webhook Notes
+
+- The page displays the GitLab `Webhook URL`.
+- The current backend version has not implemented webhook event handlers for the GitLab provider, so webhooks do not affect connection, repository reading, and merge request creation capabilities.

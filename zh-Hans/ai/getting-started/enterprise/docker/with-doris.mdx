@@ -1,0 +1,69 @@
+---
+title: 集成 Doris
+sidebar_position: 1
+---
+
+将 Xpert 分析云与 Doris 集群一起部署在 Docker Cluster 中可以提供一个完整的数据分析和存储解决方案。通过将 Xpert 分析云与 Doris 集群一起部署在 Docker Cluster 中，您可以实现数据分析和存储的集成和协同工作。 Xpert 分析云提供了可视化和交互式的分析工具，而 Doris 集群提供了高性能的数据存储和查询能力。这种部署方式可以提供一个强大的解决方案，适用于需要进行大规模数据分析和查询的场景。
+
+## 准备工作
+
+需在宿主机执行如下命令
+
+```
+sysctl -w vm.max_map_count=2000000
+```
+
+<Tip>
+**Doris 官方文档**
+
+
+注意 Doris 安装部署的一些前提条件和系统设置：
+
+https://doris.apache.org/docs/dev/install/construct-docker/run-docker-cluster/
+
+</Tip>
+
+## 安装部署
+
+请下载我们提供的安装脚本
+
+```bash
+git clone https://github.com/meta-d/installer.git
+```
+
+然后在 docker 目录下，首先配置环境变量文件 `.env`
+
+```bash
+cd installer/docker
+cp env.tmpl .env
+```
+
+- 将 **INSTALLATION_MODE** 值设置为 **with-doris**
+- 其他密码字段可重新设置
+
+最后执行以下命令启动服务：
+```bash
+docker-compose -f docker-compose-with-doris.yml up -d
+```
+
+服务启动完成后访问 [http://localhost/](http://localhost/) 即可看到XpertAI的登录页面。
+
+## 1 FE x 1 BE
+
+在单节点上部署一个前端服务和一个后端服务，这种部署方式适合小规模的数据分析场景。
+
+下载 installer 项目代码， 在 docker 目录下执行以下命令启动服务：
+
+```bash
+docker-compose -f docker-compose-with-doris.yml up -d
+```
+
+## 3 FE x 3 BE
+
+在单节点上部署三个前端服务和三个后端服务和一个负载均衡反向代理服务，这种部署方式适合大规模的数据分析场景。 服务个数和网络结构可以根据实际情况进行调整。
+
+下载 installer 项目代码， 在 docker 目录下执行以下命令启动服务：
+
+```bash
+docker-compose -f docker-compose-with-doris-fe3xbe3.yml up -d
+```
