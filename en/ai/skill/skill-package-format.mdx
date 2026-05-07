@@ -1,0 +1,96 @@
+---
+title: Skill Package Format
+sidebar_position: 6
+---
+
+A skill package is a folder that contains a required `SKILL.md` file and optional supporting files. Xpert installs the folder into a workspace and lets Skills Middleware sync it into the runtime sandbox when an agent uses the skill.
+
+## Minimal Folder
+
+```text
+my-skill/
+  SKILL.md
+```
+
+`SKILL.md` is required. The file contains YAML frontmatter followed by instructions for the agent.
+
+```md
+---
+name: my-skill
+description: Helps the agent perform a repeatable task.
+version: 1.0.0
+license: MIT
+tags:
+  - operations
+  - review
+---
+
+# My Skill
+
+Use this skill when the user asks for ...
+
+## Workflow
+
+1. Read the user request.
+2. Inspect the relevant files or context.
+3. Produce the expected output.
+```
+
+## Recommended Structure
+
+```text
+my-skill/
+  SKILL.md
+  references/
+    checklist.md
+  scripts/
+    helper.py
+  templates/
+    report.md
+  assets/
+    icon.png
+```
+
+Use supporting files when the full instructions would otherwise become too long. `SKILL.md` should explain when to open those files and how to use them.
+
+## Frontmatter Fields
+
+| Field | Required | Notes |
+| --- | --- | --- |
+| `name` | Recommended | Human-readable or namespaced skill name. |
+| `description` | Recommended | Used for discovery and progressive disclosure. |
+| `version` | Optional | Used for install and update display. |
+| `license` | Optional | Shown in skill details when available. |
+| `tags` | Optional | Used for search, filtering, and organization. |
+
+Marketplace metadata can also include display names, summaries, icons, authors, categories, runtime hints, and slash commands when produced by repository sync or advanced packaging.
+
+## ZIP Upload Rules
+
+You can upload a ZIP containing one or more skill folders.
+
+```text
+skills.zip
+  code-review/
+    SKILL.md
+    checklist.md
+  sales-email/
+    SKILL.md
+    templates/
+      follow-up.md
+```
+
+Xpert scans the archive for folders that contain `SKILL.md`. Each matching folder becomes a skill package.
+
+## Writing Good Skill Instructions
+
+- Make the trigger condition clear: when should the agent use this skill?
+- Keep the workflow actionable and ordered.
+- Name supporting files explicitly.
+- Put large examples, scripts, and reference material in separate files.
+- Mention prerequisites, permissions, or external systems the skill depends on.
+- Avoid hiding secrets in skill files; use platform credentials and repository settings instead.
+
+## Runtime Behavior
+
+When enabled for an agent, Skills Middleware copies the selected skill folder into the sandbox under `.xpert/skills`. The agent first sees the skill name and description, then reads the full `SKILL.md` only when the task matches the skill.

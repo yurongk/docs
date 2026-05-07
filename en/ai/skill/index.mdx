@@ -1,0 +1,44 @@
+---
+title: Skills
+sidebar_position: 1
+---
+
+Skills are reusable capability packages for Xpert agents. A skill gives an agent a focused set of instructions, supporting files, prompt workflows, scripts, templates, or task-specific behavior that can be installed once and reused across workspaces and agents.
+
+Use skills when a capability is repeatable but does not need a full tool integration. For example, a team can install a code review skill, a document co-authoring skill, a presentation skill, or an internal operating procedure skill, then let agents load those instructions only when the task needs them.
+
+## What Skills Provide
+
+- **Reusable instructions**: each skill is centered around a `SKILL.md` file that explains when and how the agent should use it.
+- **Supporting resources**: a skill can include scripts, references, templates, assets, or examples.
+- **Workspace installation**: installed skills live in a workspace and can be browsed, edited, uploaded, or removed from the workspace skills workbench.
+- **Runtime enablement**: agents can load selected skills through Skills Middleware and expose them to ChatKit runtime selection.
+- **Organization sharing**: workspace-uploaded skills can be shared to the organization skill market for other workspaces to install.
+- **Repository discovery**: administrators can connect skill repositories so teams can browse, search, install, and update skills from indexed sources.
+
+## Skill Lifecycle
+
+1. **Discover** skills in the skills market or repository indexes.
+2. **Install** a skill into a target workspace.
+3. **Inspect and edit** installed skill files in the workspace skills workbench.
+4. **Enable** selected skills when creating or configuring an agent.
+5. **Run** the agent. Skills Middleware syncs selected skills into the sandbox and adds concise skill metadata to the agent context.
+6. **Share or administer** skills through organization-level repositories and template synchronization.
+
+## Where To Use Skills
+
+| Area | What You Can Do |
+| --- | --- |
+| Explore / Skills | Browse featured skills, search indexed repositories, view details, and install or update skills into a workspace. |
+| Workspace / Skills | Manage installed skills, install from GitHub, upload ZIP packages, register repositories, and edit skill files. |
+| Agent creation | Select skills while creating a blank agent so Skills Middleware is wired into the primary agent flow. |
+| Agent Studio | Configure Skills Middleware defaults and command exposure for installed skill commands. |
+| Settings / Tenant / Skills | Initialize the public skill repository, sync template skills, upload organization skills, and manage repositories. |
+
+## Related Pages
+
+- [Browse and install skills](./marketplace)
+- [Manage workspace skills](./workspace)
+- [Use skills in agents](./use-in-agent)
+- [Administer skill repositories](./administration)
+- [Skill package format](./skill-package-format)

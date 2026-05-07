@@ -1,0 +1,70 @@
+---
+title: Administer Skills
+sidebar_position: 5
+---
+
+Administrators manage the skill supply chain for a tenant or organization. This includes repository registration, public skill publishing, template synchronization, and default workspace skills.
+
+## Tenant Skills Page
+
+Open **Settings / Tenant / Skills** to manage organization-level skills.
+
+From this page, administrators can:
+
+- initialize the system-managed public skill repository
+- upload ZIP skill bundles into the public repository
+- register skill repositories
+- review synced repository indexes
+- sync template skill assets
+- force a full template skill sync when needed
+
+## Public Skill Repository
+
+Xpert uses a system-managed repository provider named `workspace-public` for skills shared inside the organization.
+
+This repository is used when:
+
+- a workspace-uploaded skill is shared to the organization market
+- template skill bundles are published as organization-visible skills
+- other workspaces install skills created inside the organization
+
+Administrators normally initialize this repository from the Tenant Skills page.
+
+## Repository Sources
+
+Skill repositories define where indexed skills come from.
+
+| Provider | Purpose |
+| --- | --- |
+| `github` | Sync skills from a GitHub repository. Configure URL, branch, and optional path. |
+| `clawhub` | Sync public or official skills from a ClawHub registry. |
+| `workspace-public` | System-managed organization market for shared workspace skills. |
+| ZIP/local upload | Upload skill folders directly from an archive. |
+
+After registration, repositories must be synced before their skills appear in marketplace search.
+
+## Template Skill Sync
+
+Template skills are configured from the external template asset directory. The important files are:
+
+| File or Folder | Purpose |
+| --- | --- |
+| `skills-market.yaml` | Defines featured skills and filter labels shown in the skills market. |
+| `skill-repositories.yaml` | Declares tenant-level repositories to register and sync. |
+| `workspace-defaults.yaml` | Declares default skills to install into new user default workspaces. |
+| `skill-packages/*/bundle.yaml` | Publishes bundled local skills into the public repository. |
+| `skill-packages/*/SKILL.md` | The actual local skill instructions and resources. |
+
+Use **Sync Template Skills** for normal incremental sync. Use **Force Full Sync** when you need to re-check repositories, indexes, bundled public skills, featured references, and workspace defaults.
+
+## Default Workspace Skills
+
+Default workspace skills are installed for new personal default workspaces when the configured references are available in `skills-market.yaml` and repository indexes.
+
+Use this for baseline skills that most users should receive automatically, such as document, spreadsheet, coding, or presentation skills.
+
+## Operational Notes
+
+- Repository credentials should be stored in the repository configuration, not inside skill files.
+- Shared workspace skills are snapshots. Republish when the source workspace skill changes.
+- Existing tenants are not automatically backfilled by environment or template changes unless an administrator syncs or registers the relevant repositories.

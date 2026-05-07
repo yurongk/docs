@@ -1,0 +1,70 @@
+---
+title: Use Skills in Agents
+sidebar_position: 4
+---
+
+Agents use skills through **Skills Middleware**. The middleware makes installed skills discoverable to the model, syncs selected skill files into the runtime sandbox, and provides tools for reading full skill instructions when needed.
+
+## Enable Skills During Agent Creation
+
+When creating a blank agent, the setup wizard can show installed workspace skills.
+
+To enable skills:
+
+1. Start from the blank agent wizard.
+2. Select the target workspace.
+3. Open the skills step.
+4. Choose the installed skills the agent should use.
+5. Finish the wizard.
+
+When skills are selected, Xpert automatically adds Skills Middleware to the agent flow.
+
+## Configure Skills Middleware
+
+In Agent Studio, Skills Middleware can be configured with:
+
+- **Default Skills**: skills loaded by default when the caller does not send an explicit runtime selection.
+- **System Prompt**: optional custom text prepended before the default skills prompt.
+- **Auto Skill Discovery**: optional repository search and installation during runtime.
+
+Skills Middleware should be used with the File toolset because agents need file access to read `SKILL.md` and supporting resources.
+
+## Runtime Skill Selection
+
+ChatKit can expose runtime skills in the composer. Users can select skills for a conversation or for the next message.
+
+At runtime:
+
+- selected skill IDs are passed as `selectedSkillIds`
+- disabled skills can be passed as `disabledSkillIds`
+- `selectedSkillWorkspaceId` can point to the workspace that owns the selected skills
+
+When a runtime allow-list is sent, it replaces the middleware's default skill list for that run. An empty allow-list is meaningful: it disables user-selectable skills for that run while required system middleware remains active.
+
+## How the Agent Uses a Skill
+
+Skills follow progressive disclosure.
+
+1. Skills Middleware adds a concise list of available skills to the system context.
+2. The agent decides whether the task matches a skill.
+3. The agent uses `read_skill_file` to read the relevant `SKILL.md`.
+4. The agent follows the full instructions and uses supporting files when needed.
+
+This keeps the default prompt compact while still giving the agent detailed procedures when a skill is relevant.
+
+## Auto Skill Discovery
+
+When Auto Skill Discovery is enabled, the agent can search indexed repositories if installed skills are not enough.
+
+The runtime can:
+
+- search indexed repositories with a query
+- install a limited number of relevant skills into the current workspace
+- sync those skills into the sandbox
+- read their `SKILL.md` files before continuing
+
+Auto discovery is disabled by default so existing agent behavior remains stable.
+
+## Skill Commands
+
+Skills can expose ChatKit slash commands through their metadata. These commands can appear alongside workspace prompt workflows and host commands. Agent command configuration can enable, disable, or prioritize skill commands for a specific agent.

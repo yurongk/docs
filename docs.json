@@ -166,6 +166,22 @@
                 ]
               },
               {
+                "tab": "Skill",
+                "groups": [
+                  {
+                    "group": "Default",
+                    "pages": [
+                      "en/ai/skill/index",
+                      "en/ai/skill/marketplace",
+                      "en/ai/skill/workspace",
+                      "en/ai/skill/use-in-agent",
+                      "en/ai/skill/administration",
+                      "en/ai/skill/skill-package-format"
+                    ]
+                  }
+                ]
+              },
+              {
                 "tab": "Knowledge Base",
                 "groups": [
                   {
@@ -830,7 +846,12 @@
                   {
                     "group": "默认",
                     "pages": [
-                      "zh-Hans/ai/skill/index"
+                      "zh-Hans/ai/skill/index",
+                      "zh-Hans/ai/skill/marketplace",
+                      "zh-Hans/ai/skill/workspace",
+                      "zh-Hans/ai/skill/use-in-agent",
+                      "zh-Hans/ai/skill/administration",
+                      "zh-Hans/ai/skill/skill-package-format"
                     ]
                   }
                 ]

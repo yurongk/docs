@@ -1,0 +1,96 @@
+---
+title: 技能包格式
+sidebar_position: 6
+---
+
+技能包是一个包含必需 `SKILL.md` 文件的目录，也可以包含辅助文件。Xpert 会把技能目录安装到工作区；当智能体启用该技能时，Skills Middleware 会把它同步到运行时沙箱。
+
+## 最小目录
+
+```text
+my-skill/
+  SKILL.md
+```
+
+`SKILL.md` 是必需文件。它包含 YAML frontmatter 和面向智能体的使用说明。
+
+```md
+---
+name: my-skill
+description: Helps the agent perform a repeatable task.
+version: 1.0.0
+license: MIT
+tags:
+  - operations
+  - review
+---
+
+# My Skill
+
+Use this skill when the user asks for ...
+
+## Workflow
+
+1. Read the user request.
+2. Inspect the relevant files or context.
+3. Produce the expected output.
+```
+
+## 推荐目录结构
+
+```text
+my-skill/
+  SKILL.md
+  references/
+    checklist.md
+  scripts/
+    helper.py
+  templates/
+    report.md
+  assets/
+    icon.png
+```
+
+当完整指令过长时，可以把参考资料、脚本、模板和示例拆到辅助文件中。`SKILL.md` 应说明什么时候打开这些文件，以及如何使用它们。
+
+## Frontmatter 字段
+
+| 字段 | 是否必需 | 说明 |
+| --- | --- | --- |
+| `name` | 推荐 | 技能名称，可以是普通名称或命名空间名称。 |
+| `description` | 推荐 | 用于发现技能和渐进披露。 |
+| `version` | 可选 | 用于安装和更新展示。 |
+| `license` | 可选 | 可在技能详情中展示。 |
+| `tags` | 可选 | 用于搜索、筛选和组织。 |
+
+高级市场元数据还可以包含展示名、摘要、图标、作者、分类、运行时提示和 slash command。这些通常来自仓库同步或高级打包流程。
+
+## ZIP 上传规则
+
+可以上传包含一个或多个技能目录的 ZIP。
+
+```text
+skills.zip
+  code-review/
+    SKILL.md
+    checklist.md
+  sales-email/
+    SKILL.md
+    templates/
+      follow-up.md
+```
+
+Xpert 会扫描压缩包中包含 `SKILL.md` 的目录。每个匹配目录都会作为一个技能包导入。
+
+## 编写高质量技能指令
+
+- 明确触发条件：什么任务应该使用这个技能。
+- 让流程具备可执行顺序。
+- 明确点名需要读取的辅助文件。
+- 将较长示例、脚本和参考资料放入独立文件。
+- 说明技能依赖的前提、权限或外部系统。
+- 不要把密钥写入技能文件；应使用平台凭据和仓库配置。
+
+## 运行时行为
+
+当技能被智能体启用时，Skills Middleware 会把选中的技能目录复制到沙箱的 `.xpert/skills` 下。智能体会先看到技能名称和描述，只有在任务匹配时才读取完整的 `SKILL.md`。

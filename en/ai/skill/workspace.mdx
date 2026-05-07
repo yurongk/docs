@@ -1,0 +1,57 @@
+---
+title: Manage Workspace Skills
+sidebar_position: 3
+---
+
+The workspace skills workbench is where you manage the skills installed in one workspace. It is designed for both day-to-day use and lightweight skill authoring.
+
+## Open Workspace Skills
+
+Open a workspace and go to **Skills**.
+
+The workbench shows:
+
+- installed skills in the workspace
+- skill metadata such as name, summary, provider, publisher, visibility, tags, and repository
+- a file tree for the selected skill
+- a file preview and editor for supported text files
+
+## Install Skills Into the Workspace
+
+You can add skills in several ways.
+
+| Method | Use It When |
+| --- | --- |
+| Add Skill from GitHub | You have a GitHub repository URL, branch, and optional path that contains skill folders. |
+| Upload Skills | You have a ZIP file containing one or more skill folders. |
+| Register from Repository | You want to connect or browse a repository source, then install indexed skills. |
+| Bulk Import | You want to install multiple indexed skills from a selected repository. |
+
+Uploaded ZIP files can contain one skill or multiple skill folders. Each skill folder must include a `SKILL.md` file.
+
+## Inspect and Edit Skill Files
+
+Select a skill to browse its file tree. The workbench can load, preview, download, upload, save, and delete files inside the selected skill package.
+
+Use this for common edits such as:
+
+- refining `SKILL.md` instructions
+- adding references or examples
+- updating scripts or helper files
+- adding templates or assets used by the skill
+
+Only supported text-like files are editable in the built-in editor. Binary assets can still be uploaded, downloaded, or organized from the file tree.
+
+## Delete Skills
+
+Delete an installed skill when the workspace no longer needs it. Deleting a workspace installation removes the workspace copy and updates the installed skills list.
+
+For shared workspace skills, removing the source skill also removes or deactivates the associated public-market entry according to the organization sharing workflow.
+
+## Practical Workflow
+
+1. Install a skill from the market, GitHub, or ZIP upload.
+2. Open the skill in **Workspace / Skills**.
+3. Review `SKILL.md` and supporting files.
+4. Edit instructions or resources if the skill is workspace-owned.
+5. Enable the skill in an agent or share it to the organization market.
