@@ -1,0 +1,113 @@
+---
+title: Human-in-the-Loop Middleware
+sidebar_position: 4
+---
+
+Human-in-the-Loop (HITL) Middleware adds human review to selected agent tool calls. When the model proposes a configured tool action, the middleware pauses execution, asks for a human decision, and then either approves, edits, or rejects the tool call.
+
+The middleware provider name is `HumanInTheLoopMiddleware`.
+
+## When To Use
+
+Use HITL when a tool call can have side effects or needs human judgment:
+
+- Sending emails, messages, tickets, or notifications.
+- Writing files, updating databases, or changing records.
+- Running SQL, scripts, shell commands, or browser actions.
+- Calling paid APIs or external systems.
+- Any action where rejection or argument editing should be possible before execution.
+
+## How It Works
+
+1. The model returns one or more tool calls.
+2. The middleware runs after the model and checks the latest AI message.
+3. Tool calls configured in `interruptOn` are grouped into a single review request.
+4. Unconfigured tool calls are auto-approved.
+5. The human returns one decision per interrupted tool call.
+6. Approved and edited calls stay pending so the graph can execute them.
+7. Rejected calls receive synthetic error `ToolMessage`s. If every pending call is rejected, the middleware jumps back to the model so it can respond to the rejection.
+
+## Configuration
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `interruptOn` | `Record<string, boolean \| InterruptOnConfig>` | none | Mapping from tool name to review behavior. If omitted, the middleware does nothing. Tools without an entry are auto-approved. |
+| `descriptionPrefix` | `string` | `Tool execution requires approval` | Prefix used to build the human-facing review description when a tool does not provide a custom description. |
+
+### `interruptOn` Values
+
+| Value | Behavior |
+| --- | --- |
+| `true` | Pause for review and allow `approve`, `edit`, and `reject`. |
+| `false` | Auto-approve the tool call. This is equivalent to not listing the tool. |
+| `InterruptOnConfig` | Customize allowed decisions, description, and optional edit schema. |
+
+### `InterruptOnConfig`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `allowedDecisions` | `("approve" \| "edit" \| "reject")[]` | Decisions allowed for this tool. |
+| `description` | `string` or function | Optional custom description shown to the reviewer. If absent, the middleware uses `descriptionPrefix`, tool name, and JSON arguments. |
+| `argsSchema` | `Record<string, any>` | Optional JSON schema for edited arguments when `edit` is allowed. |
+
+## Decision Types
+
+| Decision | Result |
+| --- | --- |
+| `approve` | Keeps the original tool name and arguments. The tool executes normally. |
+| `edit` | Replaces the tool name and arguments with the reviewed `editedAction`, preserving the original tool-call ID. |
+| `reject` | Creates an error tool message. The model receives the rejection message and can decide what to do next. |
+
+## Example
+
+```json
+{
+  "interruptOn": {
+    "send_email": true,
+    "run_sql": {
+      "allowedDecisions": ["approve", "reject"],
+      "description": "Review this SQL statement before execution."
+    },
+    "update_customer": {
+      "allowedDecisions": ["approve", "edit", "reject"],
+      "argsSchema": {
+        "type": "object",
+        "properties": {
+          "customerId": { "type": "string" },
+          "status": { "type": "string" }
+        },
+        "required": ["customerId", "status"]
+      }
+    }
+  },
+  "descriptionPrefix": "Please review this tool call before it runs"
+}
+```
+
+## Review Payload
+
+The middleware sends a HITL request with:
+
+- `actionRequests`: tool names, arguments, and descriptions for the reviewer.
+- `reviewConfigs`: allowed decisions and optional argument schema for each action.
+
+The response must contain a `decisions` array with the same length as the interrupted tool calls. A mismatch is treated as an error.
+
+## Runtime Overrides
+
+At runtime, middleware options are merged with `runtime.context`. This allows advanced integrations to provide or override `interruptOn` policy for a specific run without changing the saved middleware node.
+
+## Best Practices
+
+- Configure HITL only for tools that need review. Unconfigured tools are auto-approved.
+- Use `edit` for high-value actions where the reviewer should correct arguments instead of restarting the conversation.
+- Provide concise custom descriptions for risky tools.
+- Use `argsSchema` when edited arguments must follow a strict shape.
+- Combine with Browser Automation or sandbox tools to review risky actions before they reach the user's environment.
+
+## Troubleshooting
+
+- **No review prompt appears**: Confirm `interruptOn` is configured and the tool name matches the actual tool call name.
+- **The tool runs without approval**: Tools missing from `interruptOn` are auto-approved.
+- **Edit fails**: The edited action must include a string `name` and object `args`.
+- **Reject does not end the run**: Rejection is returned to the model as an error tool message; the model may choose a safer follow-up response.

@@ -14,6 +14,9 @@ The following middleware works with any LLM provider:
 | Middleware                              | Description                                                                 |
 | --------------------------------------- | --------------------------------------------------------------------------- |
 | [Context Compression](#context-compression)         | Automatically summarizes conversation history when approaching session limit. |
+| [Browser Automation Middleware](./browser-automation) | Lets ChatKit clients execute safe browser-page actions such as snapshot, click, fill, scroll, screenshot, and wait. |
+| [Ralph Loop Middleware](./ralph-loop) | Retries an agent from a clean message context until it emits the completion promise or reaches the retry limit. |
+| [Human-in-the-Loop Middleware](./human-in-the-loop) | Pauses configured tool calls for human approval, editing, or rejection before execution. |
 | [Sensitive Filter Middleware](./sensitive-filter) | Filters sensitive input/output content using rule-based or LLM policies. |
 | [Agent Behavior Monitor Middleware](./agent-behavior-monitor) | Detects prompt injection, risky instructions, high-frequency tool calls, and repeated failures. |
 

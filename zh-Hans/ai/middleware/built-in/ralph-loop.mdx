@@ -1,0 +1,101 @@
+---
+title: Ralph Loop 中间件
+sidebar_position: 3
+---
+
+Ralph Loop 会从干净的消息上下文中自动重试智能体，直到模型输出完成承诺。它适合模型容易提前停止或只给出部分最终答案的任务：在返回给用户之前，中间件会进行有上限的自我重试。
+
+中间件 provider 名称是 `ralph-loop`。
+
+## 完成承诺
+
+Ralph Loop 会向系统消息追加一条规则，要求模型在任务真正完成时，在最终回答末尾输出这个标记：
+
+```text
+<promise>DONE</promise>
+```
+
+如果最新 AI 消息包含该标记，中间件会从用户可见回答中移除它，并重置 Ralph Loop 状态。如果最新 AI 消息没有该标记，且没有待执行工具调用，Ralph Loop 会清空消息历史并重新调用模型。
+
+## 适用场景
+
+当你希望为最终答案完整性增加一个有边界的自动重试机制时，可以使用 Ralph Loop：
+
+- 长任务中，模型容易在完成前提前收尾。
+- 写作、迁移、研究、分析等任务，需要智能体明确声明完成后才结束。
+- 比起带着混乱历史继续推理，你更希望每次重试都从干净上下文重新开始。
+- 智能体可以在过程中调用工具，但最终必须输出完成承诺才算结束。
+
+不要把 Ralph Loop 当作任务状态管理器使用。当前实现不会注入任务工具，也不会维护 `TASKS` 或 `progress` 状态；它只追踪重试轮次和原始用户任务。
+
+## 工作方式
+
+| 钩子 | 行为 |
+| --- | --- |
+| `beforeAgent` | 保存原始用户任务，并把 `ralphLoopIteration` 重置为 `0`。 |
+| `wrapModelCall` | 向系统消息追加完成承诺规则。重试时只发送重试提示，而不是完整历史消息。 |
+| `afterModel` | 检查最新 AI 消息。有工具调用时继续执行工具；出现完成承诺时结束循环；缺少完成承诺时，在 `maxIterations` 范围内清空上下文重试。 |
+
+每次重试时，Ralph Loop 会删除之前的所有消息，并发送类似下面的新用户消息：
+
+```text
+[RALPH LOOP - ITERATION 1/20]
+
+Your previous attempt did not output the completion promise, so this is a fresh retry with a clean message history.
+...
+Original task:
+...
+```
+
+如果原始消息包含结构化内容片段，Ralph Loop 会把这些片段附加在重试文本之后继续保留。
+
+## 配置项
+
+| 字段 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `maxIterations` | `number` | `20` | 最大自动干净上下文重试次数。最小值为 `1`。 |
+
+示例：
+
+```json
+{
+  "maxIterations": 8
+}
+```
+
+## 运行时状态
+
+Ralph Loop 会保存以下状态字段：
+
+| 字段 | 说明 |
+| --- | --- |
+| `ralphLoopIteration` | 当前重试次数。 |
+| `ralphLoopOriginalHumanContent` | 原始用户消息内容或结构化消息片段。 |
+| `ralphLoopOriginalTaskText` | 从运行时 human input 中提取到的原始纯文本任务。 |
+
+成功完成或达到重试上限后，这些字段会被重置。
+
+## 达到重试上限
+
+如果达到 `maxIterations` 后仍没有收到完成承诺，Ralph Loop 会停止重试，并在最新 AI 回答后追加提示：
+
+```text
+Ralph Loop stopped after reaching <maxIterations> automatic retries without receiving the completion promise.
+```
+
+随后该回答会被返回，避免无限循环。
+
+## 最佳实践
+
+- 用在最终答案完整性比延迟更重要的智能体上。
+- 保守设置 `maxIterations`，因为每次重试都是一次额外模型调用。
+- 在主提示词中明确说明“完全完成”的判断标准。
+- 当智能体需要先行动再完成时，可与工具、浏览器自动化等中间件组合。
+- 避免在系统提示中加入另一个互相冲突的完成标记。
+
+## 排障建议
+
+- **最终回答里看不到 `<promise>DONE</promise>`**：这是正常现象，中间件会在返回前移除该标记。
+- **智能体重试过多**：降低 `maxIterations`，或让主提示词更明确完成条件。
+- **回答带有重试上限提示**：模型始终没有输出完成承诺。检查任务是否过于模糊，或上一次回答是否仍未完成。
+- **工具调用后没有立即重试**：Ralph Loop 会等待工具执行完成。只有最新 AI 消息没有待执行工具调用时，才检查完成承诺。

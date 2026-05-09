@@ -1,0 +1,186 @@
+---
+title: Automate Browser Operations with the ChatKit Browser Extension
+sidebar_position: 7
+tags:
+  - ChatKit
+  - Agent
+  - Browser Automation
+---
+
+The ChatKit browser extension lets users run a published XpertAI digital expert from the Chrome side panel or from an overlay injected into the current page. When the expert uses the Xpert backend `browser-automation` middleware, the agent can inspect the current page, click, fill forms, scroll, navigate, and fall back to screenshots plus viewport coordinates for complex pages.
+
+The usual setup is: create and publish a digital expert from the "Client browser automation tools" template in XpertAI, then configure the Chrome extension with the expert's `xpertId`, Xpert API URL, ChatKit frame URL, and credential.
+
+## Important resources
+
+- [ChatKit JavaScript repository](https://github.com/xpert-ai/chatkit-js)
+- [ChatKit browser extension releases](https://github.com/xpert-ai/chatkit-js/releases)
+- [XpertAI platform](https://app.xpertai.cn/)
+- [XpertAI API integration guide](/en/ai/chatkit/sdk/integrate-xpertai-api)
+- [Browser Automation Middleware](/en/ai/middleware/built-in/browser-automation)
+
+## How it works
+
+| Component | Role |
+| --- | --- |
+| Xpert digital expert | Created from the template. Its backend workflow includes the `browser-automation` middleware. |
+| `browser-automation` middleware | Declares `host_page_*` capabilities as ChatKit client tools and feeds tool results back into the model context. |
+| ChatKit browser extension | Renders `xpertai-chatkit` in the Chrome side panel or page overlay, reads extension-local configuration, and handles client tool calls. |
+| Host page automation | Uses Chrome `debugger` and CDP when available for richer snapshots, screenshots, and real mouse or keyboard input. Falls back to a content-script DOM executor when CDP is unavailable. |
+
+The extension provides two surfaces:
+
+- Chrome side panel: useful for ongoing conversations and tasks across pages.
+- Page overlay: injected on demand into the active HTTP(S) tab, either as a Pet launcher or as a full chat panel.
+
+## Prerequisites
+
+Before you start, make sure you have:
+
+- Access to XpertAI with permission to create and publish digital experts.
+- The [ChatKit Chrome extension package](https://github.com/xpert-ai/chatkit-js/releases), or source access so you can build it.
+- An XpertAI AI API URL.
+  - Public cloud default: `https://api.xpertai.cn/api/ai`
+  - For private deployments, use your own API URL.
+- A ChatKit frame URL.
+  - Public cloud default: `https://app.xpertai.cn/chatkit`
+  - For private deployments, use your own ChatKit frontend URL.
+- A normal HTTP(S) target page. Chrome internal pages such as `chrome://`, the Chrome Web Store, extension pages, and other restricted pages cannot host the overlay and cannot be operated by normal host page automation.
+
+<Warning>
+The extension stores `Client Secret / API Key` in `chrome.storage.local`. In production, use a dedicated, least-privilege, rotatable credential. If your deployment supports short-lived `client_secret` values, prefer those over storing a long-lived high-privilege API key in an unmanaged browser.
+</Warning>
+
+## Step 1: Create the digital expert from the template
+
+1. Sign in to [XpertAI](https://app.xpertai.cn/).
+2. Open the template or explore page and search for "Client browser automation tools".
+3. Create a digital expert from that template.
+4. Open the agent orchestration view and confirm that the workflow includes the `Browser Automation` middleware.
+5. If the agent should be allowed to navigate the current page, keep `Allow Navigation` enabled. This exposes the `host_page_navigate` tool.
+6. Adjust the main agent prompt if needed. The default template prompt instructs the agent to help the user operate the browser and to switch to screenshot plus coordinate actions after repeated action failures.
+7. Publish the digital expert.
+8. Copy the published expert's `xpertId`.
+9. Create an access key from the digital expert development interface or workspace API Keys page. See [Development SDK](/docs/ai/agent/development-api) for API key details.
+
+The template configuration file is `xpert--client-browser-automation-tools`. Its key node is a middleware whose provider is `browser-automation`; the template enables `allowNavigation: true` by default.
+
+## Step 2: Install the Chrome extension
+
+If you have a [ChatKit browser extension release package](https://github.com/xpert-ai/chatkit-js/releases), unzip it and load the extension directory in Chrome.
+
+If you build from source, use the [xpert-ai/chatkit-js](https://github.com/xpert-ai/chatkit-js) repository:
+
+```bash
+cd chatkit-js
+pnpm install
+pnpm --filter @xpert-ai/chatkit-browser-extension build
+```
+
+The build output is:
+
+```text
+chatkit-js/packages/browser-extension/dist/chrome
+```
+
+In Chrome, open `chrome://extensions`:
+
+1. Enable Developer mode.
+2. Click Load unpacked.
+3. Select the `dist/chrome` directory.
+4. Pin the Xpert ChatKit extension icon to the toolbar.
+
+The current extension is generated for Chrome Manifest V3. It uses the core permissions `storage`, `sidePanel`, `scripting`, `activeTab`, and `debugger`.
+
+## Step 3: Configure the extension
+
+Click the extension icon, open Options, and fill in these fields:
+
+| Field | Description | Example |
+| --- | --- | --- |
+| ChatKit frame URL | The ChatKit iframe page URL. | `https://app.xpertai.cn/chatkit` |
+| Xpert API URL | The XpertAI AI API URL. | `https://api.xpertai.cn/api/ai` |
+| Xpert ID | The `xpertId` of the published digital expert. | `your-xpert-id` |
+| Client Secret / API Key | Runtime credential used by ChatKit. The extension returns it from `getClientSecret`. | `sk-x-...` or a short-lived secret |
+| Locale | Extension and ChatKit locale. Supports browser default, `en`, and `zh-Hans`. | `en` |
+| Launch mode | Page overlay launch mode. `Pet launcher` starts with the pet entrypoint; `Chat panel` shows the full chat panel immediately. | `Pet launcher` |
+| Color scheme | Light or dark theme. | `Light` |
+| Enable Chrome side panel | Allows opening ChatKit in the Chrome side panel. | Enabled |
+| Enable page overlay | Allows injecting the ChatKit overlay into the current page. | Enabled |
+| Auto launch page pet | Opens the Pet overlay automatically on newly loaded HTTP(S) tabs. Only works in `Pet launcher` mode. | Optional |
+| Overlay width / height | Overlay size. Width range is `320`-`900`; height range is `360`-`1200`. | `420` x `720` |
+| Overlay position | Overlay corner: bottom-right, bottom-left, top-right, or top-left. | Bottom-right |
+| Allow agents to operate the host page | Forwards `host_page_*` tool calls from the agent to the current page. | Enabled |
+
+After saving, the extension popup shows whether the configuration is complete. If `frameUrl`, `apiUrl`, or the credential is missing, ChatKit shows a configuration prompt.
+
+## Step 4: Use it
+
+1. Open a normal HTTP(S) page.
+2. Click the Xpert ChatKit extension icon.
+3. Choose Open side panel, or click Toggle page overlay to open the overlay on the current page.
+4. Ask ChatKit to perform a task, for example:
+
+```text
+Inspect the current page and summarize the main content.
+```
+
+```text
+Find the search box, search for "browser automation", and open the first result.
+```
+
+```text
+Help me fill this form. Use Alice for the name and alice@example.com for the email, then stop before submitting so I can confirm.
+```
+
+In side panel mode, automation targets the current active tab. In page overlay mode, automation targets the page that hosts the overlay.
+
+## Automation capabilities
+
+The `browser-automation` middleware exposes these client tools to the model:
+
+| Tool | Capability |
+| --- | --- |
+| `host_page_snapshot` | Captures the current URL, title, viewport, scroll position, actionable elements, form labels, accessibility summaries, and other structured page state. |
+| `host_page_click` | Clicks by `ref`, `axRef`, role/name, text, CSS selector, or coordinates. |
+| `host_page_fill` | Fills inputs and textareas. |
+| `host_page_press` | Sends keyboard keys such as `Enter`, `Tab`, or `F8`. |
+| `host_page_select` | Selects options in a dropdown. |
+| `host_page_scroll` | Scrolls the page or a target element. |
+| `host_page_navigate` | Navigates to an HTTP(S) URL. Exposed only when middleware `allowNavigation` is enabled. |
+| `host_page_hover` | Hovers over an element. |
+| `host_page_focus` | Focuses an element. |
+| `host_page_pointer` | Performs low-level pointer actions using viewport CSS coordinates. Useful for complex enterprise, SAP/Fiori, or iframe-heavy pages when DOM clicks do not work. |
+| `host_page_screenshot` | Captures a host page screenshot and attaches it as image input for the next model step. Works best through Chrome CDP. |
+| `host_page_wait_for` | Waits for an element to become attached, visible, hidden, or detached. |
+
+The backend also provides a server-side `host_page_wait` tool for waiting 3 to 60 seconds while pages render, animate, navigate, or settle after async work.
+
+Recommended action flow:
+
+1. Start with `host_page_snapshot` to understand the page and identify targets.
+2. Prefer `host_page_fill`, `host_page_press`, and `host_page_select` for clear form fields.
+3. If one click does not change the page, do not repeat the same click. Use `host_page_wait_for`, `host_page_screenshot`, or `host_page_pointer` instead.
+4. Screenshot coordinates are viewport CSS pixels. They are not OS screen coordinates and do not include browser chrome or the ChatKit side panel.
+
+## Troubleshooting
+
+### ChatKit asks me to configure it
+
+Check that `ChatKit frame URL`, `Xpert API URL`, and `Client Secret / API Key` are filled in the extension Options page. Also confirm that the configured `xpertId` belongs to a published digital expert.
+
+### The page overlay does not open
+
+The overlay can only be injected into HTTP(S) pages. Avoid `chrome://`, the Chrome Web Store, PDF viewer pages, extension pages, browser settings pages, and other restricted surfaces.
+
+### The agent cannot click or fill the page
+
+Confirm that `Allow agents to operate the host page` is enabled in Options. If Chrome asks for debugger permission, allow the extension to connect to the current tab. For complex pages, ask the agent to take a screenshot and then use `host_page_pointer` with viewport coordinates instead of repeating DOM clicks.
+
+### A private or local ChatKit frame is blocked by Chrome
+
+Make sure the service behind `frameUrl` allows extension pages to embed it. Do not return `X-Frame-Options` headers that block embedding, and check whether `Content-Security-Policy: frame-ancestors` allows extension usage.
+
+### Auto launch Pet does not work
+
+Make sure all required conditions are true: `Enable page overlay` is enabled, `Auto launch page pet` is enabled, `Launch mode` is `Pet launcher`, the tab is an HTTP(S) page, and the base configuration validates successfully.

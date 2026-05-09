@@ -1,0 +1,96 @@
+---
+title: Browser Automation Middleware
+sidebar_position: 2
+---
+
+Browser Automation lets a ChatKit client operate the browser page that hosts the conversation. It exposes a safe Playwright-style subset of page actions as client tools, so an agent can inspect the current page, click controls, fill forms, scroll, navigate, wait for page state, and use screenshots plus viewport coordinates when DOM targeting is not enough.
+
+The middleware provider name is `browser-automation`.
+
+## When To Use
+
+Use Browser Automation when the agent needs to work with a page open in the user's browser:
+
+- Assist users on web apps, admin consoles, dashboards, or forms.
+- Read page structure before choosing an action.
+- Fill search filters or business forms, then wait for page updates.
+- Operate complex enterprise pages such as SAP/Fiori or iframe-heavy screens.
+- Combine ChatKit with the [ChatKit browser extension](/docs/ai/tutorial/chatkit-browser-extension).
+
+## How It Works
+
+Browser Automation extends the ChatKit client-tool middleware:
+
+1. The middleware declares `host_page_*` tools to the model.
+2. When the model calls one of those tools, ChatKit sends the request to the browser client.
+3. The client performs the page action and returns a tool result.
+4. The middleware emits readable tool-call messages and feeds the result back into the model.
+5. For screenshots, the middleware attaches the captured image to the next model call and includes coordinate mapping hints for `host_page_pointer`.
+
+It also injects a server-side wait tool named `host_page_wait`, useful when a page needs time to render, animate, navigate, or settle after an action.
+
+## Configuration
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `allowNavigation` | `boolean` | `true` | Exposes `host_page_navigate`, allowing the agent to navigate the host page to HTTP(S) URLs. Disable this when the agent should only operate the current page. |
+
+Example:
+
+```json
+{
+  "allowNavigation": true
+}
+```
+
+## Client Requirements
+
+Browser Automation requires a ChatKit client that handles these client tool calls. The Xpert ChatKit browser extension supports this out of the box and can use Chrome DevTools Protocol for richer snapshots, screenshots, and real mouse/keyboard input. Other ChatKit hosts can use the host automation handler from the ChatKit JavaScript repository.
+
+If the client does not implement a tool, the model may see a failed tool call or be unable to complete the browser task.
+
+## Available Tools
+
+| Tool | What It Does |
+| --- | --- |
+| `host_page_snapshot` | Captures URL, title, viewport, scroll, page state, actionable elements, form labels, nearby text, accessibility summaries, hit-test details, and client capabilities. |
+| `host_page_click` | Clicks a target using `ref`, `axRef`, role/name, text, test ID, selector, or viewport coordinates. |
+| `host_page_fill` | Fills text inputs, textareas, or contenteditable elements. |
+| `host_page_press` | Presses a keyboard key such as `Enter`, `Escape`, `Tab`, or `F8`. |
+| `host_page_select` | Selects one or more values in a select element. |
+| `host_page_scroll` | Scrolls the page or a scrollable target element. |
+| `host_page_navigate` | Navigates the page to an HTTP(S) URL when `allowNavigation` is enabled. |
+| `host_page_hover` | Moves the pointer over a target. |
+| `host_page_focus` | Focuses a target. |
+| `host_page_pointer` | Performs low-level pointer actions using viewport CSS coordinates. |
+| `host_page_screenshot` | Captures a screenshot when the client supports screenshots and attaches it to the next model call. |
+| `host_page_wait_for` | Waits on the client for a target to become attached, visible, hidden, or detached. |
+| `host_page_wait` | Waits on the server for 3 to 60 seconds. |
+
+## Recommended Agent Behavior
+
+For reliable browser tasks, guide the agent to follow this pattern:
+
+1. Start with `host_page_snapshot` to understand the page and collect stable refs.
+2. Prefer structured actions such as `host_page_fill`, `host_page_select`, and `host_page_press` for forms.
+3. If one DOM/ref click does not change the page, do not repeat the same click. Use `host_page_screenshot` and then `host_page_pointer`.
+4. Use `host_page_wait_for` or `host_page_wait` after navigation, animation, SPA refresh, or slow backend requests.
+5. Treat pointer coordinates as viewport CSS pixels. They are not OS screen coordinates and do not include browser chrome or ChatKit sidebars.
+
+## Screenshot Handling
+
+When `host_page_screenshot` returns image data, the middleware compacts the tool message and appends a new model input containing the screenshot. If the screenshot includes viewport and image sizes, the middleware also gives the model a formula for converting image coordinates into `host_page_pointer` CSS coordinates:
+
+```text
+cssX = imageX / imageWidth * viewportWidth
+cssY = imageY / imageHeight * viewportHeight
+```
+
+This is especially useful for pages whose visible controls are hard to describe through DOM or accessibility snapshots.
+
+## Troubleshooting
+
+- **Navigation tool is missing**: Check whether `allowNavigation` is disabled.
+- **The agent cannot operate the page**: Confirm the ChatKit client implements host page automation and that the target page is an HTTP(S) page.
+- **Clicks repeat without progress**: Ask the agent to switch to screenshot plus pointer coordinates after the first unchanged click.
+- **Coordinates land in the wrong place**: Confirm the coordinates are viewport CSS pixels, not screen pixels.

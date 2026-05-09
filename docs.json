@@ -321,6 +321,9 @@
                     "group": "Built In",
                     "pages": [
                       "en/ai/middleware/built-in/index",
+                      "en/ai/middleware/built-in/browser-automation",
+                      "en/ai/middleware/built-in/ralph-loop",
+                      "en/ai/middleware/built-in/human-in-the-loop",
                       "en/ai/middleware/built-in/sensitive-filter",
                       "en/ai/middleware/built-in/agent-behavior-monitor"
                     ]
@@ -404,6 +407,7 @@
                   {
                     "group": "Default",
                     "pages": [
+                      "en/ai/tutorial/chatkit-browser-extension",
                       "en/ai/tutorial/workflow-and-agent",
                       "en/ai/tutorial/wechat-work-integration",
                       "en/ai/tutorial/integrate-with-mcp-dify",
@@ -996,6 +1000,9 @@
                     "group": "内置",
                     "pages": [
                       "zh-Hans/ai/middleware/built-in/index",
+                      "zh-Hans/ai/middleware/built-in/browser-automation",
+                      "zh-Hans/ai/middleware/built-in/ralph-loop",
+                      "zh-Hans/ai/middleware/built-in/human-in-the-loop",
                       "zh-Hans/ai/middleware/built-in/sensitive-filter",
                       "zh-Hans/ai/middleware/built-in/agent-behavior-monitor"
                     ]
@@ -1086,12 +1093,14 @@
                   {
                     "group": "默认",
                     "pages": [
+                      "zh-Hans/ai/tutorial/chatkit-browser-extension",
                       "zh-Hans/ai/tutorial/workflow-and-agent",
                       "zh-Hans/ai/tutorial/wechat-work-integration",
                       "zh-Hans/ai/tutorial/integrate-with-mcp-dify",
                       "zh-Hans/ai/tutorial/build-agentic-chatbi-from-scratch",
                       "zh-Hans/ai/tutorial/project-group-single-vs-multi-agent",
-                      "zh-Hans/ai/tutorial/agentic-bi-end-to-end-analysis"
+                      "zh-Hans/ai/tutorial/agentic-bi-end-to-end-analysis",
+                      "zh-Hans/ai/tutorial/tutorial"
                     ]
                   }
                 ]

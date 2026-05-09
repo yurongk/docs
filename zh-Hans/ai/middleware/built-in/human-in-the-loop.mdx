@@ -1,0 +1,113 @@
+---
+title: 人机协同中间件
+sidebar_position: 4
+---
+
+人机协同中间件为选定的智能体工具调用增加人工审核。当模型提出一个被配置为需要审核的工具动作时，中间件会暂停执行，等待人工做出决策，然后批准、编辑或拒绝该工具调用。
+
+中间件 provider 名称是 `HumanInTheLoopMiddleware`。
+
+## 适用场景
+
+当工具调用具有副作用，或需要人工判断时，可以使用人机协同中间件：
+
+- 发送邮件、消息、工单或通知。
+- 写文件、更新数据库或修改业务记录。
+- 执行 SQL、脚本、Shell 命令或浏览器动作。
+- 调用付费 API 或外部系统。
+- 任何需要在执行前允许拒绝或修改参数的动作。
+
+## 工作方式
+
+1. 模型返回一个或多个工具调用。
+2. 中间件在模型返回后检查最新 AI 消息。
+3. `interruptOn` 中配置的工具调用会被合并成一次审核请求。
+4. 未配置的工具调用会自动批准。
+5. 人工为每个被中断的工具调用返回一个决策。
+6. 被批准和被编辑的调用会继续保留为待执行工具调用。
+7. 被拒绝的调用会生成一个错误状态的合成 `ToolMessage`。如果所有待执行调用都被拒绝，中间件会跳回模型，让模型根据拒绝原因继续回应。
+
+## 配置项
+
+| 字段 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `interruptOn` | `Record<string, boolean \| InterruptOnConfig>` | 无 | 工具名称到审核行为的映射。不配置时中间件不生效。没有配置条目的工具默认自动批准。 |
+| `descriptionPrefix` | `string` | `Tool execution requires approval` | 当工具未提供自定义描述时，用于构造面向人工审核说明的前缀。 |
+
+### `interruptOn` 取值
+
+| 取值 | 行为 |
+| --- | --- |
+| `true` | 暂停审核，并允许 `approve`、`edit`、`reject` 三种决策。 |
+| `false` | 自动批准该工具调用，与不配置该工具等价。 |
+| `InterruptOnConfig` | 自定义允许的决策、审核描述和可选编辑参数 Schema。 |
+
+### `InterruptOnConfig`
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `allowedDecisions` | `("approve" \| "edit" \| "reject")[]` | 该工具允许的人工决策。 |
+| `description` | `string` 或函数 | 可选自定义审核说明。缺省时使用 `descriptionPrefix`、工具名称和 JSON 参数生成描述。 |
+| `argsSchema` | `Record<string, any>` | 当允许 `edit` 时，用于约束编辑后参数的可选 JSON Schema。 |
+
+## 决策类型
+
+| 决策 | 结果 |
+| --- | --- |
+| `approve` | 保留原始工具名称和参数，工具正常执行。 |
+| `edit` | 用审核后的 `editedAction` 替换工具名称和参数，同时保留原工具调用 ID。 |
+| `reject` | 生成错误状态工具消息，模型会收到拒绝原因并决定下一步。 |
+
+## 配置示例
+
+```json
+{
+  "interruptOn": {
+    "send_email": true,
+    "run_sql": {
+      "allowedDecisions": ["approve", "reject"],
+      "description": "执行前请审核这条 SQL。"
+    },
+    "update_customer": {
+      "allowedDecisions": ["approve", "edit", "reject"],
+      "argsSchema": {
+        "type": "object",
+        "properties": {
+          "customerId": { "type": "string" },
+          "status": { "type": "string" }
+        },
+        "required": ["customerId", "status"]
+      }
+    }
+  },
+  "descriptionPrefix": "请在工具运行前审核本次调用"
+}
+```
+
+## 审核请求与响应
+
+中间件会发送一个 HITL 请求，其中包含：
+
+- `actionRequests`：给审核者看的工具名称、参数和描述。
+- `reviewConfigs`：每个动作允许的决策，以及可选参数 Schema。
+
+返回值必须包含 `decisions` 数组，并且长度必须与被中断的工具调用数量一致。数量不一致会被视为错误。
+
+## 运行时覆盖
+
+运行时会把中间件保存配置和 `runtime.context` 合并。高级集成可以在单次运行中提供或覆盖 `interruptOn` 策略，而不必修改已保存的中间件节点。
+
+## 最佳实践
+
+- 只为确实需要审核的工具配置 HITL。未配置工具会自动批准。
+- 对高价值操作开启 `edit`，让审核者可以修正参数，而不是重新发起对话。
+- 为高风险工具提供简短明确的自定义描述。
+- 当编辑后的参数必须符合固定结构时，配置 `argsSchema`。
+- 可与浏览器自动化或沙箱工具组合，在动作进入用户环境前进行审核。
+
+## 排障建议
+
+- **没有出现审核提示**：确认已配置 `interruptOn`，并且工具名称与实际 tool call 名称完全一致。
+- **工具未经审核直接执行**：没有出现在 `interruptOn` 中的工具会自动批准。
+- **编辑失败**：编辑后的 action 必须包含字符串类型 `name` 和对象类型 `args`。
+- **拒绝后运行没有结束**：拒绝会作为错误工具消息返回给模型，模型可能会继续给出更安全的后续回应。

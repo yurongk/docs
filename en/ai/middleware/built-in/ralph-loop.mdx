@@ -1,0 +1,101 @@
+---
+title: Ralph Loop Middleware
+sidebar_position: 3
+---
+
+Ralph Loop automatically retries an agent from a clean message context until the model emits a completion promise. It is designed for tasks where the model may stop early or produce a partial final answer, and you want a bounded self-retry loop before returning to the user.
+
+The middleware provider name is `ralph-loop`.
+
+## Completion Promise
+
+Ralph Loop adds a system rule telling the model to include this marker at the end of the final answer when the task is fully complete:
+
+```text
+<promise>DONE</promise>
+```
+
+If the latest AI message contains that marker, the middleware removes it from the visible answer and resets Ralph Loop state. If the latest AI message does not contain the marker and there are no pending tool calls, Ralph Loop retries the model from a clean message history.
+
+## When To Use
+
+Use Ralph Loop when you want a bounded retry mechanism for final-answer completeness:
+
+- Long single-agent tasks that often stop before completion.
+- Writing, migration, research, or analysis tasks where the agent should keep working until it explicitly says it is done.
+- Workflows where a clean retry is preferable to continuing with a cluttered message history.
+- Agents that may call tools during the work but should only finish after producing the completion promise.
+
+Do not use Ralph Loop as a task-state manager. The current implementation does not inject task tools and does not maintain `TASKS` or `progress` state. It only tracks the retry iteration and the original user task.
+
+## How It Works
+
+| Hook | Behavior |
+| --- | --- |
+| `beforeAgent` | Stores the original human task and resets `ralphLoopIteration` to `0`. |
+| `wrapModelCall` | Appends the completion-promise rule to the system message. During retries, it sends only the retry prompt instead of the full previous message history. |
+| `afterModel` | Checks the latest AI message. Tool calls are allowed to continue. A completion promise ends the loop. Missing promise triggers a clean retry until `maxIterations` is reached. |
+
+On each retry, Ralph Loop removes all previous messages and sends a new human message like:
+
+```text
+[RALPH LOOP - ITERATION 1/20]
+
+Your previous attempt did not output the completion promise, so this is a fresh retry with a clean message history.
+...
+Original task:
+...
+```
+
+If the original message contained structured content parts, Ralph Loop preserves those parts after the retry text.
+
+## Configuration
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `maxIterations` | `number` | `20` | Maximum number of automatic clean-context retries. Must be at least `1`. |
+
+Example:
+
+```json
+{
+  "maxIterations": 8
+}
+```
+
+## Runtime State
+
+Ralph Loop stores these state fields:
+
+| Field | Description |
+| --- | --- |
+| `ralphLoopIteration` | Current retry count. |
+| `ralphLoopOriginalHumanContent` | Original human message content or structured message parts. |
+| `ralphLoopOriginalTaskText` | Original plain-text task extracted from runtime human input when available. |
+
+These fields are reset after successful completion or after the retry limit is reached.
+
+## Retry Limit Behavior
+
+When `maxIterations` is reached without the completion promise, Ralph Loop stops retrying and appends a notice to the latest AI answer:
+
+```text
+Ralph Loop stopped after reaching <maxIterations> automatic retries without receiving the completion promise.
+```
+
+The answer is then returned instead of continuing indefinitely.
+
+## Best Practices
+
+- Use it on agents where final-answer completeness matters more than latency.
+- Keep `maxIterations` conservative. Each retry is another model call.
+- Make the agent prompt explicit about what "fully complete" means.
+- Combine with tool and browser automation middleware when the agent needs to act before producing the final promise.
+- Avoid adding your own conflicting final-answer marker in the system prompt.
+
+## Troubleshooting
+
+- **The final answer shows no `<promise>DONE</promise>`**: This is expected. The middleware strips the marker before returning the answer.
+- **The agent retries too often**: Lower `maxIterations` or make the main prompt clearer about completion criteria.
+- **The agent stops with a retry-limit notice**: The model never emitted the completion promise. Inspect the previous answer to see what remained incomplete or whether the prompt is too ambiguous.
+- **Tool calls are not retried immediately**: Ralph Loop waits for tool execution to finish. It only evaluates completion when the latest AI message has no pending tool calls.
