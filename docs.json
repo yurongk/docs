@@ -141,6 +141,12 @@
                     ]
                   },
                   {
+                    "group": "Handoff",
+                    "pages": [
+                      "en/ai/agent/handoff/agent-chat-handoff-architecture"
+                    ]
+                  },
+                  {
                     "group": "Sandbox",
                     "pages": [
                       "en/ai/agent/sandbox/index"
@@ -817,6 +823,12 @@
                       "zh-Hans/ai/agent/chat-channels",
                       "zh-Hans/ai/agent/supervised-architecture",
                       "zh-Hans/ai/agent/swarm-architecture"
+                    ]
+                  },
+                  {
+                    "group": "Handoff",
+                    "pages": [
+                      "zh-Hans/ai/agent/handoff/agent-chat-handoff-architecture"
                     ]
                   },
                   {
