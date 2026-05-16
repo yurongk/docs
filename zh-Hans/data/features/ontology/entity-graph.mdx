@@ -1,0 +1,85 @@
+---
+title: 实体、关系、属性图谱
+description: UOSE图谱如何表达不同资源中的业务对象和技术对象。
+---
+
+实体图谱是 UOSE系统的可视化语义结果。它把外部资源中的对象、关系和属性以统一图结构展示，让用户和 Agent 都可以围绕对象理解上下文。
+
+## 图谱基本结构
+
+图谱由三部分组成：
+
+- 节点：实体实例，例如指标、Cube、数据库表、SAP Entity Set、知识实体。
+- 边：关系实例，例如包含、引用、指向、关联、导航。
+- 属性：节点或边上的结构化信息，例如字段定义、查询能力、证据样本、状态和版本。
+
+图谱不是简单的血缘图。它同时表达业务语义、技术结构和执行上下文。
+
+## 不同资源的图谱形态
+
+语义模型通常包含：
+
+- `semantic_model`
+- `semantic_cube`
+- `semantic_indicator`
+- `semantic_measure`
+- `semantic_dimension`
+
+SAP OData 通常包含：
+
+- `sap_odata_service`
+- `sap_odata_entity_type`
+- `sap_odata_entity_set`
+- `sap_odata_operation`
+
+Knowledge 通常包含：
+
+- `knowledgebase`
+- `knowledge_entity`
+
+Xpert 数据库通常包含：
+
+- `database_source`
+- `database_namespace`
+- `database_table`
+- `database_column`
+- `database_constraint`
+- `database_index`
+
+这些资源类型虽然来源不同，但都被投影为统一实体和关系列表。
+
+## 属性详情
+
+属性是图谱可执行性的关键。例如：
+
+- `analysis_contract` 告诉系统如何把指标或 Cube 编译为事实查询。
+- `query_capabilities` 告诉系统 OData Entity Set 支持哪些查询选项。
+- `key_schema` 告诉系统如何读取单个 OData 实体。
+- `properties` 告诉系统 OData Entity Type 的字段定义。
+- `connection_summary` 只保留数据库连接的非敏感摘要。
+- `evidence_samples` 说明知识实体来自哪些文档片段。
+
+查看属性时，应关注结构化字段是否完整，而不只是节点是否存在。
+
+## 一跳邻域
+
+Agent 最常用的是一跳邻域。它能回答：
+
+- 当前对象属于哪个上级对象。
+- 当前对象包含哪些可用字段或维度。
+- 当前对象指向哪个实体类型。
+- 当前对象有哪些相关知识实体。
+- 当前对象可执行哪些 affordances。
+
+`getEntityNeighborhood` 会返回关系摘要和关联实体的完整属性。Agent 可以直接根据邻域生成计划，而不需要一次性读取全图。
+
+## 图谱验收
+
+资源同步后，建议按以下方式验收图谱：
+
+1. 检查实体类型是否符合资源预期。
+2. 检查核心关系是否存在，例如 model 到 cube、entity set 到 entity type、table 到 column。
+3. 检查关键属性是否完整，例如 `analysis_contract`、`properties`、`key_schema`。
+4. 检查节点数量是否异常过少或过多。
+5. 对一个典型对象执行 action discovery，确认动作能被发现或给出明确拒绝原因。
+

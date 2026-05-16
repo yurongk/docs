@@ -1,0 +1,108 @@
+---
+title: 语义分析最佳实践
+description: 使用 语义模型资源完成指标趋势和 Cube 切片分析的推荐流程。
+---
+
+语义分析是 UOSE系统最典型的只读执行场景。它把用户的自然语言分析需求映射到语义模型对象，再通过受控动作回源查询事实数据。
+
+## 适用场景
+
+适合使用语义分析流程的问题包括：
+
+- 查询某个指标最近一段时间的趋势。
+- 按地区、产品、门店等维度查看 Cube 切片。
+- 对指标做同比、环比或前期比较。
+- 查看某个 Cube 有哪些可分析维度和度量。
+- 解释为什么某个指标当前无法查询。
+
+## 推荐流程
+
+```text
+queryEntities -> getEntityNeighborhood -> discoverActions -> simulateAction -> executeAction -> getAuditTrace
+```
+
+这条流程适用于 indicator 和 cube 两类目标。
+
+## 第一步：定位对象
+
+先通过 `queryEntities` 查询目标对象。对于指标问题，优先限定：
+
+```json
+{
+  "resourceId": "inner-bi",
+  "intent": "查询面包交易量最近 7 天每日变化",
+  "scope": {
+    "entityTypeCode": "semantic_indicator",
+    "query": "面包交易量",
+    "limit": 5
+  }
+}
+```
+
+如果返回多个候选，不要直接执行。应让用户确认，或增加模型、Cube、业务域等限制。
+
+## 第二步：读取邻域
+
+通过 `getEntityNeighborhood` 查看指标所属 Cube、关联度量、可用维度和 `analysis_contract`。重点确认：
+
+- indicator 是否挂到 cube。
+- cube 是否存在 measures 和 dimensions。
+- `analysis_contract` 是否包含 metricRefs。
+- 是否有默认时间维度。
+- 可选 granularity 是否满足用户问题。
+
+## 第三步：发现动作
+
+对 indicator 通常期望发现：
+
+- `semantic_model.query_metric_snapshot`
+
+对 cube 通常期望发现：
+
+- `semantic_model.query_cube_slice`
+
+如果 action 不在 allowed actions 中，查看 denied actions 的 stage 和 reasonCode。常见原因包括 `analysis_contract_missing`、`query_endpoint_missing` 或策略拒绝。
+
+## 第四步：模拟
+
+执行前先模拟。指标趋势示例：
+
+```json
+{
+  "resourceId": "inner-bi",
+  "actionTypeCode": "semantic_model.query_metric_snapshot",
+  "target": {
+    "entityRef": "面包交易量",
+    "entityTypeCode": "semantic_indicator"
+  },
+  "params": {
+    "window": {
+      "from": "2026-03-15T00:00:00.000Z",
+      "to": "2026-03-21T23:59:59.999Z"
+    },
+    "granularity": "day"
+  }
+}
+```
+
+模拟通过后再执行。模拟失败时应优先修正参数或资源配置，不要让 Agent 换一种未经验证的动作。
+
+## 第五步：执行与解释
+
+执行结果重点看：
+
+- `effect.series` 或 `effect.rows`。
+- `effect.summary`。
+- `effect.appliedPlan`。
+- `auditRef`。
+- `policyDecision`。
+
+面向用户解释结果时，应说明使用了哪个指标或 Cube、时间窗、粒度、过滤条件和数据来源。
+
+## 常见问题
+
+- 指标能查到但不能执行：检查 `analysis_contract`。
+- Cube 切片参数报错：检查 dimensions 和 measures 是否在 contract 中。
+- 时间窗不生效：统一使用 `window.from` 和 `window.to`。
+- 结果为空：检查业务过滤条件和源系统事实数据，而不只检查 UOSE 图谱。
+

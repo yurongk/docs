@@ -1,0 +1,69 @@
+---
+title: Agent Tools
+description: Standard tool interfaces provided by the UOSE system for Agents, MCP, and ChatKit.
+---
+
+Agent Tools are the stable execution interfaces that the UOSE system provides to agents. They wrap resources, entities, relationships, actions, and governance capabilities into a fixed set of tools so Agents can complete tasks within a controlled semantic space.
+
+## Tool List
+
+Core tools include:
+
+- `queryEntities`: query candidate entities by intent and scope.
+- `getEntityNeighborhood`: get the one-hop neighborhood of the target entity and attributes of related entities.
+- `queryOntologySchema`: view entity types, relation types, and action types of a resource.
+- `queryRdf`: execute RDF debugging queries when allowed.
+- `discoverActions`: discover actions executable on the target object.
+- `simulateAction`: simulate and validate an action before execution.
+- `executeAction`: execute an action that passed validation.
+- `getAuditTrace`: view the audit trace of a task.
+
+These tools are exposed through REST APIs and can also be exposed to business Assistants by an MCP provider.
+
+## Recommended Call Order
+
+Agents should use this main path:
+
+```text
+queryEntities -> getEntityNeighborhood/queryOntologySchema -> discoverActions -> simulateAction -> executeAction -> getAuditTrace
+```
+
+This path has these benefits:
+
+- Locate the object first, then read context.
+- Discover actions first, then construct parameters.
+- Simulate and validate first, then execute for real.
+- Review audit evidence after execution.
+
+Agents should not skip `discoverActions` and execute directly, and should not choose by themselves when the entity is not unique.
+
+## Target Selection
+
+Action tools use target to select objects. Prefer reusing the `preferredTarget` returned by the previous step, which contains:
+
+- `entityRef`
+- `entityTypeCode`
+
+Use `entityId` only when copying the full UOSE UUID. Do not treat ontology ID fragments, short hashes of external keys, or display names as `entityId`.
+
+## MCP Access
+
+The MCP provider exposes UOSE Agent Tools as constrained tools and derives these values from trusted headers:
+
+- tenant.
+- organization.
+- actor identity.
+- assistant identity.
+- current business user token.
+
+For resources that use `current_user_oidc`, MCP calls must forward the business user token, for example through `x-uose-actor-token`. Otherwise, although the Agent has an MCP server token, it cannot access BI or xpert-pro source systems on behalf of the user.
+
+## Tool Output
+
+Tool outputs are kept as Agent-consumable as possible:
+
+- `discoverActions` returns allowed actions, denied actions, `reasonCode`, and input schema.
+- `executeAction` returns status, executionId, policyDecision, auditRef, and effect.
+- MCP output omits some large fields, such as summary, appliedPlan, and audit, and indicates them through omitted fields.
+
+Agents should plan the next step from structured fields instead of parsing natural language logs.

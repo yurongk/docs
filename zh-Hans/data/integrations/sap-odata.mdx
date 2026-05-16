@@ -1,0 +1,88 @@
+---
+title: SAP OData API 资源
+description: 将 SAP OData V4 服务同步为本体对象，并支持受控读写动作。
+---
+
+`sap_odata_api` 资源用于接入 SAP OData V4 服务。UOSE 会从 SAP catalog 和 `$metadata` 中发现 service、Entity Type、Entity Set 和 Operation，并把它们转化为可搜索、可发现动作的本体对象。
+
+## 支持范围
+
+当前支持：
+
+- SAP OData V4 metadata。
+- Catalog V4 优先发现，必要时回退到 Gateway V2 catalog。
+- Basic Auth 和 static bearer。
+- 查询 collection 和单实体。
+- create entity、update entity。
+- unbound action import 和 function import。
+- CSRF token 获取配置。
+- service root allowlist 缩小同步范围。
+
+当前不支持：
+
+- OData V2 metadata 作为执行目标。
+- `$batch`。
+- bound action 或 bound function。
+
+## 同步对象
+
+同步后通常包含：
+
+- `sap_odata_service`：服务根。
+- `sap_odata_entity_type`：EDMX 中的结构化类型。
+- `sap_odata_entity_set`：面向执行的集合入口。
+- `sap_odata_operation`：unbound action/function import。
+
+关键关系包括：
+
+- `sap_odata_service_has_entity_set`
+- `sap_odata_service_has_entity_type`
+- `sap_odata_entity_set_targets_entity_type`
+- `sap_odata_entity_type_navigates_to_entity_type`
+- `sap_odata_service_exposes_operation`
+
+Agent 应通过 Entity Set 进入执行，并沿关系读取 Entity Type 的字段定义。
+
+## Capabilities
+
+常用 capabilities 包括：
+
+- `protocolVersion`：固定为 v4。
+- `catalogV4Path`、`catalogV2Path`：catalog 发现路径。
+- `metadataPath`：通常为 `$metadata`。
+- `serviceAllowlist` 或 `serviceRootAllowlist`：限制同步服务。
+- `entitySetAllowlist`：限制同步 Entity Set。
+- `operationAllowlist`：限制可执行 operation。
+- `mutationEntitySets`：在 metadata 缺少写能力声明时，手动允许写入的 Entity Set。
+- `csrf`：写请求前的 CSRF token 获取方式。
+
+## Actions
+
+常用动作包括：
+
+- `sap_odata.read_collection`
+- `sap_odata.read_entity`
+- `sap_odata.create_entity`
+- `sap_odata.update_entity`
+- `sap_odata.invoke_operation`
+
+读动作风险较低。创建、更新和 operation 调用风险较高，生产环境建议通过策略要求审批。
+
+## 推荐使用方式
+
+1. 创建 SAP Secret，填写系统 baseUrl、认证方式、sap-client 和 TLS 配置。
+2. 注册 `sap_odata_api` resource。
+3. 通过 service discovery 选择要同步的 service。
+4. 执行 full sync。
+5. 查询 `sap_odata_entity_set`。
+6. 查看邻域，确认目标 Entity Type、字段、key schema 和 query capabilities。
+7. 先 `discoverActions`，再 `simulateAction`。
+8. 对写动作查看预期效果和审批要求后执行。
+
+## 排障提示
+
+- 如果 sync 报 OData V4 metadata 错误，检查目标服务是否实际为 V2。
+- 如果发现不到 create 或 update，检查 metadata restrictions 和 `mutationEntitySets`。
+- 如果写请求失败，检查 CSRF、ETag 和源系统权限。
+- 如果字段不存在，优先查看关联 Entity Type 的 `properties`，不要只看 Entity Set 摘要。
+

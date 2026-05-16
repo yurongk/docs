@@ -1,0 +1,82 @@
+---
+title: SAP OData Operation Examples
+description: Use UOSE to read, create, update, and call operations on SAP OData Entity Sets.
+---
+
+The key in SAP OData scenarios is ontology-first. Agents should not directly compose OData URLs. They should first locate Entity Sets in the UOSE ontology, read related Entity Types, and then execute through controlled actions.
+
+## Reading Collections
+
+Suitable questions include:
+
+- Query recently created sales orders.
+- View customers under an organization.
+- Filter business partners by fields.
+
+Recommended flow:
+
+1. Use `queryEntities` to search `sap_odata_entity_set`.
+2. Use `getEntityNeighborhood` to inspect `properties`, `key_schema`, and `query_capabilities`.
+3. Use `discoverActions` to confirm `sap_odata.read_collection` is available.
+4. Use `simulateAction` to validate select, expand, filter, and top.
+5. Use `executeAction` to read.
+
+Parameter example:
+
+```json
+{
+  "queryOptions": {
+    "select": ["SalesOrder", "SalesOrganization", "SoldToParty"],
+    "filter": "SalesOrganization eq '1010'",
+    "top": 10
+  }
+}
+```
+
+## Reading a Single Entity
+
+Reading a single entity requires a key. The source of truth for keys is the Entity Set's `key_schema` or key properties of the related Entity Type.
+
+Ask the Agent to confirm key fields in the neighborhood first, rather than guessing from display names.
+
+## Creating Entities
+
+The create action is usually `sap_odata.create_entity`. Before execution, confirm that:
+
+- The Entity Set allows create.
+- `mutationEntitySets` or metadata restrictions allow it.
+- Payload fields exist in Entity Type properties.
+- The source system user has write permission.
+- Policy does not deny it, or approval has passed.
+
+In production, configure create actions as require approval and require approvers to review expected effect.
+
+## Updating Entities
+
+The update action is usually `sap_odata.update_entity`. Before execution, confirm that:
+
+- The key is complete.
+- Fields are updatable.
+- If the source system requires ETag, concurrency is handled correctly.
+- The payload does not contain read-only fields.
+- Policy and approval have passed.
+
+When updates fail, first check source system permissions, CSRF token, ETag, and field constraints.
+
+## Operation Calls
+
+`sap_odata.invoke_operation` is used for unbound action imports or function imports. It is riskier than normal reads because it may trigger business side effects.
+
+Recommendations:
+
+- Configure it as an approval action by default.
+- Make parameters and expected effect explicit in `simulateAction`.
+- Keep operation name, parameter summary, and source system response summary in audits.
+
+## Practical Rules
+
+- Use Entity Type properties as the source of truth for read fields.
+- Always run `discoverActions` before executing actions.
+- Write actions must go through policy governance.
+- Do not put SAP passwords or tokens in capabilities.
+- If service discovery returns too much, use service root allowlist to narrow the scope.

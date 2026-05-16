@@ -1,0 +1,74 @@
+---
+title: 同步任务与死信事件
+description: UOSE资源同步、异步队列、重试清理和异常排查机制。
+---
+
+同步任务负责把外部资源元数据拉入 UOSE系统，并发布为 ontology snapshot 与实体关系投影。同步成功后，资源才具备可搜索、可分析、可执行的语义上下文。
+
+## 同步模式
+
+UOSE 支持两类同步模式：
+
+- incremental：基于当前资源状态做增量 upsert。
+- full：先清空当前资源已同步的实体、关系和动作实例，再重新拉取。
+
+同步请求还可以携带 cursor 类型：
+
+- time：按时间游标。
+- version：按版本游标。
+- event_offset：按事件偏移。
+
+不同 adapter 对游标的支持程度不同。对于首版资源接入，full sync 通常是最稳定的初始化方式。
+
+## 同步链路
+
+一次同步通常经过：
+
+1. 读取 resource 和 capabilities。
+2. 解析 `connectionRef`。
+3. 调用对应 adapter 的 `pullSemanticMetadata`。
+4. 把外部元数据归一化为 canonical ontology IR。
+5. 发布 ontology snapshot。
+6. 投影到实体、关系和动作实例表。
+7. 更新 sync checkpoint。
+8. 记录失败事件或同步结果。
+
+如果开启 RDF sidecar，发布过程还会把本体图写入 RDF 图数据库，支持 schema、邻域和 SPARQL 查询。
+
+## 异步队列
+
+对耗时或大规模资源，UOSE 提供基于 Redis 的 resource sync queue：
+
+- 注册资源时自动排入首次同步。
+- 手动提交 sync job。
+- 对相同 `resourceId + mode + cursorType` 做去重。
+- 展示 waiting、active、completed、failed 等状态。
+- 支持失败重试、取消进行中任务、清理历史任务。
+- 通过 progress 展示当前处理阶段和服务进度。
+
+队列适合 SAP OData 多服务同步、数据库大 schema 同步等场景。
+
+## Dead-letter
+
+当同步过程中出现无法立即恢复的错误，系统会记录 dead-letter event。它用于保留失败上下文，避免错误只停留在日志中。
+
+常见 dead-letter 场景包括：
+
+- 连接配置错误。
+- 源系统认证失败。
+- SAP OData metadata 不是 V4。
+- Knowledge GraphRAG 未 ready。
+- 上游 API 返回不可解析结构。
+- 元数据过大并触发截断或限制。
+
+处理方式通常是：查看 event payload、修正 Secret 或 capabilities、重新触发同步。
+
+## 最佳实践
+
+- 初次接入使用 full sync，验证本体图谱后再切换到增量策略。
+- 对 SAP OData 使用 service root allowlist 缩小同步范围。
+- 对数据库设置 `maxTables` 和 `maxColumns`，避免一次同步过大。
+- 对知识图谱设置 `maxRelations` 和 mention 样本数，保持上下文可控。
+- 对失败 job 优先查看 failedReason 和 dead-letter，再决定 retry。
+- 每次重大 capabilities 调整后执行一次 full sync，以避免旧投影残留。
+

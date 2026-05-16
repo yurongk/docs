@@ -1,0 +1,95 @@
+---
+title: Action Discovery, Simulation, and Execution
+description: The complete control flow for UOSE actions from discovery to real execution.
+---
+
+Actions are how the UOSE system connects ontology objects to real system capabilities. An action describes the target entity type, input schema, risk level, whether approval is required, idempotency requirements, and execution effects.
+
+## Action Sources
+
+Actions mainly come from adapter manifests. A manifest defines:
+
+- action code.
+- action name and description.
+- target entity types.
+- input schema and input hints.
+- risk level.
+- discovery mode.
+- whether approval is required.
+- whether idempotency is required.
+- whether expected effect is required.
+- effects.
+
+After sync publishing, these actions become ontology affordances and serve action discovery in instance projection.
+
+## Discover Actions
+
+`discoverActions` determines what the target object can do right now. It combines:
+
+- manifest and ontology affordances.
+- target entity type.
+- discovery mode.
+- policy binding.
+- runtime readiness.
+- Agent candidate action allowlist.
+
+The result contains allowed actions and denied actions. Denied actions carry `reasonCode` and stage to help locate problems.
+
+Common stages:
+
+- discovery: the action itself does not apply to the target.
+- policy: policy denies the action or requires approval.
+- runtime: resource runtime conditions are not met.
+- planning: the plan or parameters cannot be generated.
+
+## Simulate Action
+
+`simulateAction` is the safety gate before execution. It does not trigger real backend writes or fact execution. Instead, it validates:
+
+- Whether the target object can be uniquely resolved.
+- Whether the action supports the target entity type.
+- Whether parameters match the input schema.
+- Whether the resource connection can be resolved.
+- Whether required runtime contracts exist.
+- Whether policy allows or requires approval.
+- Whether the adapter itself allows the action.
+
+For low-risk query actions, execution can usually proceed after simulation passes. For high-risk actions, simulation may return `NEEDS_APPROVAL`.
+
+## Execute Action
+
+`executeAction` actually calls the adapter. The execution flow includes:
+
+1. Resolve resource and target.
+2. Validate the action contract.
+3. Evaluate policy.
+4. Check whether the approval request matches.
+5. Resolve connection credentials.
+6. Handle cache or idempotency requirements.
+7. Call the adapter.
+8. Generate visualization events or execution effects.
+9. Write audit records.
+
+Write operations should provide `idempotencyKey` and `expectedEffect`, especially when the manifest marks them as required.
+
+## Cache and Idempotency
+
+Read actions can use query cache to avoid repeated queries. Cache keys are usually based on:
+
+- resourceId.
+- snapshotId.
+- actionTypeCode.
+- target entity.
+- normalized parameters or applied plan.
+
+Write actions should rely on idempotency keys and source-system concurrency control. UOSE should not pretend a write succeeded through caching.
+
+## Common Rejection Reasons
+
+- `ENTITY_NOT_UNIQUE`: entity reference is not unique.
+- `target_entity_type_not_supported`: the action does not support the target type.
+- `analysis_contract_missing`: the semantic model lacks a query contract.
+- `query_endpoint_missing`: the resource lacks a query endpoint.
+- `discovery_mode_manual_only`: the action cannot be planned automatically.
+- `policy_binding:deny`: policy denies the request.
+- `approval_required`: approval is required.

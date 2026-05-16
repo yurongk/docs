@@ -1,0 +1,73 @@
+---
+title: Execution Audit
+description: How UOSE records Agent calls, policy decisions, execution results, and evidence.
+---
+
+Execution audit is the foundation for productionizing the UOSE system. Every Agent tool call and key user decision should leave a traceable record for review, compliance, and issue diagnosis.
+
+## Audit Objects
+
+Audit records usually contain:
+
+- requestId or taskId.
+- traceId.
+- tenantId and organizationId.
+- resourceId.
+- actorType and actorId.
+- toolName or actionTypeCode.
+- mappingVersion.
+- snapshotId.
+- status.
+- policyDecision.
+- decisionSummary.
+- evidenceRef.
+- input.
+- output.
+- duration and timestamp.
+
+These fields let audits answer: who did what, when, based on which resource and semantic version, why the system allowed or rejected it, and what the result was.
+
+## Audit Entry Points
+
+Users can access audits through:
+
+- The execution audit page, filtered by status, resource, or time.
+- `getAuditTrace`, used to review one task flow by taskId.
+- auditRef in approval requests, linking to related execution records.
+- Workbench artifacts, used to review execution effects and visualizations.
+
+The audit page focuses on runtime facts, not configuration snapshots.
+
+## Evidence References
+
+The evidenceRef in audit records stores structured evidence summaries, such as:
+
+- Number of matched entities.
+- graphVersion.
+- allowed actions.
+- denied actions.
+- policyId.
+- approvalRequestId.
+- snapshotId.
+- rowCount or result summary.
+
+Evidence references should not store sensitive credentials or put large full results into audits. Large results should be stored in dedicated artifacts or caches.
+
+## Audit and Governance Loop
+
+Audit results can improve governance:
+
+- If Agents often hit non-unique entities, add aliases or narrow resource scope.
+- If certain actions are frequently denied, check whether policies are too strict or documentation is misleading.
+- If queries time out, adjust adapter timeout, cache, or sync granularity.
+- If write action approval information is insufficient, require expected effect or more detailed parameters.
+
+Audit is not post-fact archiving. It is a feedback system for continuous UOSE improvement.
+
+## Best Practices
+
+- Pass a stable taskId for each Agent task.
+- Reuse the same taskId across multi-step flows to make tracing easier.
+- Record audits for low-risk queries too, so users can review answer sources.
+- Keep approval requests and policy hit reasons for high-risk actions.
+- Do not store tokens, passwords, cookies, or full sensitive business data in audits.

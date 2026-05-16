@@ -137,6 +137,7 @@ const NAVBAR_BY_LANGUAGE = {
   en: {
     links: [
       { label: "GitHub", href: "https://github.com/xpert-ai/xpert" },
+      { label: "UOSE", href: "https://data.xpertai.cn/" },
       { label: "Support", href: "mailto:service@xpertai.cn" },
     ],
     primary: {
@@ -148,6 +149,7 @@ const NAVBAR_BY_LANGUAGE = {
   "zh-Hans": {
     links: [
       { label: "GitHub", href: "https://github.com/xpert-ai/xpert" },
+      { label: "进入 UOSE", href: "https://data.xpertai.cn/" },
       { label: "支持", href: "mailto:service@xpertai.cn" },
     ],
     primary: {
@@ -906,14 +908,12 @@ async function main() {
   docs.navigation.languages = languageNodes;
 
   // Note: navbar is configured per-language; if Mintlify doesn't support it,
-  // fall back to global navbar (default language)
-  if (!docs.navbar) {
-    const defaultLang =
-      languageNodes.find((l) => l.default)?.language ??
-      languageNodes[0]?.language ??
-      "en";
-    docs.navbar = NAVBAR_BY_LANGUAGE[defaultLang] ?? NAVBAR_BY_LANGUAGE.en;
-  }
+  // fall back to global navbar (default language).
+  const defaultLang =
+    languageNodes.find((l) => l.default)?.language ??
+    languageNodes[0]?.language ??
+    "en";
+  docs.navbar = NAVBAR_BY_LANGUAGE[defaultLang] ?? NAVBAR_BY_LANGUAGE.en;
 
   // ⭐ Site custom CSS entry (for fonts/sidebar emphasis etc)
   // If docs.json already configures css, do not override

@@ -1,0 +1,72 @@
+---
+title: 资源接入控制面
+description: 注册、维护和同步外部资源的统一入口。
+---
+
+资源接入控制面是外部系统进入 UOSE系统的第一站。它负责登记资源、选择资源类型、绑定连接引用、配置能力参数，并触发同步，把外部资源转化为可进入本体空间的语义资产。
+
+## 资源对象
+
+一个 UOSE resource 至少包含：
+
+- `resourceId`：资源在当前组织内的唯一标识。
+- `resourceType`：资源类型，例如 `semantic_model`、`sap_odata_api`、`knowledge`、`xpert_database`。
+- `connectionRef`：指向 Secret 版本的连接引用。
+- `owner`：资源负责人或团队。
+- `version`：资源配置版本。
+- `capabilities`：资源类型专属能力配置。
+- `tags`：用于检索、分组和治理。
+
+这些字段共同定义“这个资源是什么、由谁负责、如何连接、允许同步什么、允许执行什么”。
+
+## 资源类型目录
+
+资源类型目录由 adapter manifest 和能力 schema 生成。它告诉控制台：
+
+- 当前支持哪些资源类型。
+- 该资源类型是否有可用 adapter。
+- 是否支持同步队列。
+- 是否支持 service root allowlist。
+- 推荐使用哪些 Secret 模板。
+- capabilities 表单有哪些字段和默认值。
+
+这样新增资源类型时，前端不需要为每个 adapter 重写表单逻辑。
+
+## 注册流程
+
+推荐的资源注册流程如下：
+
+1. 在 Secret Manager 中创建连接密钥，得到 `connectionRef`。
+2. 在资源接入页面选择资源类型。
+3. 填写资源 ID、负责人、版本和标签。
+4. 根据资源类型填写 capabilities。
+5. 保存 resource。
+6. 如果资源支持队列，系统可自动排入首次 full sync。
+7. 同步完成后进入资源详情和本体空间查看结果。
+
+资源注册成功只表示控制面记录已创建，不等于资源已经完成语义化。真正可被 Agent 使用，还需要同步产出 ontology snapshot 和实例投影。
+
+## 能力配置
+
+capabilities 是资源接入的关键扩展点。不同资源类型的配置不同：
+
+- 语义模型配置模型 ID、分页参数和上游 endpoint。
+- SAP OData 配置协议版本、catalog path、service allowlist、entity set allowlist、写入 entity set 和 CSRF。
+- Knowledge 配置 knowledgebase ID、是否包含隐藏图谱项、关系数量和 mention 样本数量。
+- Xpert 数据库配置 dataSource ID、catalog/table allowlist、元数据增强、最大表数、最大列数和查询行数上限。
+
+capabilities 既影响同步范围，也影响动作 readiness 和执行边界。
+
+## 资源详情
+
+资源详情页围绕单个 resource 提供：
+
+- 资源上下文：类型、状态、负责人、版本、连接引用、标签和最近同步摘要。
+- 本体图谱：当前实体、关系、属性和图谱结构。
+- 同步作业：队列状态、重试、取消、清理和进度。
+- 异常事件：同步失败或处理失败的 dead-letter。
+- 设置：更新连接引用、capabilities、负责人、版本和标签。
+- 资源对话：在当前资源上下文中调用本体助手。
+
+资源详情是运营和排障的主入口。
+

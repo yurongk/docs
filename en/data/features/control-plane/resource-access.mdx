@@ -1,0 +1,71 @@
+---
+title: Resource Access Control Plane
+description: A unified entry point for registering, maintaining, and syncing external resources.
+---
+
+The resource access control plane is the first stop for external systems entering the UOSE system. It registers resources, selects resource types, binds connection references, configures capability parameters, and triggers sync so external resources can become semantic assets in the ontology space.
+
+## Resource Object
+
+A UOSE resource contains at least:
+
+- `resourceId`: the unique identifier of the resource within the current organization.
+- `resourceType`: the resource type, such as `semantic_model`, `sap_odata_api`, `knowledge`, or `xpert_database`.
+- `connectionRef`: a connection reference pointing to a Secret version.
+- `owner`: the resource owner or team.
+- `version`: the resource configuration version.
+- `capabilities`: resource-type-specific capability configuration.
+- `tags`: used for search, grouping, and governance.
+
+Together, these fields define "what this resource is, who owns it, how it connects, what can be synced, and what can be executed".
+
+## Resource Type Catalog
+
+The resource type catalog is generated from adapter manifests and capability schemas. It tells the console:
+
+- Which resource types are currently supported.
+- Whether the resource type has an available adapter.
+- Whether it supports the sync queue.
+- Whether it supports a service root allowlist.
+- Which Secret templates are recommended.
+- Which fields and defaults appear in the capabilities form.
+
+This way, when new resource types are added, the frontend does not need to rewrite form logic for each adapter.
+
+## Registration Flow
+
+The recommended resource registration flow is:
+
+1. Create a connection secret in Secret Manager and obtain a `connectionRef`.
+2. Select a resource type on the resource access page.
+3. Fill in the resource ID, owner, version, and tags.
+4. Fill in capabilities according to the resource type.
+5. Save the resource.
+6. If the resource supports queues, the system can automatically enqueue the first full sync.
+7. After sync completes, view the results in resource details and the ontology workspace.
+
+Successful resource registration only means the control plane record has been created. It does not mean the resource has been semanticized. To be usable by Agents, the resource still needs sync to produce an ontology snapshot and instance projections.
+
+## Capability Configuration
+
+Capabilities are the key extension point for resource access. Each resource type has different configuration:
+
+- semantic models configure model IDs, pagination parameters, and upstream endpoints.
+- SAP OData configures protocol version, catalog path, service allowlist, entity set allowlist, writable entity sets, and CSRF.
+- Knowledge configures knowledgebase ID, whether hidden graph items are included, relation count, and mention sample count.
+- Xpert databases configure dataSource ID, catalog/table allowlists, metadata enrichment, maximum table count, maximum column count, and query row limit.
+
+Capabilities affect both sync scope and action readiness and execution boundaries.
+
+## Resource Details
+
+The resource details page provides these views around a single resource:
+
+- Resource context: type, status, owner, version, connection reference, tags, and latest sync summary.
+- Ontology graph: current entities, relationships, attributes, and graph structure.
+- Sync jobs: queue status, retry, cancellation, cleanup, and progress.
+- Abnormal events: dead-letter events from sync or processing failures.
+- Settings: update connection reference, capabilities, owner, version, and tags.
+- Resource chat: call the ontology assistant in the current resource context.
+
+Resource details are the main entry point for operations and troubleshooting.

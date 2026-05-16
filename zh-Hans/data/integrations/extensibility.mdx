@@ -1,0 +1,90 @@
+---
+title: 适配器扩展与 manifest 契约
+description: 新资源类型如何通过 adapter、manifest 和 capabilities schema 接入 UOSE。
+---
+
+UOSE系统的资源接入是可扩展的。新增资源类型时，不需要改变 Agent Tools 的整体协议，而是实现新的 adapter、manifest 和 capabilities schema，让新资源自然进入统一对象语义执行模型。
+
+## 新资源类型组成
+
+一个新资源类型通常需要：
+
+- Resource type 枚举或注册项。
+- Adapter manifest。
+- Capabilities schema。
+- ExternalResourceAdapter 实现。
+- Adapter registry 注册。
+- 同步 mapper，把源系统元数据转为 canonical ontology IR。
+- action simulate 和 execute 实现。
+- 测试覆盖同步、发现、模拟、执行和错误映射。
+
+如果资源只提供语义发现，也可以先实现同步和只读 action，再逐步增加写动作。
+
+## Adapter 接口
+
+核心 adapter 能力包括：
+
+- `pullSemanticMetadata`：同步外部资源语义元数据。
+- `simulateAction`：执行前模拟和校验。
+- `executeAction`：真实执行动作。
+- `listCapabilityOptions`：为动态表单提供候选项。
+- `supportsSyncQueue`：声明是否支持异步同步。
+- `discoverServices`：支持服务发现类资源。
+- `validateRuntimeActionParams`：做运行时参数校验。
+- `buildActionVisualization`：构建工作台可视化事件。
+
+Adapter 应把源系统错误映射为结构化原因，避免把裸异常抛给 Agent。
+
+## Manifest 设计
+
+Manifest 应先定义最小稳定对象：
+
+- 哪些实体类型是用户和 Agent 会直接搜索的。
+- 哪些关系能帮助 Agent 获取上下文。
+- 哪些属性是执行必须的。
+- 哪些动作可以自动发现。
+- 哪些动作必须 manual only 或审批。
+
+Manifest 一旦发布，应保持向后兼容。新增字段优先使用可选属性；动作 code 和错误语义不应随意复用。
+
+## Capabilities 设计
+
+Capabilities 应控制同步和执行范围：
+
+- 白名单和黑名单。
+- 最大数量和超时。
+- 是否开启增强能力。
+- 默认查询限制。
+- 源系统 endpoint 覆盖。
+- 是否允许写动作。
+
+不要把凭据放进 capabilities；凭据应放在 Secret。
+
+## 执行治理
+
+新增动作时要同时考虑：
+
+- riskLevel。
+- requiresApproval。
+- idempotencyRequired。
+- expectedEffectRequired。
+- inputSchema。
+- outputSchema。
+- effects。
+- discoveryMode。
+
+对写动作和外部副作用动作，推荐先设为 `manual_only`，并要求审批、幂等键和预期效果。
+
+## 验收清单
+
+新增资源类型上线前，应验证：
+
+- 资源可注册并通过 capabilities schema 校验。
+- Secret 解析正确且敏感字段不进入本体。
+- full sync 可生成 snapshot 和实体关系投影。
+- 本体空间能搜索关键实体。
+- `discoverActions` 返回清晰 allowed 和 denied 结果。
+- `simulateAction` 能拒绝非法参数。
+- `executeAction` 能记录审计。
+- 错误进入可排查状态，而不是静默失败。
+

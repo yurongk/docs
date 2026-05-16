@@ -1,0 +1,62 @@
+---
+title: Policy Binding
+description: Use Policy Binding to control execution boundaries for resources, entity types, and actions.
+---
+
+Policy binding is the execution guard of the UOSE system. It defines whether a resource, action, or entity type in the current tenant and organization should be allowed, denied, or sent to approval.
+
+## Policy Effects
+
+Policies support three effects:
+
+- allow: allow the matching request to continue.
+- deny: reject the matching request.
+- require_approval: require an approval request before execution can continue.
+
+When no policy matches, the current implementation allows by default. In production, explicitly configure policies for high-risk resources and write actions.
+
+## Matching Scope
+
+Policies can match these fields:
+
+- resourceId: restrict to a resource.
+- scope: for example, action.
+- actionTypeCode or actionTypeCodes: restrict to actions.
+- entityTypeCode or entityTypeCodes: restrict to target entity types.
+- priority: control policy matching order.
+- validFrom and validTo: control the effective time window.
+
+Policies are matched by priority and creation time. After the first valid policy is hit, the corresponding effect is returned.
+
+## Typical Policies
+
+Common policies include:
+
+- Allow BI query actions to execute automatically.
+- Deny database write actions.
+- Require approval for SAP create and update actions.
+- For production databases, allow only preview, describe, and explain, and deny mutation.
+- Deny Agent calls on unpublished or experimental resources.
+
+Policies should be as specific as possible to avoid one overly broad policy covering all resources and actions.
+
+## Policy Evaluation
+
+The policy governance page supports create, update, delete, and evaluate. Evaluation helps administrators confirm before execution:
+
+- Whether an action will be allowed.
+- Whether an entity type will trigger approval.
+- Which policyId is hit.
+- Whether the returned reason matches expectations.
+
+Policy evaluation is an important check before going live.
+
+## Relationship to Action Discovery
+
+`discoverActions` reflects policy results in allowed and denied actions:
+
+- Allowed actions can enter simulation.
+- Denied actions appear in denied actions.
+- Actions requiring approval keep approval context and return approval requirements during simulation or execution.
+
+This lets Agents know governance boundaries during planning instead of only failing at execution time.

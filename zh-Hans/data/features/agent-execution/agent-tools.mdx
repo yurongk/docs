@@ -1,0 +1,70 @@
+---
+title: Agent Tools
+description: UOSE系统提供给 Agent、MCP 与 ChatKit 的标准工具接口。
+---
+
+Agent Tools 是 UOSE系统面向智能体的稳定执行接口。它把资源、实体、关系、动作和治理能力包装成一组固定工具，让 Agent 在受控语义空间中完成任务。
+
+## 工具清单
+
+核心工具包括：
+
+- `queryEntities`：根据意图和范围查询实体候选。
+- `getEntityNeighborhood`：获取目标实体的一跳邻域和关联实体属性。
+- `queryOntologySchema`：查看资源的实体类型、关系类型和动作类型。
+- `queryRdf`：在允许时执行 RDF 调试查询。
+- `discoverActions`：发现目标对象可执行动作。
+- `simulateAction`：执行前模拟并校验动作。
+- `executeAction`：执行通过校验的动作。
+- `getAuditTrace`：查看某个任务的审计轨迹。
+
+这些工具通过 REST API 暴露，也可以由 MCP provider 暴露给业务 Assistant。
+
+## 推荐调用顺序
+
+推荐 Agent 使用以下主路径：
+
+```text
+queryEntities -> getEntityNeighborhood/queryOntologySchema -> discoverActions -> simulateAction -> executeAction -> getAuditTrace
+```
+
+这条路径的好处是：
+
+- 先定位对象，再读取上下文。
+- 先发现动作，再构造参数。
+- 先模拟校验，再真实执行。
+- 执行后可回看审计证据。
+
+Agent 不应跳过 `discoverActions` 直接执行，也不应在实体不唯一时自行选择。
+
+## Target 选择
+
+动作工具使用 target 选择对象。推荐优先复用上一步返回的 `preferredTarget`，其中包含：
+
+- `entityRef`
+- `entityTypeCode`
+
+只有在复制完整 UOSE UUID 时才使用 `entityId`。不要把 ontology ID 片段、外部键短 hash 或展示名称当作 `entityId`。
+
+## MCP 访问
+
+MCP provider 会把 UOSE Agent Tools 暴露为受约束工具，并从可信 headers 推导：
+
+- tenant。
+- organization。
+- actor identity。
+- assistant identity。
+- 当前业务用户 token。
+
+对使用 `current_user_oidc` 的资源，MCP 调用需要转发业务用户 token，例如通过 `x-uose-actor-token`。否则 Agent 虽然有 MCP server token，也无法代表用户回源访问 BI 或 xpert-pro。
+
+## 工具输出
+
+工具输出会尽量保持 Agent 可消费：
+
+- `discoverActions` 返回 allowed actions、denied actions、reasonCode 和 input schema。
+- `executeAction` 返回 status、executionId、policyDecision、auditRef 和 effect。
+- MCP 输出会省略部分大字段，例如 summary、appliedPlan、audit，并通过 omitted 字段提示。
+
+Agent 应根据结构化字段规划下一步，而不是解析自然语言日志。
+

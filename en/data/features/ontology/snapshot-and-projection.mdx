@@ -1,0 +1,66 @@
+---
+title: Snapshot, RDF, and Instance Projection
+description: How UOSE publishes external resource metadata as versioned ontologies and projects them to runtime instance tables.
+---
+
+Ontology Snapshot is the versioned result of semantic publishing in the UOSE system. It freezes the canonical ontology IR obtained from one resource sync and serves as the shared semantic baseline for queries, graphs, action discovery, and auditing.
+
+## Canonical Ontology IR
+
+After an adapter syncs an external resource, it generates canonical ontology IR. It usually contains:
+
+- ontology meta: ontology ID, adapter ID, resource ID, and graph version.
+- entity types: entity type definitions.
+- relation types: relation type definitions.
+- attribute types: attribute definitions.
+- affordances: executable actions for objects.
+- instances: entity instances.
+- relations: relationship instances.
+- constraints: constraints, shapes, or references.
+
+IR is the intermediate contract between resource adapters and the ontology publishing layer.
+
+## Snapshot Publishing
+
+Publishing saves IR as an ontology snapshot and marks the current graph version of the resource. After publishing succeeds, the snapshot becomes the source for semantic queries and projections for the current resource.
+
+The value of snapshots is:
+
+- Traceable: know which semantic version an Agent execution was based on.
+- Replaceable: new syncs create new snapshots, while old snapshots can be used for audit replay.
+- Repairable: issues such as missing `analysis_contract` can be repaired from semantic context in the snapshot.
+- Scopable: different resources can publish independently without requiring a global rebuild.
+
+## RDF Graph
+
+When an RDF engine is configured, UOSE materializes the ontology into an RDF graph. The RDF graph supports:
+
+- schema queries.
+- entity resolution.
+- neighborhood queries.
+- affordance discovery.
+- raw SPARQL debugging.
+
+The RDF layer is used for semantic discovery and does not directly execute fact queries. Real data is still queried by adapters back to BI, SAP, database, or knowledge base systems.
+
+## Instance Projection
+
+To let the frontend and Agent Tools use the current snapshot efficiently, UOSE projects the snapshot into runtime instance tables:
+
+- `uose_entity`: entity instances.
+- `uose_relation`: relationship instances.
+- `uose_action`: action instances or affordance projections.
+
+Projection results are used for entity search, resource graphs, action discovery, and audit evidence. They are the runtime bridge between the ontology graph and product features.
+
+## Repair and Backfill
+
+During resource upgrades or old snapshot migrations, a snapshot may have entities but lack runtime contracts. For example, an indicator in an semantic model may be visible but lack `analysis_contract`.
+
+UOSE attempts repair at these times:
+
+- Application startup maintenance scans.
+- After resource register or update.
+- Before sync publishing.
+
+After repair succeeds, IR is regenerated, a snapshot is published, and entity projections are updated. This prevents bad contracts from continuing to become the current snapshot.

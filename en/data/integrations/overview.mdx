@@ -1,0 +1,81 @@
+---
+title: Resource Types and Extension Model
+description: Resource types supported by the UOSE system, unified adapter flow, and extensible access model.
+---
+
+The UOSE system uses resource adapters to connect different external systems into the same object-semantic execution model. Whether the source system is a BI semantic model, SAP OData, a knowledge graph, or a database, once connected it must produce unified entities, relationships, attributes, actions, and governance contracts.
+
+## Current Built-in Resource Types
+
+Current built-in resource types include:
+
+| Resource Type | Main Purpose | Execution Boundary |
+| --- | --- | --- |
+| `semantic_model` | Connect Xpert semantic models, Cubes, metrics, measures, and dimensions | Read-only analytical queries |
+| `sap_odata_api` | Connect SAP OData V4 services, Entity Sets, Entity Types, and Operations | Read, create, update, and call operations |
+| `knowledge` | Connect xpert-pro GraphRAG knowledge base graphs | Read-only graph retrieval and evidence queries |
+| `xpert_database` | Connect xpert-pro SQL DataSource metadata | Read-only query and analysis; write actions are defined but not executed in v1 |
+
+All these resources use the same control plane capabilities: Secret, resource registry, capabilities, sync, snapshot, projection, Agent Tools, policy, and audit.
+
+## Adapter Responsibilities
+
+Each resource adapter needs to:
+
+- Read metadata from the external system.
+- Trim sync scope according to capabilities.
+- Build canonical ontology IR.
+- Provide action simulation and execution.
+- Declare whether actions support caching, idempotency, connection resolution, and runtime validation.
+- Provide dynamic form options when needed, such as selecting a knowledgebase or dataSource.
+
+Adapters should not bypass UOSE policy, approval, and audit, and should not write sensitive connection information into the ontology.
+
+## Manifest Contract
+
+The manifest is the semantic declaration for a resource type. It contains:
+
+- entityTypes.
+- relationTypes.
+- actionTypes.
+- states.
+- rules.
+- metrics.
+- policies.
+- version.
+
+The manifest decides which objects, relationships, and actions exist after a resource type is connected. Agent discovery and the frontend resource type catalog both depend on the manifest.
+
+## Capabilities Schema
+
+The capabilities schema decides which configuration is required when registering and updating a resource. It is used by both frontend forms and backend validation/default filling.
+
+When designing capabilities:
+
+- Put connection credentials in Secrets, not capabilities.
+- Put sync scope, query limits, allowlists, and switches in capabilities.
+- Set reasonable defaults and maximum values.
+- Provide clear descriptions for fields that affect cost or security.
+
+## Unified Agent Flow
+
+After different resource types are connected, Agents use the same flow:
+
+```text
+queryEntities -> getEntityNeighborhood -> discoverActions -> simulateAction -> executeAction
+```
+
+Differences only appear in entity types, action codes, and parameter schemas. This lets business Assistants reuse the same way of working across resources.
+
+## Extension Principles
+
+When adding a new resource type, first ensure that it can:
+
+- Generate clear entities and relationships.
+- Provide a minimum usable action.
+- Give clear rejection reasons in `discoverActions`.
+- Complete configuration through Secrets and capabilities.
+- Record execution audits.
+- Be understood by users in the frontend resource graph.
+
+Build a stable object space first, then expand complex actions. This is the recommended path for adding new resources to UOSE.

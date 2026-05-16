@@ -1,0 +1,67 @@
+---
+title: Snapshot、RDF 与实例投影
+description: UOSE 如何把外部资源元数据发布为版本化本体并投影到运行时实例表。
+---
+
+Ontology Snapshot 是 UOSE系统中语义发布的版本化结果。它把某次资源同步得到的 canonical ontology IR 固化下来，作为查询、图谱、动作发现和审计的共同语义基线。
+
+## Canonical Ontology IR
+
+adapter 同步外部资源后，会生成 canonical ontology IR。它通常包含：
+
+- ontology meta：本体 ID、adapter ID、资源 ID、图谱版本。
+- entity types：实体类型定义。
+- relation types：关系类型定义。
+- attribute types：属性定义。
+- affordances：对象可执行动作。
+- instances：实体实例。
+- relations：关系实例。
+- constraints：约束、shape 或引用。
+
+IR 是资源适配器和本体发布层之间的中间契约。
+
+## Snapshot 发布
+
+发布过程会把 IR 保存为 ontology snapshot，并标记当前资源的 graph version。发布成功后，snapshot 成为当前资源语义查询和投影的来源。
+
+Snapshot 的价值在于：
+
+- 可追踪：知道 Agent 执行时基于哪个语义版本。
+- 可替换：新同步生成新 snapshot，旧 snapshot 可用于审计回放。
+- 可修复：对缺少 `analysis_contract` 等问题，可从 snapshot 中的 semantic context 做 repair。
+- 可裁剪：不同资源可以各自发布，不要求全局一次性重建。
+
+## RDF 图
+
+当配置 RDF engine 时，UOSE 会把本体物化为 RDF 图。RDF 图支持：
+
+- schema 查询。
+- 实体解析。
+- 邻域查询。
+- affordance 发现。
+- 原始 SPARQL 调试。
+
+RDF 层用于语义发现，不直接执行事实查询。真实数据仍由 adapter 回源到 BI、SAP、数据库或知识库系统。
+
+## 实例投影
+
+为了让前端和 Agent Tools 高效使用当前 snapshot，UOSE 会把 snapshot 投影到运行时实例表：
+
+- `uose_entity`：实体实例。
+- `uose_relation`：关系实例。
+- `uose_action`：动作实例或 affordance 投影。
+
+投影结果用于实体搜索、资源图谱、action discovery 和审计证据。它是本体图和产品功能之间的运行时桥梁。
+
+## Repair 与 Backfill
+
+资源升级或旧快照迁移时，可能出现 snapshot 有实体但缺少运行契约的情况。例如 语义模型中的 indicator 已可见，但缺少 `analysis_contract`。
+
+UOSE 会在以下时机尝试 repair：
+
+- 应用启动维护扫描。
+- resource register 或 update 后。
+- sync publish 前。
+
+repair 成功后会重新生成 IR、发布 snapshot，并更新实体投影。这样可以避免坏 contract 继续成为 current snapshot。
+

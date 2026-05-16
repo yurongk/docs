@@ -1,0 +1,67 @@
+---
+title: 知识图谱与 GraphRAG 案例
+description: 使用 knowledge 资源把文档证据和图谱关系接入 Agent 上下文。
+---
+
+Knowledge 资源适合把非结构化知识转化为可检索、可解释、可引用的图谱上下文。它通常与数据分析资源配合使用：分析结果回答“发生了什么”，知识图谱帮助解释“为什么”和“依据是什么”。
+
+## 场景示例
+
+一个销售分析 Assistant 可以同时访问：
+
+- `semantic_model`：查询销售额、订单数和利润。
+- `knowledge`：检索销售政策、产品说明、客户合同和运营复盘文档中的实体关系。
+
+当用户问“华东利润下降可能和哪些促销政策有关”时，Agent 可以先做指标分析，再沿知识图谱查找政策、产品、区域和活动实体之间的关系。
+
+## 推荐流程
+
+1. 注册 knowledge resource，绑定已启用 GraphRAG 的 knowledgebase。
+2. 触发同步，生成 `knowledgebase` 和 `knowledge_entity`。
+3. 在本体空间搜索关键实体。
+4. 通过 `getEntityNeighborhood` 查看实体关系。
+5. 通过 knowledge graph actions 检索 chunks、mentions 和 evidence。
+6. 在回答中引用证据摘要。
+
+## 实体检索
+
+可以通过 `queryEntities` 搜索：
+
+- 产品名称。
+- 政策名称。
+- 客户名称。
+- 业务主题。
+- 文档中抽取的概念实体。
+
+如果实体名称歧义较大，应使用 aliases、origin 或 entity type 帮助判断。
+
+## 证据使用
+
+GraphRAG 证据通常包括：
+
+- entity summary。
+- relation description。
+- mention samples。
+- chunk 内容。
+- source metadata。
+
+Agent 应在回答中区分“图谱关系显示”和“业务数据证明”。知识图谱提供解释线索，不应替代事实指标查询。
+
+## 控制上下文规模
+
+知识图谱很容易变大。建议：
+
+- 用 `maxRelations` 限制同步关系数量。
+- 用 `mentionSamplesPerItem` 控制证据样本。
+- 查询时设置 topK。
+- 优先读取一跳邻域，必要时再扩展。
+- 对低置信度实体要求用户确认。
+
+## 最佳实践
+
+- 保持知识库 GraphRAG 状态 ready。
+- 对重要业务术语维护别名。
+- 把高价值文档优先纳入知识库。
+- 定期检查隐藏实体是否需要同步。
+- 在回答中展示证据来源，避免纯自然语言推测。
+

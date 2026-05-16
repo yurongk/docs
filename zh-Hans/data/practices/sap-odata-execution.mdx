@@ -1,0 +1,83 @@
+---
+title: SAP OData 操作案例
+description: 使用 UOSE 对 SAP OData Entity Set 执行读取、创建、更新和操作调用。
+---
+
+SAP OData 场景的关键是 ontology-first。Agent 不应直接拼接 OData URL，而应先在 UOSE 本体中定位 Entity Set，读取关联 Entity Type，再通过受控 action 执行。
+
+## 读取集合
+
+适合问题：
+
+- 查询最近创建的销售订单。
+- 查看某个组织下的客户列表。
+- 按字段过滤业务伙伴。
+
+推荐流程：
+
+1. `queryEntities` 搜索 `sap_odata_entity_set`。
+2. `getEntityNeighborhood` 查看 `properties`、`key_schema` 和 `query_capabilities`。
+3. `discoverActions` 确认 `sap_odata.read_collection` 可用。
+4. `simulateAction` 校验 select、expand、filter、top。
+5. `executeAction` 执行读取。
+
+参数示例：
+
+```json
+{
+  "queryOptions": {
+    "select": ["SalesOrder", "SalesOrganization", "SoldToParty"],
+    "filter": "SalesOrganization eq '1010'",
+    "top": 10
+  }
+}
+```
+
+## 读取单实体
+
+读取单实体需要 key。Key 的真相源来自 Entity Set 的 `key_schema` 或关联 Entity Type 的 key properties。
+
+推荐先让 Agent 在邻域中确认 key 字段，而不是根据展示名称猜测。
+
+## 创建实体
+
+创建动作通常为 `sap_odata.create_entity`。执行前应确认：
+
+- Entity Set 允许 create。
+- `mutationEntitySets` 或 metadata restriction 已放行。
+- payload 字段存在于 Entity Type properties。
+- 源系统用户有写权限。
+- 策略没有拒绝或审批已通过。
+
+生产环境建议对 create 动作配置 require approval，并要求审批人查看 expected effect。
+
+## 更新实体
+
+更新动作通常为 `sap_odata.update_entity`。执行前应确认：
+
+- key 完整。
+- 字段可更新。
+- 如源系统要求 ETag，需要正确处理并发。
+- payload 不包含只读字段。
+- 策略和审批已通过。
+
+更新失败时优先检查源系统权限、CSRF token、ETag 和字段约束。
+
+## Operation 调用
+
+`sap_odata.invoke_operation` 用于 unbound action import 或 function import。它比普通读取风险更高，因为可能触发业务副作用。
+
+建议：
+
+- 默认设置为审批动作。
+- 在 `simulateAction` 中明确参数和预期效果。
+- 审计中保留 operation 名称、参数摘要和源系统响应摘要。
+
+## 实操守则
+
+- 读取字段以 Entity Type properties 为准。
+- 执行动作以前必须 `discoverActions`。
+- 写动作必须经过策略治理。
+- 不要把 SAP 密码或 token 放入 capabilities。
+- 如果服务发现过多，用 service root allowlist 缩小范围。
+

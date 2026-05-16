@@ -1,0 +1,197 @@
+---
+title: 文件记忆与 Dreaming
+sidebar_position: 6
+---
+
+文件记忆是 Xpert 的内置文件型长期记忆能力。它把可长期复用的用户偏好、项目状态、反馈修正和参考资料保存为 Markdown 文件，让智能体可以在后续会话中检索、读取和补充这些记忆。
+
+Dreaming 是文件记忆的后台整理能力。它会基于现有记忆、使用信号和会话证据运行一个专门的 Dreamer 智能体，对记忆文件进行整理，并生成可追踪的运行记录和报告。
+
+## 适用场景
+
+- 保存跨会话仍然有效的用户偏好、长期事实和个性化信息。
+- 沉淀项目背景、阶段性结论、业务规则和可复用上下文。
+- 记录用户对回答的反馈、纠错和后续修正。
+- 需要让管理员直接查看、编辑和审计智能体记忆内容。
+
+## 记忆类型
+
+文件记忆按用途分为四类，每个 Xpert 拥有独立的记忆空间。
+
+| 类型 | 用途 |
+| --- | --- |
+| `user` | 用户偏好、用户档案、长期有效的个性化信息 |
+| `feedback` | 用户反馈、纠错、对答案风格或业务口径的修正 |
+| `project` | 项目状态、业务背景、阶段性决策、任务上下文 |
+| `reference` | 可复用资料、规则说明、流程说明、标准口径 |
+
+## 文件结构
+
+文件记忆以一个 Xpert 为单位组织。常见结构如下：
+
+```text
+MEMORY.md
+user/
+feedback/
+project/
+reference/
+.dream/
+```
+
+- `MEMORY.md` 是记忆索引，用于快速浏览和召回候选记忆。
+- `user/`、`feedback/`、`project/`、`reference/` 保存具体记忆主题文件。
+- `.dream/` 保存 Dreaming 运行状态、运行记录、信号和评分缓存，默认不是前台记忆正文。
+
+每个主题文件是带 frontmatter 的 Markdown。frontmatter 中包含记忆 ID、类型、状态、标题、摘要、标签、来源、更新时间和 `usage` 使用统计。正文部分保存可供智能体阅读的具体内容。
+
+## 智能体如何使用文件记忆
+
+启用 Xpert 文件记忆中间件后，智能体会获得以下记忆工具：
+
+| 工具 | 作用 |
+| --- | --- |
+| `memory_search` | 按自然语言问题搜索相关记忆，可限制记忆类型和返回数量 |
+| `memory_get` | 读取指定记忆的完整内容，支持使用 `memoryId`、`relativePath` 或 `canonicalRef` |
+| `memory_write` | 写入或更新一条长期有效的文件记忆 |
+
+系统会在对话前自动准备记忆索引和摘要。只有当摘要不足、记忆冲突、用户要求来源，或需要正文级细节时，智能体才需要调用 `memory_search` 或 `memory_get`。
+
+文件记忆是辅助上下文，不会覆盖用户当前输入。若当前用户输入与记忆冲突，智能体应优先遵循当前输入，并在必要时说明记忆可能已过期。
+
+## 自动召回配置
+
+文件记忆中间件支持自动召回相关记忆，并把选中的内容注入到本轮模型上下文中。
+
+| 配置项 | 说明 |
+| --- | --- |
+| 召回模式 | 当前支持 `hybrid_async`，系统会异步准备索引、摘要和候选记忆 |
+| 召回选择模型 | 用于从候选记忆中选择最相关内容的模型 |
+| 选择模型超时 | 选择模型的最长等待时间 |
+| 最大选择数量 | 单轮最多选入多少条详细记忆 |
+| 摘要数量 | 单轮提供给模型的摘要数量上限 |
+| 单轮最大详情字节 | 单轮可注入的详细记忆内容上限 |
+| 单会话最大详情字节 | 一个会话内详细记忆内容的累计上限 |
+
+当记忆被搜索、读取或写入时，系统会记录使用信号，并更新主题文件中的 `usage` 统计和 `.dream/scorecards/index.json` 评分缓存。
+
+## 自动写回
+
+如果一轮对话中没有显式调用 `memory_write`，系统会在对话结束后触发自动写回流程。自动写回会读取最近对话内容，判断其中是否存在值得长期保存的信息。
+
+| 配置项 | 说明 |
+| --- | --- |
+| 写回模型 | 用于判断是否需要新增、更新或归档记忆的模型 |
+| 等待策略 | `never_wait` 表示不等待后台写回；`soft_drain` 表示短暂等待后台任务完成 |
+| 软等待时长 | `soft_drain` 模式下最多等待的毫秒数 |
+| 写回提示词 | 用于指导模型如何判断长期记忆价值 |
+
+自动写回适合沉淀稳定事实、明确偏好、项目状态和可复用结论。临时闲聊、未经确认的猜测和原始对话转录不适合写入长期记忆。
+
+## 文件记忆管理页面
+
+进入数字专家的记忆页面后，选择“文件”即可管理文件记忆。
+
+页面左侧是文件工作区，可查看 `MEMORY.md`、四类记忆目录和具体主题文件。支持打开、编辑、保存、上传和删除文件。
+
+手动编辑记忆文件时建议保持以下规则：
+
+- `MEMORY.md` 保持为简洁索引，不在索引中写入大段正文。
+- 主题文件放入正确类型目录。
+- frontmatter 中的 `type`、`scopeId`、`status`、`title` 和 `summary` 保持有效。
+- 归档内容使用 `status: archived`，避免直接删除仍有价值的记忆。
+
+## Dreaming 配置
+
+文件记忆页面顶部提供 Dreaming 配置。
+
+| 字段 | 说明 |
+| --- | --- |
+| 记忆整理智能体 | 选择负责整理文件记忆的 Dreamer Xpert |
+| 记忆整理智能体 Key | 指定 Dreamer Xpert 内部用于执行整理任务的 Agent key，默认通常为 `FileMemoryDreamer` |
+| 打开 Dreamer | 跳转到所选 Dreamer Xpert 的智能体配置页面 |
+| 启用 Dream gate | 开启后，系统会根据 gate 条件判断本次 Dream 是否需要真正执行 |
+| 最小间隔 | 距离上次有效 Dream 运行至少经过多少分钟 |
+| 新记忆数 | 上次有效 Dream 之后至少出现多少条新增或更新记忆 |
+| 会话数 | 上次有效 Dream 之后至少出现多少个相关会话 |
+
+“记忆整理智能体 Key”不是外部 API Key，而是 Dreamer Xpert 内部某个 Agent 的标识。系统会使用这个 Agent 来读取 Dreaming 证据、整理记忆文件并生成报告。
+
+## 运行 Dream
+
+点击“Dream”按钮会创建一次手动 Dream 运行。系统会立即返回运行 ID，并在后台继续执行。
+
+Dream 运行会完成以下工作：
+
+1. 创建运行记录。
+2. 获取当前 Xpert 的 Dream 锁，避免同一个 Xpert 同时运行多个 Dream。
+3. 评估 Dream gate 条件；不满足时标记为 `skipped`。
+4. 准备 evidence 文件，包括记忆清单、信号、评分缓存、会话片段和 instructions。
+5. 运行配置的 Dreamer Xpert。
+6. 校验整理后的记忆文件和 `MEMORY.md`。
+7. 生成 Dream report、validation、changed files 和 `DREAMS.md` 记录。
+
+## Dream 运行状态
+
+| 状态 | 说明 |
+| --- | --- |
+| `queued` | 已创建运行，等待后台处理 |
+| `running` | 正在执行 |
+| `succeeded` | 执行成功，校验未发现问题 |
+| `partial` | 执行完成，但校验发现需要处理的问题 |
+| `failed` | 执行失败 |
+| `cancelled` | 运行被取消 |
+| `skipped` | gate 条件未满足，跳过本次 Dream |
+
+同一个 Xpert 的 Dream 会串行执行；如果已有运行在进行中，新的触发会复用或进入等待状态。不同 Xpert 的 Dream 可以独立运行。
+
+## 查看 Dream 结果
+
+文件记忆页面右侧展示 Dream runs 列表。选择某次运行后，可查看：
+
+- 运行状态、开始时间、结束时间、变更文件数和问题数。
+- gate 判断结果、新增或更新记忆数、相关会话数和跳过原因。
+- preflight 报告。
+- Dream report，包括整理摘要、变更文件和未解决冲突。
+- validation 校验结果。
+- 运行 artifacts，包括 `status.json`、`request.json`、`evidence/`、`gate.json`、`dream-report.json`、`validation.json` 和 `changed-files.json`。
+
+当运行状态为 `partial` 时，建议优先查看 validation 和 unresolved conflicts，根据提示修复 frontmatter、索引链接或重复标题等问题。
+
+## 当前校验规则
+
+Dreaming 完成后，系统会对记忆文件执行结构校验。当前已覆盖：
+
+- 主题文件 frontmatter 的 Xpert scope 是否匹配当前 Xpert。
+- 是否存在重复标题。
+- 是否存在无法解析的主题文件。
+- `MEMORY.md` 链接是否指向有效记忆路径。
+- `MEMORY.md` 是否引用不存在、重复或已归档的主题文件。
+- `MEMORY.md` 是否出现过长索引项或疑似正文内容。
+
+校验通过时运行状态为 `succeeded`；存在问题时运行状态为 `partial`，并在页面中展示需要处理的问题。
+
+## 相关接口
+
+文件记忆页面使用以下接口：
+
+| 接口 | 说明 |
+| --- | --- |
+| `GET /xpert/:id/memory/files` | 获取文件记忆目录 |
+| `GET /xpert/:id/memory/file` | 读取指定文件 |
+| `PUT /xpert/:id/memory/file` | 保存指定文件 |
+| `POST /xpert/:id/memory/file/upload` | 上传文件到记忆目录 |
+| `DELETE /xpert/:id/memory/file` | 删除指定文件 |
+| `POST /xpert/:id/memory/dream` | 手动触发 Dream |
+| `GET /xpert/:id/memory/dream/config` | 获取 Dreaming 配置 |
+| `PUT /xpert/:id/memory/dream/config` | 保存 Dreaming 配置 |
+| `GET /xpert/:id/memory/dream/runs` | 获取 Dream runs 列表 |
+| `GET /xpert/:id/memory/dream/runs/:runId` | 获取单次 Dream 详情 |
+| `POST /xpert/:id/memory/dream/runs/:runId/cancel` | 取消尚未开始的 Dream |
+
+## 使用建议
+
+- 把稳定、可复用的信息写入文件记忆，避免保存临时闲聊。
+- 主题文件保持单一主题，标题和摘要尽量清晰。
+- 批量导入或多轮对话后，可以手动运行 Dream 进行整理。
+- Dream report 出现冲突时，先修复 validation 中列出的问题，再继续运行下一次 Dream。
+- 对关键业务口径建议优先保存到 `reference` 或 `project` 类型，方便后续检索和审计。

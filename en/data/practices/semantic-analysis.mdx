@@ -1,0 +1,107 @@
+---
+title: Semantic Analysis Best Practices
+description: Recommended flow for using semantic model resources to analyze metric trends and Cube slices.
+---
+
+Semantic analysis is the most typical read-only execution scenario in the UOSE system. It maps a user's natural language analysis need to semantic model objects, then queries fact data from the source through controlled actions.
+
+## Use Cases
+
+The semantic analysis flow is suitable for questions such as:
+
+- Query the trend of a metric over a recent period.
+- View Cube slices by dimensions such as region, product, or store.
+- Compare metrics year over year, period over period, or against previous periods.
+- See which analyzable dimensions and measures a Cube has.
+- Explain why a metric cannot currently be queried.
+
+## Recommended Flow
+
+```text
+queryEntities -> getEntityNeighborhood -> discoverActions -> simulateAction -> executeAction -> getAuditTrace
+```
+
+This flow applies to both indicator and cube targets.
+
+## Step 1: Locate the Object
+
+First use `queryEntities` to query the target object. For metric questions, prefer narrowing the scope:
+
+```json
+{
+  "resourceId": "inner-bi",
+  "intent": "Query daily changes in bread transaction volume over the last 7 days",
+  "scope": {
+    "entityTypeCode": "semantic_indicator",
+    "query": "bread transaction volume",
+    "limit": 5
+  }
+}
+```
+
+If multiple candidates are returned, do not execute directly. Ask the user to confirm, or add constraints such as model, Cube, or business domain.
+
+## Step 2: Read the Neighborhood
+
+Use `getEntityNeighborhood` to inspect the indicator's owning Cube, related measures, available dimensions, and `analysis_contract`. Focus on:
+
+- Whether the indicator is attached to a cube.
+- Whether the cube has measures and dimensions.
+- Whether `analysis_contract` contains metricRefs.
+- Whether a default time dimension exists.
+- Whether optional granularity satisfies the user's question.
+
+## Step 3: Discover Actions
+
+For an indicator, usually expect:
+
+- `semantic_model.query_metric_snapshot`
+
+For a cube, usually expect:
+
+- `semantic_model.query_cube_slice`
+
+If an action is not in allowed actions, inspect the stage and reasonCode of denied actions. Common causes include `analysis_contract_missing`, `query_endpoint_missing`, or policy denial.
+
+## Step 4: Simulate
+
+Simulate before execution. Example metric trend request:
+
+```json
+{
+  "resourceId": "inner-bi",
+  "actionTypeCode": "semantic_model.query_metric_snapshot",
+  "target": {
+    "entityRef": "bread transaction volume",
+    "entityTypeCode": "semantic_indicator"
+  },
+  "params": {
+    "window": {
+      "from": "2026-03-15T00:00:00.000Z",
+      "to": "2026-03-21T23:59:59.999Z"
+    },
+    "granularity": "day"
+  }
+}
+```
+
+Execute only after simulation passes. When simulation fails, first fix parameters or resource configuration. Do not let the Agent switch to another unvalidated action.
+
+## Step 5: Execute and Explain
+
+In execution results, focus on:
+
+- `effect.series` or `effect.rows`.
+- `effect.summary`.
+- `effect.appliedPlan`.
+- `auditRef`.
+- `policyDecision`.
+
+When explaining results to users, state which metric or Cube was used, the time window, granularity, filters, and data source.
+
+## Common Issues
+
+- The metric can be found but cannot execute: check `analysis_contract`.
+- Cube slice parameters fail: check whether dimensions and measures are in the contract.
+- Time window does not take effect: use `window.from` and `window.to` consistently.
+- Result is empty: check business filters and source-system fact data, not only the UOSE graph.

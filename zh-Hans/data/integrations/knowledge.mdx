@@ -1,0 +1,82 @@
+---
+title: 知识库资源
+description: 将 xpert-pro GraphRAG 知识库同步为 UOSE 知识实体图谱。
+---
+
+`knowledge` 资源用于把 xpert-pro 中已启用 GraphRAG 的知识库图谱同步到 UOSE系统。它面向只读知识检索和证据化问答，不负责重新抽取、回写实体或触发 rebuild。
+
+## 同步对象
+
+同步后通常包含：
+
+- `knowledgebase`：源知识库。
+- `knowledge_entity`：GraphRAG 中抽取或维护的知识实体。
+
+核心关系包括：
+
+- `knowledgebase_has_entity`
+- `knowledge_entity_related`
+
+实体属性可能包含：
+
+- graph entity id。
+- entity type。
+- name。
+- origin。
+- visibility。
+- aliases。
+- description。
+- summary。
+- confidence。
+- mention count。
+- evidence samples。
+- metadata。
+
+## 前置条件
+
+注册前应确认：
+
+- xpert-pro 知识库已经启用 GraphRAG。
+- GraphRAG 状态为 ready 或 rebuild_required。
+- data-xpert API 能访问 xpert-pro API。
+- 已准备可调用知识库 API 的 token 或 API key。
+
+如果状态为 disabled、indexing 或 failed，同步会失败并进入异常事件。
+
+## Capabilities
+
+常用 capabilities 包括：
+
+- `knowledgebaseId`：必填，源知识库 ID。
+- `includeHidden`：是否同步隐藏图谱项。
+- `maxRelations`：同步关系数量上限。
+- `mentionSamplesPerItem`：每个实体或关系保留的证据样本数。
+- `defaultRetrievalMode`：默认检索模式。
+- `defaultTopK` 和 `maxTopK`：检索数量边界。
+- `evidenceSamplesPerChunk`：每个 chunk 的证据样本数。
+
+这些配置用于控制上下文规模和证据密度。
+
+## Actions
+
+知识库资源提供只读图谱动作，例如：
+
+- `knowledge.graph.search_chunks`
+- `knowledge.graph.explore`
+- `knowledge.graph.neighborhood`
+- `knowledge.graph.entity_chunks`
+- `knowledge.graph.mentions`
+
+这些动作适合让 Agent 检索实体、查看邻域、获取证据 chunk 和 mention。
+
+## 使用场景
+
+知识库资源适合：
+
+- 在业务问答中提供可追溯证据。
+- 把文档中的实体和关系接入本体空间。
+- 让 Agent 沿知识实体关系探索上下文。
+- 把结构化数据分析和非结构化文档证据结合起来。
+
+使用时应注意，GraphRAG 大图需要控制同步量。过多关系和证据样本会增加上下文成本。
+

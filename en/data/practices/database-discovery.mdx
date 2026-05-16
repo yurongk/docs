@@ -1,0 +1,77 @@
+---
+title: Database Metadata Discovery Example
+description: Use xpert_database resources to discover database structure and execute controlled read-only queries.
+---
+
+Database resources are suitable for helping Agents understand the structure of SQL DataSources, but they do not encourage Agents to freely write SQL. Through ontology graphs and read-only actions, UOSE turns database exploration into a controlled process.
+
+## Use Cases
+
+Database discovery is suitable for tasks such as:
+
+- Find a business table.
+- View table fields, types, and comments.
+- View primary keys, foreign keys, constraints, and indexes.
+- Preview a small amount of data.
+- Explain a SELECT query plan.
+- Execute row-limited read-only queries.
+
+## Recommended Flow
+
+1. Register an `xpert_database` resource.
+2. Set catalog/table allowlists.
+3. Enable metadata enrichment.
+4. Complete full sync.
+5. Search tables or columns in the ontology workspace.
+6. Use `database.describe_table` to inspect fields and constraints.
+7. Use `database.preview_rows` to preview a small number of rows.
+8. Use `database.explain_query` to inspect the query.
+9. Use `database.query_select` to execute read-only queries.
+
+## Understanding Table Structure
+
+Agents should first read:
+
+- table name.
+- column name.
+- data type.
+- nullable.
+- primary key.
+- foreign key.
+- index.
+- comment.
+- row count estimate.
+
+This information helps Agents determine join conditions, filter fields, and query cost.
+
+## Read-only SQL Boundary
+
+`database.query_select` allows only one read-only statement. Recommendations:
+
+- Set an explicit limit.
+- Select only necessary fields first.
+- Avoid full scans of large tables.
+- Explain complex queries first.
+- Do not execute DDL, DML, CALL, or multiple statements.
+
+If users request update, delete, or table creation, v1 should explicitly reject the request or explain that the capability is only defined in the ontology and is not executed at runtime.
+
+## Metadata Enrichment
+
+After metadata enrichment is enabled, the system supplements according to the database dialect:
+
+- constraints.
+- indexes.
+- foreign keys.
+- check.
+- row count estimate.
+
+If a dialect does not support enrichment or enrichment SQL fails, sync should not fail as a whole. Basic metadata still enters the graph, and the failure reason is recorded in semantic context or abnormal information.
+
+## Security Recommendations
+
+- Set strict allowlists for production databases.
+- Limit `maxQueryRows`.
+- Do not write sensitive connection information into the graph.
+- Display query results minimally.
+- Configure stricter policies for tables that contain sensitive columns.

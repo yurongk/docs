@@ -1,0 +1,84 @@
+---
+title: Entity, Relationship, and Attribute Graph
+description: How the UOSE graph represents business objects and technical objects from different resources.
+---
+
+The entity graph is the visual semantic result of the UOSE system. It displays objects, relationships, and attributes from external resources in a unified graph structure so users and Agents can understand context around objects.
+
+## Basic Graph Structure
+
+The graph consists of three parts:
+
+- Nodes: entity instances, such as metrics, Cubes, database tables, SAP Entity Sets, and knowledge entities.
+- Edges: relationship instances, such as contains, references, points to, associates with, and navigates to.
+- Attributes: structured information on nodes or edges, such as field definitions, query capabilities, evidence samples, status, and version.
+
+The graph is not a simple lineage graph. It expresses business semantics, technical structure, and execution context at the same time.
+
+## Graph Shapes of Different Resources
+
+semantic models usually contain:
+
+- `semantic_model`
+- `semantic_cube`
+- `semantic_indicator`
+- `semantic_measure`
+- `semantic_dimension`
+
+SAP OData usually contains:
+
+- `sap_odata_service`
+- `sap_odata_entity_type`
+- `sap_odata_entity_set`
+- `sap_odata_operation`
+
+Knowledge usually contains:
+
+- `knowledgebase`
+- `knowledge_entity`
+
+Xpert databases usually contain:
+
+- `database_source`
+- `database_namespace`
+- `database_table`
+- `database_column`
+- `database_constraint`
+- `database_index`
+
+Although these resource types come from different sources, they are all projected into unified entity and relationship lists.
+
+## Attribute Details
+
+Attributes are the key to graph executability. For example:
+
+- `analysis_contract` tells the system how to compile a metric or Cube into a fact query.
+- `query_capabilities` tells the system which query options an OData Entity Set supports.
+- `key_schema` tells the system how to read a single OData entity.
+- `properties` tells the system the field definitions of an OData Entity Type.
+- `connection_summary` keeps only non-sensitive summaries of database connections.
+- `evidence_samples` explains which document snippets knowledge entities come from.
+
+When inspecting attributes, focus on whether structured fields are complete, not only whether the node exists.
+
+## One-hop Neighborhood
+
+The one-hop neighborhood is what Agents use most often. It can answer:
+
+- Which parent object the current object belongs to.
+- Which available fields or dimensions the current object contains.
+- Which entity type the current object points to.
+- Which related knowledge entities the current object has.
+- Which affordances the current object can execute.
+
+`getEntityNeighborhood` returns relationship summaries and full attributes of related entities. Agents can generate plans directly from the neighborhood without reading the whole graph at once.
+
+## Graph Acceptance
+
+After resource sync, validate the graph as follows:
+
+1. Check whether entity types match expectations for the resource.
+2. Check whether core relationships exist, such as model to cube, entity set to entity type, and table to column.
+3. Check whether key attributes are complete, such as `analysis_contract`, `properties`, and `key_schema`.
+4. Check whether node counts are unusually low or high.
+5. Run action discovery on a typical object and confirm actions can be discovered or provide clear rejection reasons.

@@ -1,0 +1,63 @@
+---
+title: 策略绑定
+description: 使用 Policy Binding 控制资源、实体类型和动作的执行边界。
+---
+
+策略绑定是 UOSE系统的执行守卫。它定义某个资源、动作或实体类型在当前租户和组织中应该被允许、拒绝或转入审批。
+
+## 策略效果
+
+策略支持三种效果：
+
+- allow：允许匹配请求继续执行。
+- deny：拒绝匹配请求。
+- require_approval：要求先创建审批请求，审批通过后才能执行。
+
+当没有匹配策略时，当前实现采用默认允许。生产环境建议为高风险资源和写动作显式配置策略。
+
+## 匹配范围
+
+策略可按以下字段匹配：
+
+- resourceId：限定资源。
+- scope：例如 action。
+- actionTypeCode 或 actionTypeCodes：限定动作。
+- entityTypeCode 或 entityTypeCodes：限定目标实体类型。
+- priority：控制策略匹配顺序。
+- validFrom 和 validTo：控制生效时间窗口。
+
+策略按 priority 和创建时间顺序匹配，命中第一条有效策略后返回对应 effect。
+
+## 典型策略
+
+常见策略包括：
+
+- 允许 BI 查询类动作自动执行。
+- 拒绝数据库写动作。
+- SAP 创建和更新动作要求审批。
+- 对生产数据库只允许 preview、describe、explain，不允许 mutation。
+- 对未发布或实验资源拒绝 Agent 调用。
+
+策略应尽量具体，避免一条过宽策略覆盖所有资源和动作。
+
+## 策略试算
+
+策略治理页面支持创建、更新、删除和 evaluate。试算可以帮助管理员在执行前确认：
+
+- 某个 action 是否会被允许。
+- 某个实体类型是否会触发审批。
+- 哪条 policyId 被命中。
+- 返回原因是否符合预期。
+
+策略试算是上线前的重要检查步骤。
+
+## 与 Action Discovery 的关系
+
+`discoverActions` 会把策略结果体现在 allowed 和 denied actions 中：
+
+- allow 的动作可进入 simulate。
+- deny 的动作出现在 denied actions。
+- require_approval 的动作会保留审批上下文，并在 simulate 或 execute 阶段返回需要审批。
+
+这让 Agent 能在规划阶段就知道治理边界，而不是执行时才失败。
+

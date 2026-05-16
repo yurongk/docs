@@ -1,0 +1,67 @@
+---
+title: 工作台与资源对话
+description: 在资源上下文中使用 ChatKit、Agent Workbench 和可视化结果。
+---
+
+UOSE系统不仅提供 API，也提供面向用户的交互式工作台。用户可以在资源详情、本体空间或 Agent Workbench 中，让本体助手携带当前上下文进行对话、分析和操作。
+
+## 资源对话
+
+资源详情页的资源对话会携带当前资源上下文：
+
+- resourceId。
+- resourceType。
+- snapshotId。
+- graphVersion。
+- 当前选中实体。
+- 当前图谱或搜索上下文。
+
+用户可以直接询问当前资源，例如：
+
+- 这个资源同步出了哪些实体类型。
+- 某个指标为什么不能查询。
+- 某个 SAP Entity Set 支持哪些动作。
+- 当前数据库表有哪些字段和主外键。
+
+本体助手应通过 UOSE Agent Tools 获取事实，而不是凭页面文本猜测。
+
+## 本体空间对话
+
+本体空间的助手面向跨资源语义运营。它适合：
+
+- 比较不同资源的 snapshot 状态。
+- 查找实体并解释匹配方式。
+- 分析图谱缺失关系。
+- 指导用户进入资源详情排障。
+
+当未配置 ChatKit target 或未初始化 Ontology Assistant 时，页面会提示管理员完成运行环境初始化。
+
+## Agent Workbench
+
+Agent Workbench 用于承载 Assistant 执行过程和结果展示。UOSE action 执行后可以生成工作台可视化事件，例如：
+
+- 语义模型查询结果渲染为趋势、表格或指标摘要。
+- OData 读取结果渲染为集合表格或图表。
+- 数据库查询结果渲染为表格和列描述。
+
+可视化不改变 action 语义，只是把 effect 以用户可理解的形式呈现。
+
+## 上下文传递
+
+在 ChatKit 或 MCP 场景中，需要正确传递身份与上下文：
+
+- 平台 token 用于访问 UOSE 或 MCP server。
+- 业务用户 token 用于回源访问需要用户身份的资源。
+- assistantId 或 assistantCode 用于限制该 Assistant 可访问的资源。
+- tenantId 和 organizationId 用于数据隔离。
+
+缺少这些上下文时，工具应拒绝访问，而不是退回到全局默认资源。
+
+## 使用建议
+
+- 在资源详情中先查看图谱和属性，再让助手执行分析。
+- 让助手遵循 UOSE 标准流程，不要直接要求它拼接后端接口。
+- 对高风险操作，先查看 simulate 结果和审批原因。
+- 执行后通过审计引用或工作台 artifact 回看结果。
+- 对跨资源问题，先在本体空间定位资源，再进入单资源执行。
+
