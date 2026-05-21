@@ -1,0 +1,90 @@
+---
+title: Register and Use Skill Repositories
+sidebar_position: 3
+tags:
+  - Skill
+  - Repository
+---
+
+This guide explains how administrators register skill repositories, sync repository indexes, and make repository skills available for users to install into workspaces.
+
+## When To Use This
+
+Skill repositories connect externally or internally maintained skill directories to XpertAI. After a repository is registered, the system scans skill directories that contain `SKILL.md` and creates searchable, installable skill indexes. Users can then choose skills from the skills market and install or update them in their workspaces.
+
+Use this flow when you need to:
+
+- connect skills from sources such as GitHub, ModelScope, or ClawHub
+- publish workspace shared skills to the organization skill market
+- reuse the same set of skills across multiple workspaces instead of uploading ZIP packages one by one
+
+## Overall Flow
+
+1. An administrator opens the tenant skill management page.
+2. The administrator registers a skill repository and configures the source, repository URL, path, branch, and credentials.
+3. The repository index is synced after the configuration is saved.
+4. Users select the synced repository in the skills market and install or update skills.
+5. Users open the workspace skills page to review installed skills and use them in workspaces or agents.
+
+## Step 1: Open Tenant Skill Management
+
+Open **Settings / Tenant / Skills**. This page manages the skill repositories available to the current organization, including the system-managed workspace shared skills repository and manually registered external repositories.
+
+The repository management area lists the skill repositories already connected to the organization. Use **Register Skill Repository** to add an external repository.
+
+## Step 2: Register a Skill Repository
+
+Click **Register Skill Repository**, choose a source strategy, and fill in the repository configuration.
+
+The system provides ClawHub and GitHub repository sources by default. To use GitCode, ModelScope, or another source, install the corresponding skill repository source plugin first. After the plugin is installed and enabled, that source appears in the **Source Strategy** dropdown.
+
+Common fields:
+
+| Field | Description |
+| --- | --- |
+| Source Strategy | Selects the provider that handles the repository. ClawHub and GitHub are available by default; GitCode and other sources require their corresponding plugins first. |
+| Name | The repository name shown in management pages and the skills market. |
+| Repository URL | The external skill repository URL. |
+| Skills Path | Optional path where skills are stored inside the repository. If empty, the repository root is scanned. |
+| Branch | Optional branch or tag. If empty, the source strategy default branch is used. |
+| Personal Access Token | Optional credential for private repositories or higher API limits. |
+
+After saving, the repository appears in the repository list. To change the configuration later, open the repository card settings.
+
+## Step 3: Sync Repository Indexes
+
+Repository registration only stores the connection configuration. Sync the repository indexes before the skills appear in the market.
+
+Incremental sync adds or updates skills found during the current scan. Full sync also removes stale indexes for skills that no longer exist in the repository.
+
+After sync completes, the system creates one index for each skill directory. A skill directory must contain `SKILL.md`; the system reads its name, description, version, tags, and other metadata from that file.
+
+## Step 4: Install Skills From the Market
+
+Open the skills market and select the repository that was registered and synced. The market lists the indexed skills from that repository. Click **Install or Update** to install a skill into a workspace.
+
+During installation, the system fetches the corresponding skill package into the target workspace. If the skill is already installed, the existing installation is reused and updated when a newer version is available.
+
+## Step 5: Review and Use Workspace Skills
+
+After installation, open the workspace **Skills** page to review installed skills, the file tree, and `SKILL.md` content.
+
+Workspace skills can be used by agents in the current workspace. When repository skills are updated later, return to the skills market and run **Install or Update** again, or review the files and installation state from the workspace skills page.
+
+## FAQ
+
+### Registered repositories do not show skills in the market
+
+Confirm that the repository index has been synced. Saving repository configuration alone does not create market cards.
+
+### Sync succeeds but the skill count is wrong
+
+Check whether the configured repository path points to the correct directory. The system indexes skill directories by looking for `SKILL.md`; skills outside the configured path are not scanned.
+
+### Private repository sync fails
+
+Check that the personal access token can access the repository and has not expired. Store tokens in repository credentials, not inside skill files.
+
+### Updated repository configuration still shows old skills
+
+Sync the repository indexes again after saving configuration changes. Use full sync when stale skill indexes should be removed.
