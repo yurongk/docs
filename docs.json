@@ -173,6 +173,7 @@
                     "pages": [
                       "en/ai/skill/index",
                       "en/ai/skill/marketplace",
+                      "en/ai/skill/skill-repository-registration-and-use",
                       "en/ai/skill/workspace",
                       "en/ai/skill/use-in-agent",
                       "en/ai/skill/administration",
@@ -852,6 +853,7 @@
                     "pages": [
                       "zh-Hans/ai/skill/index",
                       "zh-Hans/ai/skill/marketplace",
+                      "zh-Hans/ai/skill/skill-repository-registration-and-use",
                       "zh-Hans/ai/skill/workspace",
                       "zh-Hans/ai/skill/use-in-agent",
                       "zh-Hans/ai/skill/administration",
