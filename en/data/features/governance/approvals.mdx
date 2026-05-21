@@ -1,0 +1,71 @@
+---
+title: Approval Flow
+description: How high-risk actions create approval requests, pass approval, and continue execution.
+---
+
+The approval flow handles execution requests whose policy decision is `require_approval`. It lets high-risk actions enter human decision-making instead of being simply rejected or automatically executed.
+
+## Approval Trigger
+
+When an Agent calls `simulateAction` or `executeAction`, if Policy Guard returns require approval, the system creates or reuses a pending approval request.
+
+The approval request contains:
+
+- taskId.
+- resourceId.
+- actionTypeCode.
+- target.
+- params.
+- expectedEffect.
+- policyId.
+- riskLevel.
+- reasons.
+- requestedBy.
+- requestedAt.
+
+The system generates a fingerprint from the execution request to avoid creating duplicate pending approval requests for the same request.
+
+## Approval Status
+
+Approval request statuses include:
+
+- pending: waiting for approval.
+- approved: approved.
+- rejected: rejected.
+- cancelled: cancelled.
+
+Only approved requests can be used to continue execution. The `approvalRequestId` provided during execution must match the fingerprint of the current request, preventing one approval from being used to execute another action.
+
+## Approval Decision
+
+The approval page allows reviewers to inspect:
+
+- Request ID.
+- Task ID.
+- Resource ID.
+- Action type.
+- Policy ID.
+- Target object.
+- Parameters.
+- Risk reasons.
+
+Approvers can approve, reject, or cancel the request and fill in decision notes. The decision is also written into the audit flow.
+
+## Continuing Execution
+
+After approval, the Agent or user can call `executeAction` again with `approvalRequestId`. The system will:
+
+1. Query the approval request.
+2. Confirm the status is approved.
+3. Validate that the fingerprint matches the current execution request.
+4. Continue executing the adapter action.
+5. Write the approval reference to the audit.
+
+This ensures the approval applies to a specific request, not a generalized authorization.
+
+## Recommendations
+
+- Put all write actions, high-risk external calls, and production data change actions under approval.
+- Require write actions to provide `expectedEffect` so approvers know the expected impact.
+- Approval notes should record business reasons, not just "approved".
+- Execute soon after approval to avoid semantic staleness caused by source-system state changes.

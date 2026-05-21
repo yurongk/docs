@@ -1,0 +1,89 @@
+---
+title: Database Resource
+description: Connect xpert-pro SQL DataSources to UOSE and provide metadata discovery and read-only database actions.
+---
+
+The `xpert_database` resource connects SQL DataSources from xpert-pro to the UOSE system. It syncs metadata such as database catalogs, schemas, tables, columns, constraints, and indexes, and provides controlled read-only query and analysis actions.
+
+## Synced Objects
+
+After sync, it usually contains:
+
+- `database_source`: data source.
+- `database_namespace`: catalog or schema.
+- `database_table`: table or view.
+- `database_column`: column.
+- `database_constraint`: primary key, foreign key, unique, check, or not-null constraint.
+- `database_index`: index.
+
+Core relationships include:
+
+- `database_source_has_namespace`
+- `database_namespace_has_table`
+- `database_table_has_column`
+- `database_table_has_constraint`
+- `database_table_has_index`
+- `database_constraint_references_table`
+- `database_constraint_references_column`
+- `database_index_covers_column`
+
+## Security Boundaries
+
+Database resources especially emphasize sensitive information isolation:
+
+- Do not write password, token, or username into RDF, snapshots, entity attributes, or logs.
+- Connection summaries keep only non-sensitive information such as host, port, database, catalog, schema, timezone, and sslmode.
+- System schemas are not included by default.
+- Use max tables, max columns, and max query rows to control scale.
+
+## Capabilities
+
+Common capabilities include:
+
+- `dataSourceId`: xpert-pro DataSource ID.
+- `catalogAllowlist`: limit synced catalogs or schemas.
+- `tableAllowlist`: limit synced tables.
+- `metadataEnrichment`: whether metadata enrichment is enabled.
+- `includeSystemSchemas`: whether system schemas are included.
+- `maxTables`: maximum number of synced tables.
+- `maxColumns`: maximum number of synced columns.
+- `maxQueryRows`: maximum returned rows for queries.
+- `defaultPreviewRows`: default number of preview rows.
+
+## Actions
+
+Current executable read-only or analytical actions include:
+
+- `database.sync_pull`
+- `database.list_namespaces`
+- `database.list_tables`
+- `database.describe_table`
+- `database.describe_query`
+- `database.query_select`
+- `database.preview_rows`
+- `database.explain_query`
+
+`database.query_select` only allows a single read-only statement, such as SELECT, WITH, SHOW, or DESCRIBE. INSERT, UPDATE, DELETE, MERGE, CREATE, ALTER, DROP, TRUNCATE, CALL, EXEC, and similar statements are rejected.
+
+## Write Action Boundary
+
+Transactional actions have entered the ontology and manifest, but v1 does not execute them:
+
+- `database.insert_rows`
+- `database.update_rows`
+- `database.delete_rows`
+- `database.upsert_rows`
+- `database.execute_mutation`
+- `database.create_table`
+- `database.alter_table`
+- `database.drop_table`
+
+These actions default to manual only, require approval, and require idempotency and expected effect. Runtime rejects real execution.
+
+## Recommendations
+
+- Use allowlists to control scope during initial sync.
+- Enable metadata enrichment to obtain constraints, indexes, foreign keys, and row count estimates.
+- Limit `maxQueryRows` for production databases.
+- Let Agents describe table or explain query before executing select.
+- Keep all write actions as approval and future-extension capabilities, and do not enable them in v1 production.

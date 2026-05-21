@@ -1,0 +1,81 @@
+---
+title: Knowledge Base Resource
+description: Sync xpert-pro GraphRAG knowledge bases as UOSE knowledge entity graphs.
+---
+
+The `knowledge` resource syncs knowledge base graphs with GraphRAG enabled in xpert-pro into the UOSE system. It is intended for read-only knowledge retrieval and evidence-based Q&A, not for re-extraction, entity writeback, or rebuild triggering.
+
+## Synced Objects
+
+After sync, it usually contains:
+
+- `knowledgebase`: source knowledge base.
+- `knowledge_entity`: knowledge entity extracted or maintained in GraphRAG.
+
+Core relationships include:
+
+- `knowledgebase_has_entity`
+- `knowledge_entity_related`
+
+Entity attributes may include:
+
+- graph entity id.
+- entity type.
+- name.
+- origin.
+- visibility.
+- aliases.
+- description.
+- summary.
+- confidence.
+- mention count.
+- evidence samples.
+- metadata.
+
+## Prerequisites
+
+Before registration, confirm that:
+
+- The xpert-pro knowledge base has GraphRAG enabled.
+- GraphRAG status is ready or rebuild_required.
+- The data-xpert API can access the xpert-pro API.
+- A token or API key that can call the knowledge base API is prepared.
+
+If the status is disabled, indexing, or failed, sync fails and enters abnormal events.
+
+## Capabilities
+
+Common capabilities include:
+
+- `knowledgebaseId`: required, source knowledge base ID.
+- `includeHidden`: whether to sync hidden graph items.
+- `maxRelations`: maximum number of synced relationships.
+- `mentionSamplesPerItem`: number of evidence samples kept per entity or relationship.
+- `defaultRetrievalMode`: default retrieval mode.
+- `defaultTopK` and `maxTopK`: retrieval count boundaries.
+- `evidenceSamplesPerChunk`: number of evidence samples per chunk.
+
+These settings control context size and evidence density.
+
+## Actions
+
+Knowledge base resources provide read-only graph actions, such as:
+
+- `knowledge.graph.search_chunks`
+- `knowledge.graph.explore`
+- `knowledge.graph.neighborhood`
+- `knowledge.graph.entity_chunks`
+- `knowledge.graph.mentions`
+
+These actions are suitable for Agents to retrieve entities, inspect neighborhoods, and obtain evidence chunks and mentions.
+
+## Use Cases
+
+Knowledge base resources are suitable for:
+
+- Providing traceable evidence in business Q&A.
+- Connecting entities and relationships from documents into the ontology workspace.
+- Letting Agents explore context along knowledge entity relationships.
+- Combining structured data analysis with unstructured document evidence.
+
+When using them, control the sync volume of large GraphRAG graphs. Too many relationships and evidence samples increase context cost.

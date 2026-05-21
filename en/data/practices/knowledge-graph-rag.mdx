@@ -1,0 +1,66 @@
+---
+title: Knowledge Graph and GraphRAG Examples
+description: Use knowledge resources to bring document evidence and graph relationships into Agent context.
+---
+
+Knowledge resources are suitable for turning unstructured knowledge into retrievable, explainable, and citable graph context. They often work together with data analysis resources: analysis results answer "what happened", while the knowledge graph helps explain "why" and "based on what".
+
+## Scenario Example
+
+A sales analysis Assistant can access both:
+
+- `semantic_model`: query sales amount, order count, and profit.
+- `knowledge`: retrieve entity relationships from sales policies, product descriptions, customer contracts, and operational review documents.
+
+When the user asks "which promotion policies may be related to the profit decline in East China", the Agent can first analyze metrics, then follow the knowledge graph to find relationships between policy, product, region, and campaign entities.
+
+## Recommended Flow
+
+1. Register a knowledge resource and bind a GraphRAG-enabled knowledgebase.
+2. Trigger sync to generate `knowledgebase` and `knowledge_entity`.
+3. Search key entities in the ontology workspace.
+4. Use `getEntityNeighborhood` to inspect entity relationships.
+5. Use knowledge graph actions to retrieve chunks, mentions, and evidence.
+6. Reference evidence summaries in the answer.
+
+## Entity Retrieval
+
+Use `queryEntities` to search for:
+
+- Product names.
+- Policy names.
+- Customer names.
+- Business topics.
+- Concept entities extracted from documents.
+
+If entity names are ambiguous, use aliases, origin, or entity type to help judge.
+
+## Evidence Usage
+
+GraphRAG evidence usually includes:
+
+- entity summary.
+- relation description.
+- mention samples.
+- chunk content.
+- source metadata.
+
+Agents should distinguish between "the graph relationship indicates" and "the business data proves" in answers. The knowledge graph provides explanatory clues and should not replace fact metric queries.
+
+## Controlling Context Size
+
+Knowledge graphs can easily become large. Recommendations:
+
+- Use `maxRelations` to limit synced relationship count.
+- Use `mentionSamplesPerItem` to control evidence samples.
+- Set topK during queries.
+- Prefer reading one-hop neighborhoods and expand only when necessary.
+- Ask users to confirm low-confidence entities.
+
+## Best Practices
+
+- Keep the knowledge base GraphRAG status ready.
+- Maintain aliases for important business terms.
+- Prioritize high-value documents in the knowledge base.
+- Regularly check whether hidden entities need to be synced.
+- Show evidence sources in answers and avoid pure natural language speculation.

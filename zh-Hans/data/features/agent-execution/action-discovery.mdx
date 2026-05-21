@@ -1,0 +1,96 @@
+---
+title: Action 发现、模拟与执行
+description: UOSE动作从发现到真实执行的完整控制链路。
+---
+
+Action 是 UOSE系统把本体对象连接到真实系统能力的方式。一个 action 描述目标实体类型、输入 schema、风险等级、是否需要审批、幂等要求和执行效果。
+
+## Action 来源
+
+动作主要来自 adapter manifest。Manifest 定义：
+
+- action code。
+- action name 和 description。
+- target entity types。
+- input schema 和 input hint。
+- risk level。
+- discovery mode。
+- requires approval。
+- idempotency required。
+- expected effect required。
+- effects。
+
+同步发布后，这些动作会成为本体 affordance，并在实例投影中服务于 action discovery。
+
+## Discover Actions
+
+`discoverActions` 判断目标对象当前可以做什么。它会综合：
+
+- manifest 和 ontology affordance。
+- 目标实体类型。
+- discovery mode。
+- policy binding。
+- runtime readiness。
+- Agent 候选动作 allowlist。
+
+返回结果包含 allowed actions 和 denied actions。Denied actions 会带 `reasonCode` 和 stage，帮助定位问题。
+
+常见 stage：
+
+- discovery：动作本身不适用于目标。
+- policy：策略拒绝或要求审批。
+- runtime：资源运行条件不满足。
+- planning：计划或参数无法生成。
+
+## Simulate Action
+
+`simulateAction` 是执行前的安全门。它不会触发真实后端写入或事实执行，而是验证：
+
+- 目标对象是否能唯一解析。
+- action 是否支持目标实体类型。
+- 参数是否符合 input schema。
+- 资源 connection 是否可解析。
+- 运行时所需契约是否存在。
+- 策略是否允许或需要审批。
+- adapter 自身是否允许该动作。
+
+对于低风险查询动作，simulate 通过后通常可执行。对于高风险动作，simulate 可能返回 `NEEDS_APPROVAL`。
+
+## Execute Action
+
+`executeAction` 会真正调用 adapter。执行链路包括：
+
+1. 解析 resource 和 target。
+2. 校验 action contract。
+3. 评估 policy。
+4. 检查审批单是否匹配。
+5. 解析连接凭据。
+6. 处理缓存或幂等要求。
+7. 调用 adapter。
+8. 生成可视化事件或执行 effect。
+9. 写入审计记录。
+
+写操作应提供 `idempotencyKey` 和 `expectedEffect`，尤其是 manifest 声明为必填时。
+
+## 缓存与幂等
+
+读类动作可以通过 query cache 避免重复查询。缓存通常基于：
+
+- resourceId。
+- snapshotId。
+- actionTypeCode。
+- target entity。
+- 归一化后的参数或 applied plan。
+
+写类动作优先依靠幂等键和源系统并发控制。UOSE 不应通过缓存伪装写入成功。
+
+## 常见拒绝原因
+
+- `ENTITY_NOT_UNIQUE`：实体引用不唯一。
+- `target_entity_type_not_supported`：动作不支持目标类型。
+- `analysis_contract_missing`：语义模型缺少查询契约。
+- `query_endpoint_missing`：资源缺少查询 endpoint。
+- `discovery_mode_manual_only`：动作不可自动规划。
+- `policy_binding:deny`：策略拒绝。
+- `approval_required`：需要审批。
+

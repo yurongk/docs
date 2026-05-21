@@ -3,63 +3,110 @@ title: Ralph Loop 中间件
 sidebar_position: 3
 ---
 
-Ralph Loop 会从干净的消息上下文中自动重试智能体，直到模型输出完成承诺。它适合模型容易提前停止或只给出部分最终答案的任务：在返回给用户之前，中间件会进行有上限的自我重试。
+Ralph Loop 会在现有 agent middleware 管线内运行一个验证优先的目标循环。它会让智能体在有上限的续跑轮次中持续工作，直到模型表达收尾意图，并且可信验证证据也确认通过。
 
 中间件 provider 名称是 `ralph-loop`。
 
-## 完成承诺
+## 核心思路
 
-Ralph Loop 会向系统消息追加一条规则，要求模型在任务真正完成时，在最终回答末尾输出这个标记：
+Ralph Loop 不再只是“重试直到出现 `<promise>DONE</promise>`”。完成标记现在只表示模型的收尾意图，不代表任务已经被证明完成。
+
+默认情况下，只有同时满足下面两个条件，Ralph Loop 才接受完成：
+
+- 最新 AI 回答包含 `<promise>DONE</promise>`。
+- 最新可信验证证据已经通过。
+
+如果模型声明完成但没有通过验证证据，Ralph Loop 会拒绝这次完成，生成一个紧凑的续跑提示，清空当前 channel 的消息历史，并把运行重新跳回模型。
+
+## Goal Slash Command
+
+当当前 agent 连接了 Ralph Loop 时，中间件会暴露一个 runtime slash command：
+
+```text
+/goal <objective>
+```
+
+这个命令由 `RalphLoopMiddleware.meta.slashCommands` 声明。下发给 composer 的 runtime command 类型是 `insert_invocation`，所以前端只插入 `/goal ...`，不会在客户端展开完整 prompt 模板。
+
+默认 `/goal` 模板要求智能体遵循：
+
+```text
+Plan -> Act -> Verify -> Reflect -> Retry
+```
+
+模板还要求智能体在最终收尾前使用最强适用的验证器。如果目标涉及 UI 屏幕或视觉一致性，它会明确要求使用 Playwright Interactive 检查并比较结果。
+
+## 完成标记
+
+Ralph Loop 仍然使用这个标记：
 
 ```text
 <promise>DONE</promise>
 ```
 
-如果最新 AI 消息包含该标记，中间件会从用户可见回答中移除它，并重置 Ralph Loop 状态。如果最新 AI 消息没有该标记，且没有待执行工具调用，Ralph Loop 会清空消息历史并重新调用模型。
+该标记表示“模型认为目标已经可以收尾”。它不会绕过验证。完成被接受后，中间件会从用户可见回答中移除该标记。
 
-## 适用场景
+## 验证证据
 
-当你希望为最终答案完整性增加一个有边界的自动重试机制时，可以使用 Ralph Loop：
+Ralph Loop 会从配置的 verifier tools 中收集最近的 `ToolMessage`。默认可信验证工具列表是：
 
-- 长任务中，模型容易在完成前提前收尾。
-- 写作、迁移、研究、分析等任务，需要智能体明确声明完成后才结束。
-- 比起带着混乱历史继续推理，你更希望每次重试都从干净上下文重新开始。
-- 智能体可以在过程中调用工具，但最终必须输出完成承诺才算结束。
+```json
+["sandbox_shell"]
+```
 
-不要把 Ralph Loop 当作任务状态管理器使用。当前实现不会注入任务工具，也不会维护 `TASKS` 或 `progress` 状态；它只追踪重试轮次和原始用户任务。
+中间件会把验证输出匹配回发起它的 AI tool call，并记录：
+
+- 工具名
+- tool call id
+- 命令内容，如果存在
+- 状态，`pass` 或 `fail`
+- 输出内容
+- 观察时间
+
+当工具输出表示非零退出码、超时或工具错误时，验证证据会被记录为失败。否则会被记录为通过。
+
+Ralph Loop 不会在 middleware hook 中直接执行验证工具。模型必须通过正常 tool pipeline 调用工具，因此 streaming、HITL、工具调用限制、工具重试中间件等机制仍然生效。
 
 ## 工作方式
 
 | 钩子 | 行为 |
 | --- | --- |
-| `beforeAgent` | 保存原始用户任务，并把 `ralphLoopIteration` 重置为 `0`。 |
-| `wrapModelCall` | 向系统消息追加完成承诺规则。重试时只发送重试提示，而不是完整历史消息。 |
-| `afterModel` | 检查最新 AI 消息。有工具调用时继续执行工具；出现完成承诺时结束循环；缺少完成承诺时，在 `maxIterations` 范围内清空上下文重试。 |
+| `beforeAgent` | 启动或恢复 Ralph Loop 状态。除非用户开始了新目标，或之前运行已经进入终态，否则 active 状态会跨 turn 保留。 |
+| `wrapModelCall` | 向系统消息追加验证优先的完成规则。重试时发送紧凑续跑提示，而不是完整历史消息。 |
+| `afterModel` | 提取验证证据，检查完成标记，用验证状态门控完成；然后决定接受完成、继续循环，或在预算耗尽时停止。 |
 
-每次重试时，Ralph Loop 会删除之前的所有消息，并发送类似下面的新用户消息：
+续跑提示会携带：
 
-```text
-[RALPH LOOP - ITERATION 1/20]
+- 原始目标
+- 当前迭代次数
+- 紧凑运行摘要
+- 上一次验证证据
+- 续跑原因
+- 下一步期望行为
 
-Your previous attempt did not output the completion promise, so this is a fresh retry with a clean message history.
-...
-Original task:
-...
-```
+它会要求智能体继续遵循 `Plan -> Act -> Verify -> Reflect -> Retry`，修复失败验证，在缺少验证证据时先运行验证器，并且只有在验证契约满足后才用完成标记收尾。
 
-如果原始消息包含结构化内容片段，Ralph Loop 会把这些片段附加在重试文本之后继续保留。
+如果原始用户消息包含结构化内容片段，Ralph Loop 会把这些片段保留在续跑提示之后。
 
 ## 配置项
 
 | 字段 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `maxIterations` | `number` | `20` | 最大自动干净上下文重试次数。最小值为 `1`。 |
+| `maxIterations` | `number` | `20` | 最大自动验证优先续跑轮次。 |
+| `requireVerifier` | `boolean` | `true` | 接受完成标记前，是否要求可信验证证据通过。 |
+| `verifierToolNames` | `string[]` | `["sandbox_shell"]` | 这些工具名对应的 `ToolMessage` 会被视为可信验证证据。 |
+| `verifierInstructions` | `string` | `""` | 关于智能体应如何验证目标的附加说明。 |
+| `maxRuntimeSummaryChars` | `number` | `4000` | 续跑提示中携带的紧凑运行摘要最大长度。 |
 
 示例：
 
 ```json
 {
-  "maxIterations": 8
+  "maxIterations": 8,
+  "requireVerifier": true,
+  "verifierToolNames": ["sandbox_shell"],
+  "verifierInstructions": "最终收尾前运行相关测试命令。涉及 UI 一致性时，使用 Playwright Interactive 检查变更后的屏幕。",
+  "maxRuntimeSummaryChars": 3000
 }
 ```
 
@@ -69,33 +116,46 @@ Ralph Loop 会保存以下状态字段：
 
 | 字段 | 说明 |
 | --- | --- |
-| `ralphLoopIteration` | 当前重试次数。 |
+| `ralphLoopIteration` | 当前续跑迭代次数。 |
 | `ralphLoopOriginalHumanContent` | 原始用户消息内容或结构化消息片段。 |
-| `ralphLoopOriginalTaskText` | 从运行时 human input 中提取到的原始纯文本任务。 |
+| `ralphLoopOriginalTaskText` | 从 runtime human input 中提取到的原始纯文本任务。 |
+| `ralphLoopStatus` | 当前运行状态：`active`、`completed`、`blocked` 或 `budget_exhausted`。 |
+| `ralphLoopRunId` | 当前 Ralph Loop 运行标识。 |
+| `ralphLoopRuntimeSummary` | 跨清理重试 turn 携带的紧凑摘要。 |
+| `ralphLoopLastVerifier` | 最近一次可信验证证据。 |
+| `ralphLoopStopReason` | 循环停止或继续的原因。 |
 
-成功完成或达到重试上限后，这些字段会被重置。
+终态包括 `completed`、`blocked` 和 `budget_exhausted`。当用户开始新目标，或上一次运行已经是终态时，会启动新的运行。
 
-## 达到重试上限
+## 预算耗尽
 
-如果达到 `maxIterations` 后仍没有收到完成承诺，Ralph Loop 会停止重试，并在最新 AI 回答后追加提示：
+当达到 `maxIterations`，但验证优先完成契约仍未满足时，Ralph Loop 会停止重试，并在最新回答后追加包含验证信息的提示：
 
 ```text
-Ralph Loop stopped after reaching <maxIterations> automatic retries without receiving the completion promise.
+Ralph Loop stopped after reaching <maxIterations> automatic retries before the verifier-first completion contract was satisfied.
+
+Last verifier evidence:
+...
 ```
 
-随后该回答会被返回，避免无限循环。
+运行状态会变为 `budget_exhausted`。
 
-## 最佳实践
+## 适用场景
 
-- 用在最终答案完整性比延迟更重要的智能体上。
-- 保守设置 `maxIterations`，因为每次重试都是一次额外模型调用。
-- 在主提示词中明确说明“完全完成”的判断标准。
-- 当智能体需要先行动再完成时，可与工具、浏览器自动化等中间件组合。
-- 避免在系统提示中加入另一个互相冲突的完成标记。
+当你希望智能体持续工作，直到有外部证据证明目标完成时，可以使用 Ralph Loop：
+
+- 需要通过测试的迁移和重构
+- 需要 Playwright Interactive 检查的 UI 视觉一致性任务
+- 模型容易提前停止的长实现任务
+- 有明确验证命令的研究或分析任务
+- 比起携带杂乱历史，更适合使用干净续跑提示的任务
+
+不要把 Ralph Loop 当作完整任务 runtime 使用。它没有提供带暂停、恢复、清理、报告或独立 goal runtime 状态的 `/goal` 产品界面；它仍然运行在现有 middleware hook 形态内。
 
 ## 排障建议
 
-- **最终回答里看不到 `<promise>DONE</promise>`**：这是正常现象，中间件会在返回前移除该标记。
-- **智能体重试过多**：降低 `maxIterations`，或让主提示词更明确完成条件。
-- **回答带有重试上限提示**：模型始终没有输出完成承诺。检查任务是否过于模糊，或上一次回答是否仍未完成。
-- **工具调用后没有立即重试**：Ralph Loop 会等待工具执行完成。只有最新 AI 消息没有待执行工具调用时，才检查完成承诺。
+- **最终回答里看不到 `<promise>DONE</promise>`**：这是正常现象。Ralph Loop 接受完成后会移除该标记。
+- **模型说已经完成但仍继续循环**：完成标记没有配套通过的可信验证证据。
+- **验证输出失败**：Ralph Loop 会带着失败上下文继续，让智能体修复根因并再次验证。
+- **没有检测到验证器**：确认智能体可以访问 `verifierToolNames` 中列出的工具，或为你的验证工具配置对应名称。
+- **智能体带预算耗尽提示停止**：提高 `maxIterations`，明确目标，或查看最后一次验证证据判断阻塞点。

@@ -1,0 +1,66 @@
+---
+title: Workbench and Resource Chat
+description: Use ChatKit, Agent Workbench, and visualized results in resource context.
+---
+
+The UOSE system provides not only APIs but also an interactive user-facing workbench. In resource details, the ontology workspace, or Agent Workbench, users can let the ontology assistant carry current context for conversations, analysis, and operations.
+
+## Resource Chat
+
+Resource chat on the resource details page carries the current resource context:
+
+- resourceId.
+- resourceType.
+- snapshotId.
+- graphVersion.
+- currently selected entity.
+- current graph or search context.
+
+Users can directly ask about the current resource, such as:
+
+- Which entity types were synced from this resource.
+- Why a metric cannot be queried.
+- Which actions a SAP Entity Set supports.
+- Which fields, primary keys, and foreign keys exist in the current database table.
+
+The ontology assistant should use UOSE Agent Tools to obtain facts instead of guessing from page text.
+
+## Ontology Workspace Chat
+
+The assistant in the ontology workspace is for cross-resource semantic operations. It is suitable for:
+
+- Comparing snapshot status across resources.
+- Finding entities and explaining match methods.
+- Analyzing missing graph relationships.
+- Guiding users into resource details for troubleshooting.
+
+When ChatKit target is not configured or Ontology Assistant is not initialized, the page prompts administrators to complete runtime initialization.
+
+## Agent Workbench
+
+Agent Workbench hosts Assistant execution processes and result display. After UOSE actions execute, they can generate workbench visualization events, such as:
+
+- Semantic model query results rendered as trends, tables, or metric summaries.
+- OData read results rendered as collection tables or charts.
+- Database query results rendered as tables and column descriptions.
+
+Visualization does not change action semantics. It only presents the effect in a user-understandable form.
+
+## Context Passing
+
+In ChatKit or MCP scenarios, identity and context must be passed correctly:
+
+- Platform token is used to access UOSE or the MCP server.
+- Business user token is used to access resources that require user identity at the source.
+- assistantId or assistantCode is used to restrict the resources accessible by that Assistant.
+- tenantId and organizationId are used for data isolation.
+
+When these contexts are missing, tools should reject access instead of falling back to global default resources.
+
+## Recommendations
+
+- In resource details, inspect the graph and attributes before asking the assistant to run analysis.
+- Let the assistant follow the standard UOSE process and do not ask it to directly compose backend APIs.
+- For high-risk operations, review the simulation result and approval reason first.
+- After execution, use audit references or workbench artifacts to review results.
+- For cross-resource questions, first locate resources in the ontology workspace, then enter single-resource execution.

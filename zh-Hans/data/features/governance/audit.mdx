@@ -1,0 +1,74 @@
+---
+title: 执行审计
+description: UOSE如何记录 Agent 调用、策略判定、执行结果与证据。
+---
+
+执行审计是 UOSE系统生产化的底座。每次 Agent 工具调用和关键用户决策都应留下可追踪记录，便于复盘、合规和问题定位。
+
+## 审计对象
+
+审计记录通常包含：
+
+- requestId 或 taskId。
+- traceId。
+- tenantId 和 organizationId。
+- resourceId。
+- actorType 和 actorId。
+- toolName 或 actionTypeCode。
+- mappingVersion。
+- snapshotId。
+- status。
+- policyDecision。
+- decisionSummary。
+- evidenceRef。
+- input。
+- output。
+- duration 和时间戳。
+
+这些字段让审计可以回答：谁在什么时候基于哪个资源和语义版本做了什么，系统为什么允许或拒绝，结果是什么。
+
+## 审计入口
+
+用户可以通过：
+
+- 执行审计页面按状态、资源或时间查看记录。
+- `getAuditTrace` 按 taskId 回看一次任务链路。
+- 审批请求中的 auditRef 跳转到相关执行记录。
+- 工作台 artifact 回看执行效果和可视化。
+
+审计页面关注的是运行事实，而不是配置快照。
+
+## 证据引用
+
+审计记录中的 evidenceRef 用于保存结构化证据摘要，例如：
+
+- 命中的实体数量。
+- graphVersion。
+- allowed actions。
+- denied actions。
+- policyId。
+- approvalRequestId。
+- snapshotId。
+- rowCount 或结果摘要。
+
+证据引用不应保存敏感凭据，也不应把大结果完整塞入审计。大结果应保存在专门 artifact 或缓存中。
+
+## 审计与治理闭环
+
+审计结果可以反向改进治理：
+
+- 发现 Agent 经常命中实体不唯一，可以补充别名或缩小资源范围。
+- 发现某类动作频繁被拒绝，可以检查策略是否过严或文档是否误导。
+- 发现查询超时，可以调整 adapter timeout、缓存或同步粒度。
+- 发现写动作审批信息不足，可以要求 expected effect 或更详细参数。
+
+审计不是事后归档，而是 UOSE 持续改进的反馈系统。
+
+## 最佳实践
+
+- 为每个 Agent 任务传入稳定 taskId。
+- 对跨步骤流程复用同一个 taskId，便于 trace。
+- 低风险查询也记录审计，方便用户复盘答案来源。
+- 对高风险动作保留审批单和策略命中原因。
+- 不在审计中保存 token、password、cookie 或完整敏感业务数据。
+

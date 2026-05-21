@@ -43,6 +43,10 @@
         "href": "https://github.com/xpert-ai/xpert"
       },
       {
+        "label": "UOSE",
+        "href": "https://data.xpertai.cn/"
+      },
+      {
         "label": "Support",
         "href": "mailto:service@xpertai.cn"
       }
@@ -63,6 +67,10 @@
             {
               "label": "GitHub",
               "href": "https://github.com/xpert-ai/xpert"
+            },
+            {
+              "label": "UOSE",
+              "href": "https://data.xpertai.cn/"
             },
             {
               "label": "Support",
@@ -128,6 +136,7 @@
                       "en/ai/agent/expert-configuration",
                       "en/ai/agent/human-ai-collaboration",
                       "en/ai/agent/long-term-memory",
+                      "en/ai/agent/file-memory-dreaming",
                       "en/ai/agent/environment-variables",
                       "en/ai/agent/enhanced-features",
                       "en/ai/agent/release-version",
@@ -138,6 +147,12 @@
                       "en/ai/agent/chat-channels",
                       "en/ai/agent/supervised-architecture",
                       "en/ai/agent/swarm-architecture"
+                    ]
+                  },
+                  {
+                    "group": "Handoff",
+                    "pages": [
+                      "en/ai/agent/handoff/agent-chat-handoff-architecture"
                     ]
                   },
                   {
@@ -156,6 +171,8 @@
                   {
                     "group": "AI Assistant",
                     "pages": [
+                      "en/ai/agent/ai-assistant/command",
+                      "en/ai/agent/ai-assistant/configure-ai-assistant",
                       "en/ai/agent/ai-assistant/index",
                       "en/ai/agent/ai-assistant/settings",
                       "en/ai/agent/ai-assistant/command",
@@ -177,7 +194,8 @@
                       "en/ai/skill/workspace",
                       "en/ai/skill/use-in-agent",
                       "en/ai/skill/administration",
-                      "en/ai/skill/skill-package-format"
+                      "en/ai/skill/skill-package-format",
+                      "en/ai/agent/ai-assistant/roles"
                     ]
                   }
                 ]
@@ -323,10 +341,10 @@
                     "pages": [
                       "en/ai/middleware/built-in/index",
                       "en/ai/middleware/built-in/browser-automation",
-                      "en/ai/middleware/built-in/ralph-loop",
-                      "en/ai/middleware/built-in/human-in-the-loop",
                       "en/ai/middleware/built-in/sensitive-filter",
-                      "en/ai/middleware/built-in/agent-behavior-monitor"
+                      "en/ai/middleware/built-in/agent-behavior-monitor",
+                      "en/ai/middleware/built-in/ralph-loop",
+                      "en/ai/middleware/built-in/human-in-the-loop"
                     ]
                   }
                 ]
@@ -384,6 +402,12 @@
                     ]
                   },
                   {
+                    "group": "Sdk",
+                    "pages": [
+                      "en/ai/chatkit/sdk/integrate-xpertai-api"
+                    ]
+                  },
+                  {
                     "group": "SDK",
                     "pages": [
                       "en/ai/chatkit/sdk/integrate-xpertai-api"
@@ -408,14 +432,30 @@
                   {
                     "group": "Default",
                     "pages": [
-                      "en/ai/tutorial/chatkit-browser-extension",
                       "en/ai/tutorial/workflow-and-agent",
                       "en/ai/tutorial/wechat-work-integration",
                       "en/ai/tutorial/integrate-with-mcp-dify",
                       "en/ai/tutorial/agentic-bi-end-to-end-analysis",
                       "en/ai/tutorial/build-agentic-chatbi-from-scratch",
                       "en/ai/tutorial/project-group-single-vs-multi-agent",
+                      "en/ai/tutorial/chatkit-browser-extension",
                       "en/ai/tutorial/tutorial"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tab": "Skill",
+                "groups": [
+                  {
+                    "group": "Default",
+                    "pages": [
+                      "en/ai/skill/index",
+                      "en/ai/skill/marketplace",
+                      "en/ai/skill/workspace",
+                      "en/ai/skill/use-in-agent",
+                      "en/ai/skill/administration",
+                      "en/ai/skill/skill-package-format"
                     ]
                   }
                 ]
@@ -442,6 +482,95 @@
                       "source": "api/openapi.ai.json",
                       "directory": "en/api-reference"
                     }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "product": "UOSE",
+            "tabs": [
+              {
+                "tab": "Overview",
+                "groups": [
+                  {
+                    "group": "Default",
+                    "pages": [
+                      "en/data/overview/concept",
+                      "en/data/overview/ontology-theory",
+                      "en/data/overview/uose-theory",
+                      "en/data/overview/product-purpose",
+                      "en/data/overview/architecture"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tab": "Features",
+                "groups": [
+                  {
+                    "group": "Control Plane",
+                    "pages": [
+                      "en/data/features/control-plane/resource-access",
+                      "en/data/features/control-plane/secret-management",
+                      "en/data/features/control-plane/sync-jobs"
+                    ]
+                  },
+                  {
+                    "group": "Ontology",
+                    "pages": [
+                      "en/data/features/ontology/ontology-workspace",
+                      "en/data/features/ontology/snapshot-and-projection",
+                      "en/data/features/ontology/entity-graph"
+                    ]
+                  },
+                  {
+                    "group": "Agent Execution",
+                    "pages": [
+                      "en/data/features/agent-execution/agent-tools",
+                      "en/data/features/agent-execution/action-discovery",
+                      "en/data/features/agent-execution/workbench-and-chatkit"
+                    ]
+                  },
+                  {
+                    "group": "Governance",
+                    "pages": [
+                      "en/data/features/governance/policies",
+                      "en/data/features/governance/approvals",
+                      "en/data/features/governance/audit"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tab": "Integrations",
+                "groups": [
+                  {
+                    "group": "Default",
+                    "pages": [
+                      "en/data/integrations/overview",
+                      "en/data/integrations/semantic-model",
+                      "en/data/integrations/sap-odata",
+                      "en/data/integrations/knowledge",
+                      "en/data/integrations/xpert-database",
+                      "en/data/integrations/extensibility"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tab": "Practices",
+                "groups": [
+                  {
+                    "group": "Default",
+                    "pages": [
+                      "en/data/practices/semantic-analysis",
+                      "en/data/practices/sap-odata-execution",
+                      "en/data/practices/knowledge-graph-rag",
+                      "en/data/practices/database-discovery",
+                      "en/data/practices/governance-playbook",
+                      "en/data/practices/troubleshooting"
+                    ]
                   }
                 ]
               }
@@ -744,6 +873,10 @@
               "href": "https://github.com/xpert-ai/xpert"
             },
             {
+              "label": "进入 UOSE",
+              "href": "https://data.xpertai.cn/"
+            },
+            {
               "label": "支持",
               "href": "mailto:service@xpertai.cn"
             }
@@ -808,6 +941,7 @@
                       "zh-Hans/ai/agent/expert-configuration",
                       "zh-Hans/ai/agent/human-ai-collaboration",
                       "zh-Hans/ai/agent/long-term-memory",
+                      "zh-Hans/ai/agent/file-memory-dreaming",
                       "zh-Hans/ai/agent/environment-variables",
                       "zh-Hans/ai/agent/enhanced-features",
                       "zh-Hans/ai/agent/release-version",
@@ -818,6 +952,12 @@
                       "zh-Hans/ai/agent/chat-channels",
                       "zh-Hans/ai/agent/supervised-architecture",
                       "zh-Hans/ai/agent/swarm-architecture"
+                    ]
+                  },
+                  {
+                    "group": "Handoff",
+                    "pages": [
+                      "zh-Hans/ai/agent/handoff/agent-chat-handoff-architecture"
                     ]
                   },
                   {
@@ -1071,6 +1211,12 @@
                     ]
                   },
                   {
+                    "group": "Sdk",
+                    "pages": [
+                      "zh-Hans/ai/chatkit/sdk/integrate-xpertai-api"
+                    ]
+                  },
+                  {
                     "group": "SDK",
                     "pages": [
                       "zh-Hans/ai/chatkit/sdk/integrate-xpertai-api"
@@ -1095,14 +1241,43 @@
                   {
                     "group": "默认",
                     "pages": [
-                      "zh-Hans/ai/tutorial/chatkit-browser-extension",
                       "zh-Hans/ai/tutorial/workflow-and-agent",
                       "zh-Hans/ai/tutorial/wechat-work-integration",
                       "zh-Hans/ai/tutorial/integrate-with-mcp-dify",
                       "zh-Hans/ai/tutorial/build-agentic-chatbi-from-scratch",
                       "zh-Hans/ai/tutorial/project-group-single-vs-multi-agent",
                       "zh-Hans/ai/tutorial/agentic-bi-end-to-end-analysis",
+                      "zh-Hans/ai/tutorial/chatkit-browser-extension",
                       "zh-Hans/ai/tutorial/tutorial"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tab": "技能",
+                "groups": [
+                  {
+                    "group": "默认",
+                    "pages": [
+                      "zh-Hans/ai/skill/index",
+                      "zh-Hans/ai/skill/marketplace",
+                      "zh-Hans/ai/skill/workspace",
+                      "zh-Hans/ai/skill/use-in-agent",
+                      "zh-Hans/ai/skill/administration",
+                      "zh-Hans/ai/skill/skill-package-format"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tab": "System",
+                "groups": [
+                  {
+                    "group": "Permissions",
+                    "pages": [
+                      "zh-Hans/ai/system/permissions/control-sources-and-defaults",
+                      "zh-Hans/ai/system/permissions/feature-permission-role-matrix",
+                      "zh-Hans/ai/system/permissions/switch-function-mapping"
                     ]
                   }
                 ]
@@ -1129,6 +1304,95 @@
                       "source": "api/openapi.ai.json",
                       "directory": "zh-Hans/api-reference"
                     }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "product": "UOSE系统",
+            "tabs": [
+              {
+                "tab": "概述",
+                "groups": [
+                  {
+                    "group": "默认",
+                    "pages": [
+                      "zh-Hans/data/overview/concept",
+                      "zh-Hans/data/overview/ontology-theory",
+                      "zh-Hans/data/overview/uose-theory",
+                      "zh-Hans/data/overview/product-purpose",
+                      "zh-Hans/data/overview/architecture"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tab": "功能模块",
+                "groups": [
+                  {
+                    "group": "控制面",
+                    "pages": [
+                      "zh-Hans/data/features/control-plane/resource-access",
+                      "zh-Hans/data/features/control-plane/secret-management",
+                      "zh-Hans/data/features/control-plane/sync-jobs"
+                    ]
+                  },
+                  {
+                    "group": "本体空间",
+                    "pages": [
+                      "zh-Hans/data/features/ontology/ontology-workspace",
+                      "zh-Hans/data/features/ontology/snapshot-and-projection",
+                      "zh-Hans/data/features/ontology/entity-graph"
+                    ]
+                  },
+                  {
+                    "group": "Agent 执行",
+                    "pages": [
+                      "zh-Hans/data/features/agent-execution/agent-tools",
+                      "zh-Hans/data/features/agent-execution/action-discovery",
+                      "zh-Hans/data/features/agent-execution/workbench-and-chatkit"
+                    ]
+                  },
+                  {
+                    "group": "治理",
+                    "pages": [
+                      "zh-Hans/data/features/governance/policies",
+                      "zh-Hans/data/features/governance/approvals",
+                      "zh-Hans/data/features/governance/audit"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tab": "资源对接",
+                "groups": [
+                  {
+                    "group": "默认",
+                    "pages": [
+                      "zh-Hans/data/integrations/overview",
+                      "zh-Hans/data/integrations/semantic-model",
+                      "zh-Hans/data/integrations/sap-odata",
+                      "zh-Hans/data/integrations/knowledge",
+                      "zh-Hans/data/integrations/xpert-database",
+                      "zh-Hans/data/integrations/extensibility"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tab": "最佳实践",
+                "groups": [
+                  {
+                    "group": "默认",
+                    "pages": [
+                      "zh-Hans/data/practices/semantic-analysis",
+                      "zh-Hans/data/practices/sap-odata-execution",
+                      "zh-Hans/data/practices/knowledge-graph-rag",
+                      "zh-Hans/data/practices/database-discovery",
+                      "zh-Hans/data/practices/governance-playbook",
+                      "zh-Hans/data/practices/troubleshooting"
+                    ]
                   }
                 ]
               }

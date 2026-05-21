@@ -1,0 +1,111 @@
+---
+title: Troubleshooting
+description: Troubleshooting paths for UOSE resource access, sync, ontology publishing, action discovery, and execution failures.
+---
+
+Troubleshooting in the UOSE system should be layered by flow: first check whether the resource is registered, then whether sync succeeded, then whether the ontology is published, then whether actions are discoverable, and finally whether execution parameters, policies, and source system responses are correct.
+
+## Resource Registration Fails
+
+Common causes:
+
+- Required fields are missing.
+- `resourceType` is not in the resource type catalog.
+- `connectionRef` format is incorrect.
+- capabilities is not a JSON object.
+- capabilities does not match the schema.
+
+How to handle:
+
+- Check default capabilities in the resource type catalog.
+- Check whether the Secret has a saved version.
+- Use frontend dynamic forms to reduce handwritten JSON.
+
+## Sync Fails
+
+Common causes:
+
+- baseUrl in the Secret payload is still an example address.
+- Authentication mode or token is incorrect.
+- Source system network is unreachable.
+- SAP OData is not V4 metadata.
+- knowledgebase GraphRAG status is not ready.
+- Database sync scope is too large.
+
+How to handle:
+
+- Check the sync job failedReason.
+- Check the dead-letter payload.
+- Retry after narrowing the allowlist.
+- For certificate issues, check TLS configuration.
+- For background queue issues, check Redis and queue switches.
+
+## Snapshot Missing in Ontology Workspace
+
+If the ontology workspace shows missing snapshot:
+
+1. Confirm the resource is registered.
+2. Confirm at least one sync has run.
+3. Check whether sync successfully returned snapshotId.
+4. Check abnormal events in resource details.
+5. Run full sync again.
+
+If the status is publish_failed or projection_failed, sync may have already pulled data but failed during publishing or projection. Check API logs and dead-letter events.
+
+## Entity Cannot Be Found
+
+Troubleshooting order:
+
+1. Check whether the resource has a current snapshot.
+2. Check whether the entity type is correct.
+3. Relax query keywords.
+4. In the resource graph, inspect nodes by type.
+5. Check whether capabilities filtered out the target object.
+6. Run full sync if necessary.
+
+If the entity exists but the name does not match, add aliases or improve the adapter's label generation logic.
+
+## Actions Are Unavailable
+
+First inspect `discoverActions.deniedActions`:
+
+- `discovery_mode_manual_only`: the action does not allow automatic planning.
+- `target_entity_type_not_supported`: the target type does not support the action.
+- `analysis_contract_missing`: semantic model query contract is missing.
+- `query_endpoint_missing`: resource capabilities lack a query endpoint.
+- `policy_binding:deny`: policy denied the request.
+- `policy_binding:require_approval`: approval is required.
+
+Do not only check that allowed actions are empty. Check denied reasons.
+
+## Execute Fails
+
+Execution failures usually come from:
+
+- Parameters do not match the input schema.
+- Target resolution is not unique.
+- Approval request is missing.
+- Approval request fingerprint does not match.
+- Adapter call to the source system failed.
+- Source system permissions are insufficient.
+- Query times out or result exceeds limits.
+
+How to handle:
+
+1. Reproduce with `simulateAction` first.
+2. Check whether params come from the allowed action's input schema.
+3. Inspect audit trace.
+4. Inspect the source system response summary.
+5. Adjust capabilities or policies if necessary.
+
+## Quick Lookup Table
+
+| Symptom | Check First |
+| --- | --- |
+| Resource list is empty | Current organization, OIDC, resource registration |
+| Resource created successfully but graph is empty | Whether sync ran, snapshot status |
+| Too many SAP services | service root allowlist |
+| Metric visible but cannot be queried | `analysis_contract`, query endpoint |
+| Database query rejected | Whether it is read-only, single-statement, maxQueryRows |
+| MCP connects but source access fails | `x-uose-actor-token` and current user OIDC |
+| Write action enters approval | policy binding and approvalRequestId |

@@ -1,0 +1,81 @@
+---
+title: 语义模型资源
+description: 将 Xpert 语义模型、Cube、指标和维度接入 UOSE 并提供分析动作。
+---
+
+`semantic_model` 资源用于把 Xpert 语义模型接入 UOSE系统。它把模型、Cube、指标、度量和维度同步为本体对象，并通过语义查询接口提供只读分析动作。
+
+## 同步对象
+
+同步后通常包含：
+
+- `semantic_model`：顶层语义模型。
+- `semantic_cube`：模型下的分析 Cube。
+- `semantic_indicator`：业务指标。
+- `semantic_measure`：Cube 下的度量。
+- `semantic_dimension`：Cube 下的维度。
+
+核心关系包括：
+
+- `semantic_model_has_cube`
+- `semantic_cube_has_indicator`
+- `semantic_cube_has_measure`
+- `semantic_cube_has_dimension`
+
+这些关系让 Agent 可以从一个指标找到所属 Cube、可用度量、维度和查询契约。
+
+## 连接与能力
+
+连接通常指向 xpert-pro API。Secret 支持：
+
+- `current_user_oidc`：使用当前用户 OIDC token。
+- `static_bearer`：使用静态 Bearer token。
+- `api_key`：使用 API key。
+
+capabilities 主要包括：
+
+- `modelIds`：同步后的本地模型过滤。
+- `endpoints.modelList`：语义模型列表接口。
+- `endpoints.modelById`：模型详情接口。
+- `endpoints.query`：语义查询接口。
+- `pagination.models`：模型列表分页配置。
+
+如果 query endpoint 缺失，查询类 action 会在 runtime readiness 阶段被拒绝。
+
+## Analysis Contract
+
+`analysis_contract` 是语义模型资源执行事实查询的关键。它通常出现在 `semantic_cube` 和 `semantic_indicator` 属性中，包含：
+
+- modelId。
+- cubeId。
+- cubeName。
+- metricRefs。
+- defaultTimeDimension。
+- supportedGranularities。
+- defaultDimensions。
+- filterableFields。
+
+缺少 `analysis_contract` 时，实体仍可被搜索和展示，但查询动作会被拒绝。
+
+## Actions
+
+常用动作包括：
+
+- `semantic_model.query_metric_snapshot`：查询指标时间序列。
+- `semantic_model.query_cube_slice`：查询 Cube 分组切片。
+- `semantic_model.query_calculated_expression`：查询计算表达式。
+- `semantic_model.query_statement`：执行受控语义查询语句。
+- `semantic_model.query_native_dsl`：执行原生语义查询 DSL。
+
+这些动作是低风险只读动作，通常不需要审批，但仍会经过参数校验、策略评估和审计记录。
+
+## 推荐使用方式
+
+1. 注册资源并完成 full sync。
+2. 在本体空间确认模型、Cube、指标、度量和维度已经入图。
+3. 通过 `queryEntities` 定位目标 indicator 或 cube。
+4. 通过 `getEntityNeighborhood` 查看所属 Cube 和可用维度。
+5. 通过 `discoverActions` 确认可执行查询动作。
+6. 通过 `simulateAction` 校验时间窗、粒度、维度和 filters。
+7. 通过 `executeAction` 返回趋势、表格或分析摘要。
+

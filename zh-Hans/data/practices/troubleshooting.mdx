@@ -1,0 +1,112 @@
+---
+title: 常见问题排查
+description: UOSE资源接入、同步、本体发布、动作发现和执行失败的排查路径。
+---
+
+UOSE系统的排障应按链路分层：先判断资源是否注册，再判断同步是否成功，再判断本体是否发布，再判断动作是否可发现，最后判断执行参数、策略和源系统响应。
+
+## 资源注册失败
+
+常见原因：
+
+- 必填字段缺失。
+- `resourceType` 不在资源类型目录中。
+- `connectionRef` 格式错误。
+- capabilities 不是 JSON object。
+- capabilities 不符合 schema。
+
+处理方式：
+
+- 查看资源类型目录的默认 capabilities。
+- 检查 Secret 是否已保存版本。
+- 使用前端动态表单，减少手写 JSON。
+
+## 同步失败
+
+常见原因：
+
+- Secret payload 中 baseUrl 仍是示例地址。
+- 认证方式或 token 错误。
+- 源系统网络不可达。
+- SAP OData 不是 V4 metadata。
+- knowledgebase GraphRAG 状态不是 ready。
+- 数据库同步范围过大。
+
+处理方式：
+
+- 查看 sync job failedReason。
+- 查看 dead-letter payload。
+- 缩小 allowlist 后重试。
+- 对证书问题检查 TLS 配置。
+- 对后台队列问题检查 Redis 和队列开关。
+
+## 本体空间缺失 Snapshot
+
+如果本体空间显示 missing snapshot：
+
+1. 确认资源已注册。
+2. 确认至少执行过一次 sync。
+3. 查看 sync 是否成功返回 snapshotId。
+4. 查看资源详情的异常事件。
+5. 重新执行 full sync。
+
+如果 publish_failed 或 projection_failed，说明同步可能已拉到数据，但发布或投影阶段失败，应查看 API 日志和 dead-letter。
+
+## 实体查不到
+
+排查顺序：
+
+1. 检查资源是否有 current snapshot。
+2. 检查实体类型是否写对。
+3. 放宽 query 关键词。
+4. 在资源图谱中按类型查看节点是否存在。
+5. 检查 capabilities 是否把目标对象过滤掉。
+6. 必要时 full sync。
+
+如果实体存在但名称不匹配，可以补充别名或优化 adapter 的 label 生成逻辑。
+
+## Actions 不可用
+
+先看 `discoverActions.deniedActions`：
+
+- `discovery_mode_manual_only`：动作不允许自动规划。
+- `target_entity_type_not_supported`：目标类型不支持该动作。
+- `analysis_contract_missing`：语义模型查询契约缺失。
+- `query_endpoint_missing`：资源 capabilities 缺少查询 endpoint。
+- `policy_binding:deny`：策略拒绝。
+- `policy_binding:require_approval`：需要审批。
+
+不要只看 allowed actions 为空，要看 denied reason。
+
+## Execute 失败
+
+执行失败通常来自：
+
+- 参数不符合 input schema。
+- target 解析不唯一。
+- 缺少审批单。
+- 审批单 fingerprint 不匹配。
+- adapter 调用源系统失败。
+- 源系统权限不足。
+- 查询超时或结果超限。
+
+处理方式：
+
+1. 先复现 `simulateAction`。
+2. 检查 params 是否来自 allowed action 的 input schema。
+3. 查看 audit trace。
+4. 查看源系统返回摘要。
+5. 必要时调整 capabilities 或策略。
+
+## 快速定位表
+
+| 现象 | 优先检查 |
+| --- | --- |
+| 资源列表为空 | 当前组织、OIDC、资源注册 |
+| resource 创建成功但图谱为空 | sync 是否执行、snapshot 状态 |
+| SAP 服务太多 | service root allowlist |
+| 指标可见但不可查询 | `analysis_contract`、query endpoint |
+| 数据库查询被拒绝 | 是否只读、是否单语句、maxQueryRows |
+| MCP 能连但回源失败 | `x-uose-actor-token` 和 current user OIDC |
+| 写动作进入审批 | policy binding 和 approvalRequestId |
+

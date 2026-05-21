@@ -1,0 +1,81 @@
+---
+title: Governance, Approval, and Audit Practices
+description: Practical guide for configuring policy, approval, and audit loops for UOSE resources and actions.
+---
+
+Production rollout of the UOSE system must put governance before execution. The more resources are connected and the more things Agents can do, the more policies, approvals, and audits are needed to maintain boundaries.
+
+## Tiered Governance
+
+Classify governance by action risk:
+
+| Risk | Example Actions | Recommended Governance |
+| --- | --- | --- |
+| LOW | Metric queries, read-only previews, knowledge retrieval | Allow execution and record audits |
+| MEDIUM | SAP create/update, operation calls | Require approval or restrict resources |
+| HIGH | Database mutation, structural changes | Deny by default or only allow manual approval |
+| CRITICAL | Cross-system large-scale writes, irreversible operations | Not exposed by default |
+
+Risk levels should be declared in manifests and enforced in policies.
+
+## Policy Configuration Steps
+
+1. List current resource types and core actions.
+2. Mark read-only actions, write actions, and actions with external side effects.
+3. Configure deny-by-default or approval policies for production resources.
+4. Configure allow policies for low-risk read-only actions.
+5. Configure require approval for high-risk actions.
+6. Use evaluate to test key requests.
+7. In Agent testing, check whether allowed and denied results from `discoverActions` match expectations.
+
+## Approval Practices
+
+Approvals should focus on concrete execution requests, not generalized authorization. Approvers need to see:
+
+- resourceId.
+- actionTypeCode.
+- target.
+- params.
+- expectedEffect.
+- riskLevel.
+- policyId.
+- reasons.
+
+For write actions, expected effect should describe the expected changed object, fields, and business impact. Write actions without expected effect should be rejected.
+
+## Audit Practices
+
+Audits should cover:
+
+- Entity queries.
+- Action discovery.
+- Simulation.
+- Execution.
+- Approval decisions.
+- Sync exceptions.
+
+Each business task should use a stable taskId so every tool call and result can be traced from one user request.
+
+## Review Metrics
+
+Regularly review:
+
+- Action rejection rate.
+- Approval pass rate and rejection rate.
+- Common denied reasons.
+- Sync failure rate.
+- Query cache hit rate.
+- Rate of non-unique Agent entity queries.
+- Number of high-risk actions.
+
+These metrics help improve ontology quality, policy quality, and user experience.
+
+## Pre-launch Checklist
+
+- All production resources have owners.
+- All resources use versioned Secrets.
+- Low-risk actions can execute automatically.
+- Write actions have policies and approvals.
+- MCP Assistants are bound only to necessary resources.
+- The audit page can find full traces.
+- Troubleshooting notes exist for common failure reasons.

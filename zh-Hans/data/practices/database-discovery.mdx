@@ -1,0 +1,78 @@
+---
+title: 数据库元数据发现案例
+description: 使用 xpert_database 资源发现数据库结构并执行受控只读查询。
+---
+
+数据库资源适合让 Agent 理解 SQL DataSource 的结构，但不鼓励 Agent 直接自由写 SQL。UOSE 通过本体图谱和只读动作，把数据库探索变成可控流程。
+
+## 适用场景
+
+适合数据库发现的任务包括：
+
+- 查找某个业务表。
+- 查看表字段、类型和注释。
+- 查看主键、外键、约束和索引。
+- 预览少量数据。
+- 解释一条 SELECT 查询计划。
+- 执行行数受限的只读查询。
+
+## 推荐流程
+
+1. 注册 `xpert_database` resource。
+2. 设置 catalog/table allowlist。
+3. 开启 metadata enrichment。
+4. 完成 full sync。
+5. 在本体空间查找表或列。
+6. 使用 `database.describe_table` 查看字段与约束。
+7. 使用 `database.preview_rows` 预览少量数据。
+8. 使用 `database.explain_query` 检查查询。
+9. 使用 `database.query_select` 执行只读查询。
+
+## 表结构理解
+
+Agent 应先读取：
+
+- table name。
+- column name。
+- data type。
+- nullable。
+- primary key。
+- foreign key。
+- index。
+- comment。
+- row count estimate。
+
+这些信息能帮助 Agent 判断 join 条件、过滤字段和查询成本。
+
+## 只读 SQL 边界
+
+`database.query_select` 只允许单条只读语句。推荐：
+
+- 设置明确 limit。
+- 优先选择必要字段。
+- 避免全表扫描大表。
+- 复杂查询先 explain。
+- 不执行 DDL、DML、CALL 或多语句。
+
+如果用户要求更新、删除或建表，当前 v1 应明确拒绝或说明该能力仅在 ontology 中定义，运行时不执行。
+
+## 元数据增强
+
+开启 metadata enrichment 后，系统会按数据库方言补充：
+
+- constraints。
+- indexes。
+- foreign keys。
+- check。
+- row count estimate。
+
+如果某个方言不支持增强或增强 SQL 失败，同步不应整体失败。基础 metadata 仍会入图，失败原因会记录在 semantic context 或异常信息中。
+
+## 安全建议
+
+- 对生产数据库设置严格 allowlist。
+- 限制 `maxQueryRows`。
+- 不把敏感连接信息写入图谱。
+- 对查询结果做最小展示。
+- 对包含敏感列的表配置更严格策略。
+

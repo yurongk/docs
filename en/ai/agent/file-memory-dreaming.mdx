@@ -1,0 +1,197 @@
+---
+title: File Memory and Dreaming
+sidebar_position: 6
+---
+
+File memory is Xpert's built-in file-based long-term memory capability. It stores reusable user preferences, project state, feedback corrections, and reference material as Markdown files so agents can retrieve, read, and extend those memories in later conversations.
+
+Dreaming is the background organization capability for file memory. Based on existing memories, usage signals, and conversation evidence, it runs a dedicated Dreamer agent to organize memory files and generate traceable run records and reports.
+
+## Use Cases
+
+- Store user preferences, long-lived facts, and personalization that remain valid across conversations.
+- Preserve project background, interim conclusions, business rules, and reusable context.
+- Record user feedback, corrections, and later changes to answer style or business wording.
+- Allow administrators to directly view, edit, and audit agent memory content.
+
+## Memory Types
+
+File memory is divided into four categories by purpose. Each Xpert has its own isolated memory space.
+
+| Type | Purpose |
+| --- | --- |
+| `user` | User preferences, user profile information, and long-lived personalization |
+| `feedback` | User feedback, corrections, and changes to answer style or business wording |
+| `project` | Project state, business background, interim decisions, and task context |
+| `reference` | Reusable material, rule descriptions, process descriptions, and standard wording |
+
+## File Structure
+
+File memory is organized per Xpert. A typical structure is:
+
+```text
+MEMORY.md
+user/
+feedback/
+project/
+reference/
+.dream/
+```
+
+- `MEMORY.md` is the memory index, used to quickly browse and recall candidate memories.
+- `user/`, `feedback/`, `project/`, and `reference/` store topic files for each memory category.
+- `.dream/` stores Dreaming run state, run records, signals, and score caches. By default, it is not foreground memory content.
+
+Each topic file is Markdown with frontmatter. The frontmatter contains the memory ID, type, status, title, summary, tags, source, updated time, and `usage` statistics. The body stores the concrete content that the agent can read.
+
+## How Agents Use File Memory
+
+After the Xpert file memory middleware is enabled, the agent receives these memory tools:
+
+| Tool | Purpose |
+| --- | --- |
+| `memory_search` | Search related memories by natural language question, with optional memory type and result count limits |
+| `memory_get` | Read the full content of a specific memory by `memoryId`, `relativePath`, or `canonicalRef` |
+| `memory_write` | Write or update one long-lived file memory |
+
+The system automatically prepares memory indexes and summaries before the conversation. The agent only needs to call `memory_search` or `memory_get` when summaries are insufficient, memories conflict, the user asks for sources, or body-level details are required.
+
+File memory is auxiliary context and does not override the user's current input. If the current input conflicts with memory, the agent should prioritize the current input and explain when a memory may be outdated.
+
+## Automatic Recall Configuration
+
+The file memory middleware supports automatic recall of related memories and injects selected content into the current model context.
+
+| Configuration | Description |
+| --- | --- |
+| Recall mode | Currently supports `hybrid_async`; the system asynchronously prepares indexes, summaries, and candidate memories |
+| Recall selection model | Model used to select the most relevant content from candidate memories |
+| Selection model timeout | Maximum wait time for the selection model |
+| Maximum selections | Maximum number of detailed memories selected for one turn |
+| Summary count | Upper limit on summaries provided to the model in one turn |
+| Max detail bytes per turn | Upper limit on detailed memory content injected in one turn |
+| Max detail bytes per session | Cumulative upper limit on detailed memory content within one session |
+
+When memories are searched, read, or written, the system records usage signals and updates the `usage` statistics in topic files and the `.dream/scorecards/index.json` score cache.
+
+## Automatic Writeback
+
+If a conversation turn does not explicitly call `memory_write`, the system triggers automatic writeback after the conversation ends. Automatic writeback reads the recent conversation and determines whether it contains information worth storing long term.
+
+| Configuration | Description |
+| --- | --- |
+| Writeback model | Model used to decide whether to add, update, or archive memories |
+| Wait strategy | `never_wait` means do not wait for background writeback; `soft_drain` means briefly wait for background tasks to finish |
+| Soft wait duration | Maximum milliseconds to wait in `soft_drain` mode |
+| Writeback prompt | Prompt used to guide the model in judging long-term memory value |
+
+Automatic writeback is suitable for stable facts, explicit preferences, project state, and reusable conclusions. Temporary small talk, unconfirmed guesses, and raw conversation transcripts are not suitable for long-term memory.
+
+## File Memory Management Page
+
+After entering the digital expert memory page, choose "File" to manage file memory.
+
+The left side of the page is the file workspace, where you can view `MEMORY.md`, the four memory directories, and individual topic files. It supports opening, editing, saving, uploading, and deleting files.
+
+When manually editing memory files, follow these rules:
+
+- Keep `MEMORY.md` as a concise index and do not write long body content into the index.
+- Put topic files in the correct type directory.
+- Keep `type`, `scopeId`, `status`, `title`, and `summary` in frontmatter valid.
+- Use `status: archived` for archived content instead of deleting memories that still have value.
+
+## Dreaming Configuration
+
+The top of the file memory page provides Dreaming configuration.
+
+| Field | Description |
+| --- | --- |
+| Memory organization agent | Select the Dreamer Xpert responsible for organizing file memory |
+| Memory organization agent key | Specify the Agent key inside the Dreamer Xpert that runs organization tasks, usually `FileMemoryDreamer` by default |
+| Open Dreamer | Go to the selected Dreamer Xpert's agent configuration page |
+| Enable Dream gate | When enabled, the system uses gate conditions to decide whether this Dream should actually run |
+| Minimum interval | Minimum minutes since the last valid Dream run |
+| New memory count | Minimum number of new or updated memories since the last valid Dream run |
+| Session count | Minimum number of related sessions since the last valid Dream run |
+
+"Memory organization agent key" is not an external API key. It is the identifier of an Agent inside the Dreamer Xpert. The system uses that Agent to read Dreaming evidence, organize memory files, and generate reports.
+
+## Running a Dream
+
+Clicking the "Dream" button creates a manual Dream run. The system immediately returns a run ID and continues execution in the background.
+
+A Dream run completes the following work:
+
+1. Create a run record.
+2. Acquire the Dream lock for the current Xpert to avoid multiple Dreams running for the same Xpert at the same time.
+3. Evaluate Dream gate conditions and mark the run as `skipped` if they are not met.
+4. Prepare evidence files, including memory inventory, signals, score cache, conversation snippets, and instructions.
+5. Run the configured Dreamer Xpert.
+6. Validate organized memory files and `MEMORY.md`.
+7. Generate the Dream report, validation, changed files, and `DREAMS.md` record.
+
+## Dream Run Status
+
+| Status | Description |
+| --- | --- |
+| `queued` | The run has been created and is waiting for background processing |
+| `running` | The run is in progress |
+| `succeeded` | The run succeeded and validation found no issues |
+| `partial` | The run completed, but validation found issues that need handling |
+| `failed` | The run failed |
+| `cancelled` | The run was cancelled |
+| `skipped` | Gate conditions were not met, so this Dream was skipped |
+
+Dreams for the same Xpert run serially. If a run is already in progress, a new trigger reuses or enters a waiting state. Dreams for different Xperts can run independently.
+
+## Viewing Dream Results
+
+The right side of the file memory page shows the Dream runs list. After selecting a run, you can view:
+
+- Run status, start time, end time, changed file count, and issue count.
+- Gate decision result, new or updated memory count, related session count, and skip reason.
+- Preflight report.
+- Dream report, including organization summary, changed files, and unresolved conflicts.
+- Validation result.
+- Run artifacts, including `status.json`, `request.json`, `evidence/`, `gate.json`, `dream-report.json`, `validation.json`, and `changed-files.json`.
+
+When the run status is `partial`, first review validation and unresolved conflicts, then fix frontmatter, index links, duplicate titles, or other issues according to the prompts.
+
+## Current Validation Rules
+
+After Dreaming completes, the system validates the memory file structure. Current coverage includes:
+
+- Whether the Xpert scope in topic file frontmatter matches the current Xpert.
+- Whether duplicate titles exist.
+- Whether there are topic files that cannot be parsed.
+- Whether `MEMORY.md` links point to valid memory paths.
+- Whether `MEMORY.md` references missing, duplicate, or archived topic files.
+- Whether `MEMORY.md` contains overly long index entries or content that looks like body text.
+
+When validation passes, the run status is `succeeded`. When issues exist, the run status is `partial`, and the page displays the items that need handling.
+
+## Related APIs
+
+The file memory page uses these APIs:
+
+| API | Description |
+| --- | --- |
+| `GET /xpert/:id/memory/files` | Get the file memory directory |
+| `GET /xpert/:id/memory/file` | Read a specified file |
+| `PUT /xpert/:id/memory/file` | Save a specified file |
+| `POST /xpert/:id/memory/file/upload` | Upload a file to the memory directory |
+| `DELETE /xpert/:id/memory/file` | Delete a specified file |
+| `POST /xpert/:id/memory/dream` | Manually trigger a Dream |
+| `GET /xpert/:id/memory/dream/config` | Get Dreaming configuration |
+| `PUT /xpert/:id/memory/dream/config` | Save Dreaming configuration |
+| `GET /xpert/:id/memory/dream/runs` | Get the Dream runs list |
+| `GET /xpert/:id/memory/dream/runs/:runId` | Get details for one Dream |
+| `POST /xpert/:id/memory/dream/runs/:runId/cancel` | Cancel a Dream that has not started |
+
+## Recommendations
+
+- Store stable, reusable information in file memory and avoid saving temporary small talk.
+- Keep each topic file focused on a single topic, with a clear title and summary.
+- After bulk imports or multi-turn conversations, manually run Dream to organize memories.
+- When a Dream report contains conflicts, fix the issues listed in validation before running the next Dream.
+- Prefer saving key business wording in `reference` or `project` memory for easier later retrieval and auditing.

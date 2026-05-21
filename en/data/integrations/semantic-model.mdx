@@ -1,0 +1,80 @@
+---
+title: Semantic Model Resource
+description: Connect Xpert semantic models, Cubes, metrics, and dimensions to UOSE and provide analytical actions.
+---
+
+The `semantic_model` resource connects Xpert semantic models to the UOSE system. It syncs models, Cubes, metrics, measures, and dimensions as ontology objects and provides read-only analytical actions through semantic query interfaces.
+
+## Synced Objects
+
+After sync, it usually contains:
+
+- `semantic_model`: top-level semantic model.
+- `semantic_cube`: analytical Cube under the model.
+- `semantic_indicator`: business metric.
+- `semantic_measure`: measure under the Cube.
+- `semantic_dimension`: dimension under the Cube.
+
+Core relationships include:
+
+- `semantic_model_has_cube`
+- `semantic_cube_has_indicator`
+- `semantic_cube_has_measure`
+- `semantic_cube_has_dimension`
+
+These relationships let Agents find the owning Cube, available measures, dimensions, and query contract from a metric.
+
+## Connection and Capabilities
+
+Connections usually point to the xpert-pro API. Secrets support:
+
+- `current_user_oidc`: use the current user's OIDC token.
+- `static_bearer`: use a static Bearer token.
+- `api_key`: use an API key.
+
+Capabilities mainly include:
+
+- `modelIds`: local model filter after sync.
+- `endpoints.modelList`: semantic model list API.
+- `endpoints.modelById`: model detail API.
+- `endpoints.query`: semantic query API.
+- `pagination.models`: model list pagination configuration.
+
+If the query endpoint is missing, query actions are rejected during the runtime readiness stage.
+
+## Analysis Contract
+
+`analysis_contract` is the key for semantic model resources to execute fact queries. It usually appears in `semantic_cube` and `semantic_indicator` attributes and contains:
+
+- modelId.
+- cubeId.
+- cubeName.
+- metricRefs.
+- defaultTimeDimension.
+- supportedGranularities.
+- defaultDimensions.
+- filterableFields.
+
+When `analysis_contract` is missing, the entity can still be searched and displayed, but query actions are rejected.
+
+## Actions
+
+Common actions include:
+
+- `semantic_model.query_metric_snapshot`: query metric time series.
+- `semantic_model.query_cube_slice`: query Cube group slices.
+- `semantic_model.query_calculated_expression`: query calculated expressions.
+- `semantic_model.query_statement`: execute controlled semantic query statements.
+- `semantic_model.query_native_dsl`: execute native semantic query DSL.
+
+These actions are low-risk read-only actions and usually do not require approval, but they still go through parameter validation, policy evaluation, and audit recording.
+
+## Recommended Usage
+
+1. Register the resource and complete full sync.
+2. In the ontology workspace, confirm that models, Cubes, metrics, measures, and dimensions have entered the graph.
+3. Use `queryEntities` to locate the target indicator or cube.
+4. Use `getEntityNeighborhood` to inspect the owning Cube and available dimensions.
+5. Use `discoverActions` to confirm executable query actions.
+6. Use `simulateAction` to validate time window, granularity, dimensions, and filters.
+7. Use `executeAction` to return trends, tables, or analytical summaries.

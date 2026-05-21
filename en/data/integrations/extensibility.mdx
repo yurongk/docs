@@ -1,0 +1,89 @@
+---
+title: Adapter Extension and Manifest Contract
+description: How new resource types connect to UOSE through adapters, manifests, and capabilities schemas.
+---
+
+Resource access in the UOSE system is extensible. When adding a new resource type, you do not need to change the overall Agent Tools protocol. Instead, implement a new adapter, manifest, and capabilities schema so the new resource naturally enters the unified object-semantic execution model.
+
+## Components of a New Resource Type
+
+A new resource type usually needs:
+
+- Resource type enum or registry entry.
+- Adapter manifest.
+- Capabilities schema.
+- ExternalResourceAdapter implementation.
+- Adapter registry registration.
+- Sync mapper that converts source-system metadata into canonical ontology IR.
+- action simulation and execution implementation.
+- Test coverage for sync, discovery, simulation, execution, and error mapping.
+
+If a resource only provides semantic discovery, you can implement sync and read-only actions first, then gradually add write actions.
+
+## Adapter Interface
+
+Core adapter capabilities include:
+
+- `pullSemanticMetadata`: sync semantic metadata from external resources.
+- `simulateAction`: simulate and validate before execution.
+- `executeAction`: truly execute actions.
+- `listCapabilityOptions`: provide options for dynamic forms.
+- `supportsSyncQueue`: declare whether asynchronous sync is supported.
+- `discoverServices`: support service discovery resources.
+- `validateRuntimeActionParams`: perform runtime parameter validation.
+- `buildActionVisualization`: build workbench visualization events.
+
+Adapters should map source-system errors into structured reasons and avoid throwing raw exceptions to Agents.
+
+## Manifest Design
+
+A manifest should first define the smallest stable objects:
+
+- Which entity types users and Agents will directly search.
+- Which relationships help Agents obtain context.
+- Which attributes are required for execution.
+- Which actions can be automatically discovered.
+- Which actions must be manual only or require approval.
+
+Once published, manifests should remain backward-compatible. Prefer optional properties for new fields; do not casually reuse action codes or error semantics.
+
+## Capabilities Design
+
+Capabilities should control sync and execution scope:
+
+- Allowlists and denylists.
+- Maximum counts and timeouts.
+- Whether enhanced capabilities are enabled.
+- Default query limits.
+- Source-system endpoint overrides.
+- Whether write actions are allowed.
+
+Do not put credentials into capabilities. Credentials should be stored in Secrets.
+
+## Execution Governance
+
+When adding actions, consider:
+
+- riskLevel.
+- requiresApproval.
+- idempotencyRequired.
+- expectedEffectRequired.
+- inputSchema.
+- outputSchema.
+- effects.
+- discoveryMode.
+
+For write actions and actions with external side effects, first set them to `manual_only`, and require approval, idempotency keys, and expected effects.
+
+## Acceptance Checklist
+
+Before a new resource type goes live, verify that:
+
+- The resource can be registered and passes capabilities schema validation.
+- Secret resolution is correct and sensitive fields do not enter the ontology.
+- Full sync generates snapshots and entity-relation projections.
+- The ontology workspace can search key entities.
+- `discoverActions` returns clear allowed and denied results.
+- `simulateAction` rejects invalid parameters.
+- `executeAction` records audits.
+- Errors enter debuggable states instead of failing silently.

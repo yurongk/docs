@@ -1,0 +1,72 @@
+---
+title: 审批流
+description: 高风险动作如何创建审批请求、通过审批并继续执行。
+---
+
+审批流用于处理策略判定为 `require_approval` 的执行请求。它让高风险动作可以进入人工决策，而不是简单拒绝或自动执行。
+
+## 审批触发
+
+当 Agent 调用 `simulateAction` 或 `executeAction` 时，如果 Policy Guard 返回 require approval，系统会生成或复用待审批请求。
+
+审批请求包含：
+
+- taskId。
+- resourceId。
+- actionTypeCode。
+- target。
+- params。
+- expectedEffect。
+- policyId。
+- riskLevel。
+- reasons。
+- requestedBy。
+- requestedAt。
+
+系统会基于执行请求生成 fingerprint，避免同一个待审批请求重复创建。
+
+## 审批状态
+
+审批请求状态包括：
+
+- pending：待审批。
+- approved：已通过。
+- rejected：已拒绝。
+- cancelled：已取消。
+
+只有 approved 请求可以用于继续执行。执行时提供的 `approvalRequestId` 必须与当前请求 fingerprint 匹配，防止拿一个审批单执行另一个动作。
+
+## 审批决策
+
+审批页面允许查看：
+
+- 请求 ID。
+- 任务 ID。
+- 资源 ID。
+- 动作类型。
+- 策略 ID。
+- 目标对象。
+- 参数。
+- 风险原因。
+
+审批人可以通过、拒绝或取消，并填写决策说明。决策也会写入审计链路。
+
+## 继续执行
+
+审批通过后，Agent 或用户可以再次调用 `executeAction`，并带上 `approvalRequestId`。系统会：
+
+1. 查询审批单。
+2. 确认状态为 approved。
+3. 校验 fingerprint 与当前执行请求一致。
+4. 继续执行 adapter action。
+5. 把审批引用写入审计。
+
+这保证审批针对的是具体请求，而不是泛化授权。
+
+## 使用建议
+
+- 把所有写动作、高风险外部调用和生产数据变更动作纳入审批。
+- 要求写动作提供 `expectedEffect`，让审批人知道预期影响。
+- 审批说明应记录业务原因，而不只是“同意”。
+- 审批通过后尽快执行，避免源系统状态变化造成语义过期。
+

@@ -1,0 +1,73 @@
+---
+title: Sync Jobs and Dead-letter Events
+description: UOSE resource sync, asynchronous queues, retry cleanup, and troubleshooting mechanisms.
+---
+
+Sync jobs pull external resource metadata into the UOSE system and publish it as ontology snapshots and entity-relation projections. After sync succeeds, the resource has semantic context that can be searched, analyzed, and executed.
+
+## Sync Modes
+
+UOSE supports two sync modes:
+
+- incremental: perform incremental upserts based on the current resource state.
+- full: first clear the entities, relationships, and action instances already synced for the current resource, then pull again.
+
+Sync requests can also carry cursor types:
+
+- time: time-based cursor.
+- version: version-based cursor.
+- event_offset: event offset.
+
+Different adapters support cursors to different degrees. For first-time resource access, full sync is usually the most stable initialization method.
+
+## Sync Flow
+
+A sync usually goes through:
+
+1. Read the resource and capabilities.
+2. Resolve `connectionRef`.
+3. Call the corresponding adapter's `pullSemanticMetadata`.
+4. Normalize external metadata into canonical ontology IR.
+5. Publish the ontology snapshot.
+6. Project entities, relationships, and action instances into runtime tables.
+7. Update the sync checkpoint.
+8. Record failure events or sync results.
+
+If the RDF sidecar is enabled, the publishing process also writes the ontology graph to the RDF graph database, supporting schema, neighborhood, and SPARQL queries.
+
+## Asynchronous Queue
+
+For long-running or large-scale resources, UOSE provides a Redis-based resource sync queue:
+
+- Automatically enqueues the first sync when a resource is registered.
+- Manually submits sync jobs.
+- Deduplicates by the same `resourceId + mode + cursorType`.
+- Displays states such as waiting, active, completed, and failed.
+- Supports failure retry, cancellation of running jobs, and cleanup of historical jobs.
+- Uses progress to show the current processing stage and service progress.
+
+The queue is suitable for scenarios such as SAP OData multi-service sync and large database schema sync.
+
+## Dead-letter
+
+When an unrecoverable error occurs during sync, the system records a dead-letter event. It preserves failure context so errors do not only remain in logs.
+
+Common dead-letter scenarios include:
+
+- Incorrect connection configuration.
+- Source system authentication failure.
+- SAP OData metadata is not V4.
+- Knowledge GraphRAG is not ready.
+- Upstream API returns an unparsable structure.
+- Metadata is too large and triggers truncation or limits.
+
+The usual handling path is to view the event payload, fix the Secret or capabilities, and trigger sync again.
+
+## Best Practices
+
+- Use full sync for initial access, validate the ontology graph, then switch to an incremental strategy.
+- Use service root allowlists for SAP OData to narrow the sync scope.
+- Set `maxTables` and `maxColumns` for databases to avoid oversized syncs.
+- Set `maxRelations` and mention sample count for knowledge graphs to keep context manageable.
+- For failed jobs, check failedReason and dead-letter first before deciding whether to retry.
+- Run full sync after major capability changes to avoid stale projections.

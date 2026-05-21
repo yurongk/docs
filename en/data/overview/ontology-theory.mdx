@@ -1,0 +1,72 @@
+---
+title: Ontology Theory
+description: Explains the theoretical foundation of UOSE through entities, relationships, attributes, constraints, and reasoning.
+---
+
+The value of ontology in the UOSE system is not to write business concepts into a static vocabulary. It is to express objects, relationships, attributes, constraints, and actions in enterprise systems as computable, verifiable, and governable semantic contracts. It changes the objects of agent reasoning from natural language fragments into stable business objects.
+
+## Entities
+
+An entity is an object in the business world that can be identified, referenced, and operated on. It can be a customer, an order, a metric, a semantic model, a database table, or a concept node in a knowledge graph.
+
+In UOSE, an entity must have:
+
+- Stable identifiers, such as external keys, internal entity IDs, and ontology IDs.
+- Type ownership, such as `semantic_indicator` or `database_table`.
+- Readable names for search, display, and agent explanation.
+- Attribute sets used to describe object state, fields, granularity, evidence, and runtime context.
+
+The point of entities is that an Agent no longer only says "sales amount metric"; it can locate the concrete metric object in a concrete resource and carry its model, Cube, time dimension, filterable fields, and other context.
+
+## Relationships
+
+Relationships express structural links between entities. They can represent containment, reference, navigation, dependency, derivation, or evidence association.
+
+Typical relationships include:
+
+- A semantic model contains Cubes: `semantic_model_has_cube`.
+- A Cube contains metrics, measures, and dimensions.
+- A SAP OData Entity Set points to an Entity Type.
+- A database table contains columns, constraints, and indexes.
+- A knowledge base contains knowledge entities, and GraphRAG relationships exist between knowledge entities.
+
+Relationships allow Agents to read context along the graph. For example, starting from a metric, the Agent can find its Cube, available dimensions, and fact query contract. Starting from an OData Entity Set, the Agent can find field definitions and navigable objects.
+
+## Attributes
+
+Attributes are structured descriptions on entities and relationships. They can carry both business information and runtime information.
+
+In UOSE, common uses of attributes include:
+
+- Describing resource objects: name, status, version, and updated time.
+- Describing execution context: `analysis_contract`, `query_capabilities`, and `key_schema`.
+- Describing graph evidence: aliases, sources, confidence, and mention samples.
+- Describing security boundaries: whether writes are allowed, whether CSRF is supported, and whether sync was truncated.
+
+Attributes should be structured whenever possible. Only structured attributes can be read reliably by Agents, matched reliably by policies, and replayed reliably by audits.
+
+## Constraints
+
+Constraints define how objects can be used legally. They answer "can this be done", "what conditions are required", and "which inputs are invalid".
+
+Constraints include:
+
+- Type constraints: actions can only apply to specified entity types.
+- Parameter constraints: action inputs must satisfy schemas.
+- Business constraints: whether write actions require approval or idempotency keys.
+- Runtime constraints: maximum query rows, maximum synced objects, and allowed service allowlists.
+- Permission constraints: policy bindings decide `allow`, `deny`, or `require_approval`.
+
+Constraints keep UOSE execution controllable: Agents can generate plans, but the system must validate them.
+
+## Reasoning and Validation
+
+UOSE uses the ontology graph to help Agents perform explainable reasoning, but final execution does not rely on the Agent proving itself correct. The system adds a second gate through these mechanisms:
+
+- Ontology snapshots store resource semantic facts.
+- RDF or local projections support entity retrieval, neighborhood queries, and schema queries.
+- Action manifests define action contracts and risk levels.
+- `simulateAction` validates target, parameters, policy, and runtime readiness before execution.
+- Audit records store inputs, outputs, policy decisions, and evidence references.
+
+Therefore, the role of ontology in the product is to turn enterprise knowledge into an operation space that Agents can read, systems can control, and users can trace.

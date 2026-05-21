@@ -1,0 +1,82 @@
+---
+title: 资源类型与扩展模型
+description: UOSE系统支持的资源类型、统一适配流程和可扩展接入模式。
+---
+
+UOSE系统通过资源适配器把不同外部系统接入同一对象语义执行模型。无论源系统是 BI 语义模型、SAP OData、知识图谱还是数据库，接入后都要产出统一的实体、关系、属性、动作和治理契约。
+
+## 当前内置资源类型
+
+当前内置资源类型包括：
+
+| Resource Type | 主要用途 | 执行边界 |
+| --- | --- | --- |
+| `semantic_model` | 接入 Xpert 语义模型、Cube、指标、度量和维度 | 只读分析查询 |
+| `sap_odata_api` | 接入 SAP OData V4 服务、Entity Set、Entity Type 和 Operation | 读、创建、更新、调用 operation |
+| `knowledge` | 接入 xpert-pro GraphRAG 知识库图谱 | 只读图谱检索与证据查询 |
+| `xpert_database` | 接入 xpert-pro SQL DataSource 元数据 | 只读查询与分析；写动作 v1 仅定义不执行 |
+
+这些资源都使用同一组控制面能力：Secret、resource registry、capabilities、sync、snapshot、projection、Agent Tools、policy 和 audit。
+
+## 适配器职责
+
+每个 resource adapter 需要承担：
+
+- 读取外部系统元数据。
+- 根据 capabilities 裁剪同步范围。
+- 构建 canonical ontology IR。
+- 提供 action simulate 和 execute。
+- 声明 action 是否支持缓存、幂等、连接解析和运行时校验。
+- 在必要时提供动态表单选项，例如选择 knowledgebase 或 dataSource。
+
+Adapter 不应绕过 UOSE 的 policy、approval 和 audit，也不应把敏感连接信息写入本体。
+
+## Manifest 契约
+
+Manifest 是资源类型的语义声明，包含：
+
+- entityTypes。
+- relationTypes。
+- actionTypes。
+- states。
+- rules。
+- metrics。
+- policies。
+- version。
+
+Manifest 决定一个资源类型接入后有哪些对象、关系和动作。Agent discovery 和前端资源类型目录都依赖 manifest。
+
+## Capabilities Schema
+
+Capabilities schema 决定资源注册和更新时需要哪些配置。它既用于前端表单，也用于后端校验和默认值填充。
+
+设计 capabilities 时应遵循：
+
+- 把连接凭据放在 Secret，不放在 capabilities。
+- 把同步范围、查询上限、白名单、开关放在 capabilities。
+- 设置合理默认值和最大值。
+- 对会影响成本或安全的字段提供明确描述。
+
+## 统一 Agent 流程
+
+不同资源类型接入后，Agent 使用同一流程：
+
+```text
+queryEntities -> getEntityNeighborhood -> discoverActions -> simulateAction -> executeAction
+```
+
+差异只体现在实体类型、动作 code 和参数 schema 上。这样业务 Assistant 可以跨资源复用同一套工作方式。
+
+## 扩展原则
+
+新增资源类型时，应优先保证：
+
+- 能生成清晰实体和关系。
+- 能提供最小可用 action。
+- 能在 `discoverActions` 中给出明确拒绝原因。
+- 能通过 Secret 和 capabilities 完成配置。
+- 能记录执行审计。
+- 能在前端资源图谱中被用户理解。
+
+先建立稳定对象空间，再扩展复杂动作，是 UOSE 接入新资源的推荐路线。
+

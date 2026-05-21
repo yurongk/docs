@@ -21,6 +21,61 @@
           "groups": []
         },
         {
+          "slug": "agent",
+          "groups": [
+            {
+              "slug": "__default__",
+              "pages": [
+                "agent",
+                "multi-agent-architecture",
+                "expert-configuration",
+                "human-ai-collaboration",
+                "long-term-memory",
+                "file-memory-dreaming",
+                "environment-variables",
+                "enhanced-features",
+                "release-version",
+                "embed-webpage",
+                "conversation-logs",
+                "development-api",
+                "monitoring-dashboard",
+                "chat-channels",
+                "supervised-architecture",
+                "swarm-architecture"
+              ]
+            },
+            {
+              "slug": "handoff",
+              "pages": [
+                "agent-chat-handoff-architecture"
+              ]
+            },
+            {
+              "slug": "sandbox",
+              "pages": [
+                "index"
+              ]
+            },
+            {
+              "slug": "conversation",
+              "pages": [
+                "conversation",
+                "projects"
+              ]
+            },
+            {
+              "slug": "ai-assistant",
+              "pages": [
+                "configure-ai-provider",
+                "command",
+                "role",
+                "configure-ai-assistant",
+                "ai-assitant"
+              ]
+            }
+          ]
+        },
+        {
           "slug": "conversation",
           "groups": []
         },
@@ -69,6 +124,95 @@
         {
           "slug": "tutorial",
           "groups": []
+        }
+      ]
+    },
+    {
+      "slug": "data",
+      "tabs": [
+        {
+          "slug": "overview",
+          "groups": [
+            {
+              "slug": "__default__",
+              "pages": [
+                "concept",
+                "ontology-theory",
+                "uose-theory",
+                "product-purpose",
+                "architecture"
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "features",
+          "groups": [
+            {
+              "slug": "control-plane",
+              "pages": [
+                "resource-access",
+                "secret-management",
+                "sync-jobs"
+              ]
+            },
+            {
+              "slug": "ontology",
+              "pages": [
+                "ontology-workspace",
+                "snapshot-and-projection",
+                "entity-graph"
+              ]
+            },
+            {
+              "slug": "agent-execution",
+              "pages": [
+                "agent-tools",
+                "action-discovery",
+                "workbench-and-chatkit"
+              ]
+            },
+            {
+              "slug": "governance",
+              "pages": [
+                "policies",
+                "approvals",
+                "audit"
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "integrations",
+          "groups": [
+            {
+              "slug": "__default__",
+              "pages": [
+                "overview",
+                "semantic-model",
+                "sap-odata",
+                "knowledge",
+                "xpert-database",
+                "extensibility"
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "practices",
+          "groups": [
+            {
+              "slug": "__default__",
+              "pages": [
+                "semantic-analysis",
+                "sap-odata-execution",
+                "knowledge-graph-rag",
+                "database-discovery",
+                "governance-playbook",
+                "troubleshooting"
+              ]
+            }
+          ]
         }
       ]
     },

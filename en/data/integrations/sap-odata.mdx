@@ -1,0 +1,87 @@
+---
+title: SAP OData API Resource
+description: Sync SAP OData V4 services as ontology objects and support controlled read and write actions.
+---
+
+The `sap_odata_api` resource connects SAP OData V4 services. UOSE discovers services, Entity Types, Entity Sets, and Operations from the SAP catalog and `$metadata`, then converts them into searchable ontology objects with discoverable actions.
+
+## Supported Scope
+
+Currently supported:
+
+- SAP OData V4 metadata.
+- Catalog V4 discovery first, with fallback to Gateway V2 catalog when necessary.
+- Basic Auth and static bearer.
+- Query collection and single entity.
+- create entity and update entity.
+- unbound action import and function import.
+- CSRF token acquisition configuration.
+- service root allowlist to narrow sync scope.
+
+Currently not supported:
+
+- OData V2 metadata as execution targets.
+- `$batch`.
+- bound action or bound function.
+
+## Synced Objects
+
+After sync, it usually contains:
+
+- `sap_odata_service`: service root.
+- `sap_odata_entity_type`: structured type in EDMX.
+- `sap_odata_entity_set`: collection entry point for execution.
+- `sap_odata_operation`: unbound action/function import.
+
+Key relationships include:
+
+- `sap_odata_service_has_entity_set`
+- `sap_odata_service_has_entity_type`
+- `sap_odata_entity_set_targets_entity_type`
+- `sap_odata_entity_type_navigates_to_entity_type`
+- `sap_odata_service_exposes_operation`
+
+Agents should enter execution through Entity Set and follow relationships to read the field definitions of Entity Type.
+
+## Capabilities
+
+Common capabilities include:
+
+- `protocolVersion`: fixed to v4.
+- `catalogV4Path`, `catalogV2Path`: catalog discovery paths.
+- `metadataPath`: usually `$metadata`.
+- `serviceAllowlist` or `serviceRootAllowlist`: limit synced services.
+- `entitySetAllowlist`: limit synced Entity Sets.
+- `operationAllowlist`: limit executable operations.
+- `mutationEntitySets`: manually allow writable Entity Sets when metadata lacks write capability declarations.
+- `csrf`: CSRF token acquisition method before write requests.
+
+## Actions
+
+Common actions include:
+
+- `sap_odata.read_collection`
+- `sap_odata.read_entity`
+- `sap_odata.create_entity`
+- `sap_odata.update_entity`
+- `sap_odata.invoke_operation`
+
+Read actions are lower risk. Create, update, and operation calls are higher risk; in production, require approval through policy.
+
+## Recommended Usage
+
+1. Create a SAP Secret with system baseUrl, authentication mode, sap-client, and TLS configuration.
+2. Register a `sap_odata_api` resource.
+3. Select the services to sync through service discovery.
+4. Run full sync.
+5. Query `sap_odata_entity_set`.
+6. Inspect the neighborhood and confirm target Entity Type, fields, key schema, and query capabilities.
+7. Run `discoverActions`, then `simulateAction`.
+8. For write actions, review expected effect and approval requirements before execution.
+
+## Troubleshooting Tips
+
+- If sync reports an OData V4 metadata error, check whether the target service is actually V2.
+- If create or update cannot be discovered, check metadata restrictions and `mutationEntitySets`.
+- If write requests fail, check CSRF, ETag, and source system permissions.
+- If a field does not exist, first inspect the `properties` of the related Entity Type, not only the Entity Set summary.

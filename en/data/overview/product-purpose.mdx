@@ -1,0 +1,60 @@
+---
+title: Product Purpose
+description: Business problems, user roles, and success criteria addressed by the UOSE system.
+---
+
+The purpose of implementing the UOSE system is to let enterprises safely make distributed business systems, data assets, and knowledge assets available to Agents. It does not rebuild every system. Instead, it builds a unified semantic control plane and governable execution plane on top of existing systems.
+
+## Target User Roles
+
+The UOSE system serves four types of users:
+
+- Data platform administrators: responsible for resource registration, connection secrets, sync tasks, and runtime status.
+- Business modelers: focused on whether objects such as metrics, models, database tables, and knowledge entities have clear semantics.
+- Agent builders: bind business Assistants to accessible resources and use UOSE tools through MCP or ChatKit.
+- Governance and audit personnel: configure policies, process approvals, review execution audits, and investigate abnormal events.
+
+## Product Goals
+
+The UOSE system aims to achieve these goals:
+
+1. Make external resources visible: register resources, models, services, tables, fields, and knowledge entities in a unified way.
+2. Make business semantics readable: publish object relationships, attributes, aliases, constraints, and evidence as ontology snapshots.
+3. Make resources usable by Agents: provide standard Agent Tools instead of exposing arbitrary backend APIs.
+4. Make execution controllable: protect execution boundaries through action manifests, policies, simulation, and approvals.
+5. Make the process traceable: record sync, actions, approvals, and execution audits to support review.
+
+## From Data Catalog to Operating System
+
+Traditional data catalogs mainly answer "where is the asset" and "what is this field". The UOSE system goes further and answers "what can the object do", "whether the Agent can do it", and "how to prove the execution result".
+
+This means UOSE assets are not static assets, but operable assets:
+
+- Metrics can be browsed and queried for trends.
+- Cubes can be inspected and used for slice analysis.
+- SAP Entity Sets can be identified and used to read collections, read entities, create, or update.
+- Database tables can be listed, described, previewed, explained, and queried through read-only queries.
+- Knowledge entities can be retrieved and followed along graph relationships to view evidence.
+
+## Success Criteria
+
+A UOSE implementation can be measured by these criteria:
+
+- Resource connection success rate is high, and failures enter debuggable dead-letter or sync job states.
+- Resources in the current organization have usable ontology snapshots.
+- Agents can locate objects, retrieve neighborhoods, discover actions, and execute low-risk actions through a fixed process.
+- High-risk actions are identified by policy and either sent to approval or rejected.
+- Execution results contain enough audit information to trace the task, resource, action, target, and policy decision.
+- New resource types can be extended through adapter manifests and capabilities schemas without breaking the existing Agent Tools protocol.
+
+## Design Tradeoffs
+
+The UOSE system prioritizes stability and governance:
+
+- Prefer structured contracts over letting Agents freely interpret documents.
+- Prefer resource-level access over boundaryless cross-system calls.
+- Prefer simulation and auditing over direct execution.
+- Prefer progressive context over exposing all metadata at once.
+- Prefer extensible adapters over one-off logic for each system.
+
+These tradeoffs make UOSE better suited for enterprise-grade agent production environments.

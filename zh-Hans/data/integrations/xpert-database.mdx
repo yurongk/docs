@@ -1,0 +1,90 @@
+---
+title: Xpert 数据库资源
+description: 将 xpert-pro SQL DataSource 接入 UOSE 并提供元数据发现和只读数据库动作。
+---
+
+`xpert_database` 资源用于把 xpert-pro 中的 SQL DataSource 接入 UOSE系统。它同步数据库 catalog、schema、table、column、constraint 和 index 等元数据，并提供受控的只读查询与分析动作。
+
+## 同步对象
+
+同步后通常包含：
+
+- `database_source`：数据源。
+- `database_namespace`：catalog 或 schema。
+- `database_table`：表或视图。
+- `database_column`：列。
+- `database_constraint`：主键、外键、唯一、check 或 not-null 约束。
+- `database_index`：索引。
+
+核心关系包括：
+
+- `database_source_has_namespace`
+- `database_namespace_has_table`
+- `database_table_has_column`
+- `database_table_has_constraint`
+- `database_table_has_index`
+- `database_constraint_references_table`
+- `database_constraint_references_column`
+- `database_index_covers_column`
+
+## 安全边界
+
+数据库资源特别强调敏感信息隔离：
+
+- 不把 password、token、username 写入 RDF、snapshot、实体属性或日志。
+- 连接摘要只保留 host、port、database、catalog、schema、timezone、sslmode 等非敏感信息。
+- 默认不包含系统 schema。
+- 通过 max tables、max columns 和 max query rows 控制规模。
+
+## Capabilities
+
+常用 capabilities 包括：
+
+- `dataSourceId`：xpert-pro DataSource ID。
+- `catalogAllowlist`：限制同步 catalog 或 schema。
+- `tableAllowlist`：限制同步表。
+- `metadataEnrichment`：是否开启元数据增强。
+- `includeSystemSchemas`：是否包含系统 schema。
+- `maxTables`：最大同步表数。
+- `maxColumns`：最大同步列数。
+- `maxQueryRows`：查询返回行数上限。
+- `defaultPreviewRows`：预览默认行数。
+
+## Actions
+
+当前可执行的只读或分析动作包括：
+
+- `database.sync_pull`
+- `database.list_namespaces`
+- `database.list_tables`
+- `database.describe_table`
+- `database.describe_query`
+- `database.query_select`
+- `database.preview_rows`
+- `database.explain_query`
+
+`database.query_select` 只允许单条只读语句，例如 SELECT、WITH、SHOW、DESCRIBE。INSERT、UPDATE、DELETE、MERGE、CREATE、ALTER、DROP、TRUNCATE、CALL、EXEC 等语句会被拒绝。
+
+## 写动作边界
+
+事务型动作已经进入 ontology 和 manifest，但 v1 不执行：
+
+- `database.insert_rows`
+- `database.update_rows`
+- `database.delete_rows`
+- `database.upsert_rows`
+- `database.execute_mutation`
+- `database.create_table`
+- `database.alter_table`
+- `database.drop_table`
+
+这些动作默认 manual only、requires approval、要求幂等和 expected effect。运行时会拒绝真实执行。
+
+## 使用建议
+
+- 初次同步时使用 allowlist 控制范围。
+- 开启 metadata enrichment 以获得约束、索引、外键和行数估计。
+- 对生产库限制 `maxQueryRows`。
+- 让 Agent 先 describe table 或 explain query，再执行 select。
+- 把所有写动作保留为审批和未来扩展，不在 v1 生产中开放。
+
