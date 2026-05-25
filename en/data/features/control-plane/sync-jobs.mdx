@@ -56,7 +56,7 @@ Common dead-letter scenarios include:
 
 - Incorrect connection configuration.
 - Source system authentication failure.
-- SAP OData metadata is not V4.
+- SAP OData metadata cannot be fetched or parsed as supported V2/V4 EDMX.
 - Knowledge GraphRAG is not ready.
 - Upstream API returns an unparsable structure.
 - Metadata is too large and triggers truncation or limits.
@@ -66,7 +66,7 @@ The usual handling path is to view the event payload, fix the Secret or capabili
 ## Best Practices
 
 - Use full sync for initial access, validate the ontology graph, then switch to an incremental strategy.
-- Use service root allowlists for SAP OData to narrow the sync scope.
+- Use the SAP OData service picker to choose the service roots for each sync run.
 - Set `maxTables` and `maxColumns` for databases to avoid oversized syncs.
 - Set `maxRelations` and mention sample count for knowledge graphs to keep context manageable.
 - For failed jobs, check failedReason and dead-letter first before deciding whether to retry.

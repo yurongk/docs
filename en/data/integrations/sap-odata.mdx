@@ -1,37 +1,43 @@
 ---
 title: SAP OData API Resource
-description: Sync SAP OData V4 services as ontology objects and support controlled read and write actions.
+description: Sync SAP OData V2 and V4 services as ontology objects and support controlled read and write actions.
 ---
 
-The `sap_odata_api` resource connects SAP OData V4 services. UOSE discovers services, Entity Types, Entity Sets, and Operations from the SAP catalog and `$metadata`, then converts them into searchable ontology objects with discoverable actions.
+The `sap_odata_api` resource connects SAP OData services from SAP systems. UOSE discovers published services from both the OData V4 catalog and the Gateway V2 catalog, reads each selected service's `$metadata`, and converts Services, Entity Types, Entity Sets, navigation relationships, and Operations into searchable ontology objects with discoverable actions.
 
 ## Supported Scope
 
 Currently supported:
 
-- SAP OData V4 metadata.
-- Catalog V4 discovery first, with fallback to Gateway V2 catalog when necessary.
-- Basic Auth and static bearer.
-- Query collection and single entity.
-- create entity and update entity.
-- unbound action import and function import.
-- CSRF token acquisition configuration.
-- service root allowlist to narrow sync scope.
+- OData V4 metadata and Microsoft EDMX 1.0/2.0/3.0 style OData V2 metadata.
+- Unified service discovery across `catalog_v4` and `catalog_v2`.
+- Mixed service selection in one picker, with source badges, source filters, and source counts.
+- Deduplication by normalized service root path. When the same service appears in both catalogs, `catalog_v4` metadata is preferred.
+- Basic Auth and static bearer authentication.
+- Query collection and single entity for V2 and V4 services.
+- Create entity and update entity when SAP metadata declares the Entity Set writable.
+- V4 action/function imports and V2 function imports.
+- V2 runtime conventions such as key predicates, `$inlinecount=allpages`, function import parameters, and `MERGE` updates.
+- V4 runtime conventions such as `$count=true` and `PATCH` updates.
+- CSRF token acquisition configuration for write requests.
+- V2 JSON response normalization: `d.results` is exposed as `value`, `d.__count` as `@odata.count`, and `__metadata.etag` remains available for previews and execution context.
 
 Currently not supported:
 
-- OData V2 metadata as execution targets.
+- Delete actions.
 - `$batch`.
-- bound action or bound function.
+- Media streams.
+- Deep insert.
+- Bound action or bound function.
 
 ## Synced Objects
 
 After sync, it usually contains:
 
-- `sap_odata_service`: service root.
-- `sap_odata_entity_type`: structured type in EDMX.
-- `sap_odata_entity_set`: collection entry point for execution.
-- `sap_odata_operation`: unbound action/function import.
+- `sap_odata_service`: service root, catalog source, protocol version, and metadata location.
+- `sap_odata_entity_type`: structured type in EDMX, including keys, properties, and navigation properties.
+- `sap_odata_entity_set`: collection entry point for execution, query capabilities, writable metadata, and navigation bindings.
+- `sap_odata_operation`: unbound action import or function import.
 
 Key relationships include:
 
@@ -45,16 +51,24 @@ Agents should enter execution through Entity Set and follow relationships to rea
 
 ## Capabilities
 
+SAP OData capabilities now describe durable connection behavior and catalog locations. They no longer ask users to maintain protocol or allowlist limits.
+
 Common capabilities include:
 
-- `protocolVersion`: fixed to v4.
-- `catalogV4Path`, `catalogV2Path`: catalog discovery paths.
+- `catalogV4Path`: OData V4 service catalog path.
+- `catalogV4Expand`: V4 catalog expand expression used to include services.
+- `catalogV2Path`: Gateway V2 catalog path.
 - `metadataPath`: usually `$metadata`.
-- `serviceAllowlist` or `serviceRootAllowlist`: limit synced services.
-- `entitySetAllowlist`: limit synced Entity Sets.
-- `operationAllowlist`: limit executable operations.
-- `mutationEntitySets`: manually allow writable Entity Sets when metadata lacks write capability declarations.
 - `csrf`: CSRF token acquisition method before write requests.
+
+The following fields are intentionally not part of SAP OData capabilities:
+
+- Protocol version: it is detected from each service's `$metadata`.
+- Discovery mode: discovery queries both V4 and V2 catalogs.
+- User-managed service, Entity Set, or operation allowlists: scope is chosen through the service picker.
+- Manual writable-entity overrides: write actions are exposed from SAP metadata restrictions, such as V4 Capabilities annotations or V2 `sap:creatable` and `sap:updatable`.
+
+Service selection happens at sync time. The selection dialog discovers all published V2 and V4 services, lets users search and filter by source, and submits only the selected normalized service root paths for that sync run. The selection is not saved back into resource capabilities.
 
 ## Actions
 
@@ -68,20 +82,26 @@ Common actions include:
 
 Read actions are lower risk. Create, update, and operation calls are higher risk; in production, require approval through policy.
 
+Create and update actions are generated only when metadata indicates the Entity Set is writable. UOSE does not use a manual mutation allowlist to override source metadata.
+
 ## Recommended Usage
 
 1. Create a SAP Secret with system baseUrl, authentication mode, sap-client, and TLS configuration.
 2. Register a `sap_odata_api` resource.
-3. Select the services to sync through service discovery.
-4. Run full sync.
-5. Query `sap_odata_entity_set`.
-6. Inspect the neighborhood and confirm target Entity Type, fields, key schema, and query capabilities.
-7. Run `discoverActions`, then `simulateAction`.
-8. For write actions, review expected effect and approval requirements before execution.
+3. Open service discovery before sync.
+4. Search, group, and filter discovered services across `catalog_v4` and `catalog_v2`.
+5. Select the service roots to include in this sync run.
+6. Run full sync.
+7. Query `sap_odata_entity_set`.
+8. Inspect the neighborhood and confirm target Entity Type, fields, key schema, query capabilities, protocol version, and source catalog.
+9. Run `discoverActions`, then `simulateAction`.
+10. For write actions, review expected effect and approval requirements before execution.
 
 ## Troubleshooting Tips
 
-- If sync reports an OData V4 metadata error, check whether the target service is actually V2.
-- If create or update cannot be discovered, check metadata restrictions and `mutationEntitySets`.
+- If an expected service is missing, check whether it is published in the SAP V4 or Gateway V2 catalog, whether the SAP user can read the catalog, whether the correct `sap-client` is used, and whether the service is active in the SAP system.
+- If a service appears in SAP documentation but not in discovery, confirm that the corresponding S/4HANA component, business function, communication scenario, or Gateway service is available and activated in the target system.
+- If metadata cannot be parsed, check whether `$metadata` returns a valid OData V2 or V4 EDMX document.
+- If create or update cannot be discovered, check SAP metadata write restrictions and source system permissions.
 - If write requests fail, check CSRF, ETag, and source system permissions.
 - If a field does not exist, first inspect the `properties` of the related Entity Type, not only the Entity Set summary.

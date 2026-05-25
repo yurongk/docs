@@ -26,7 +26,7 @@ The resource type catalog is generated from adapter manifests and capability sch
 - Which resource types are currently supported.
 - Whether the resource type has an available adapter.
 - Whether it supports the sync queue.
-- Whether it supports a service root allowlist.
+- Whether it supports service selection before sync.
 - Which Secret templates are recommended.
 - Which fields and defaults appear in the capabilities form.
 
@@ -51,11 +51,11 @@ Successful resource registration only means the control plane record has been cr
 Capabilities are the key extension point for resource access. Each resource type has different configuration:
 
 - semantic models configure model IDs, pagination parameters, and upstream endpoints.
-- SAP OData configures protocol version, catalog path, service allowlist, entity set allowlist, writable entity sets, and CSRF.
+- SAP OData configures catalog paths, metadata path, and CSRF. Protocol is detected from service metadata, and service scope is selected at sync time.
 - Knowledge configures knowledgebase ID, whether hidden graph items are included, relation count, and mention sample count.
 - Xpert databases configure dataSource ID, catalog/table allowlists, metadata enrichment, maximum table count, maximum column count, and query row limit.
 
-Capabilities affect both sync scope and action readiness and execution boundaries.
+Capabilities affect durable adapter behavior, action readiness, and execution boundaries. Some adapters also accept sync-scoped selections, such as SAP OData service roots chosen in the service picker.
 
 ## Resource Details
 

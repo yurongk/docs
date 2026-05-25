@@ -5,6 +5,8 @@ description: Use UOSE to read, create, update, and call operations on SAP OData 
 
 The key in SAP OData scenarios is ontology-first. Agents should not directly compose OData URLs. They should first locate Entity Sets in the UOSE ontology, read related Entity Types, and then execute through controlled actions.
 
+SAP OData V2 and V4 services share the same ontology-facing action model. The adapter handles protocol-specific details, such as V2 `MERGE` updates and V4 `PATCH` updates, after the Agent has selected the target Entity Set or Operation.
+
 ## Reading Collections
 
 Suitable questions include:
@@ -44,7 +46,7 @@ Ask the Agent to confirm key fields in the neighborhood first, rather than guess
 The create action is usually `sap_odata.create_entity`. Before execution, confirm that:
 
 - The Entity Set allows create.
-- `mutationEntitySets` or metadata restrictions allow it.
+- SAP metadata restrictions allow it. UOSE does not use a manual mutation allowlist to override source metadata.
 - Payload fields exist in Entity Type properties.
 - The source system user has write permission.
 - Policy does not deny it, or approval has passed.
@@ -67,6 +69,8 @@ When updates fail, first check source system permissions, CSRF token, ETag, and 
 
 `sap_odata.invoke_operation` is used for unbound action imports or function imports. It is riskier than normal reads because it may trigger business side effects.
 
+For V2 services, function import parameters and GET/POST behavior are read from metadata. For V4 services, action and function imports use the V4 import definitions.
+
 Recommendations:
 
 - Configure it as an approval action by default.
@@ -79,4 +83,4 @@ Recommendations:
 - Always run `discoverActions` before executing actions.
 - Write actions must go through policy governance.
 - Do not put SAP passwords or tokens in capabilities.
-- If service discovery returns too much, use service root allowlist to narrow the scope.
+- If service discovery returns too much, use the SAP OData service picker, source filters, and search to choose only the service roots needed for the sync run.

@@ -12,7 +12,7 @@ Current built-in resource types include:
 | Resource Type | Main Purpose | Execution Boundary |
 | --- | --- | --- |
 | `semantic_model` | Connect Xpert semantic models, Cubes, metrics, measures, and dimensions | Read-only analytical queries |
-| `sap_odata_api` | Connect SAP OData V4 services, Entity Sets, Entity Types, and Operations | Read, create, update, and call operations |
+| `sap_odata_api` | Connect SAP OData V2/V4 services, Entity Sets, Entity Types, and Operations | Read, create, update, and call operations |
 | `knowledge` | Connect xpert-pro GraphRAG knowledge base graphs | Read-only graph retrieval and evidence queries |
 | `xpert_database` | Connect xpert-pro SQL DataSource metadata | Read-only query and analysis; write actions are defined but not executed in v1 |
 
@@ -53,7 +53,8 @@ The capabilities schema decides which configuration is required when registering
 When designing capabilities:
 
 - Put connection credentials in Secrets, not capabilities.
-- Put sync scope, query limits, allowlists, and switches in capabilities.
+- Put durable query limits, adapter defaults, and switches in capabilities.
+- Put one-time selections, such as selected SAP OData service roots for a sync run, in the sync request rather than saving them as resource capabilities.
 - Set reasonable defaults and maximum values.
 - Provide clear descriptions for fields that affect cost or security.
 

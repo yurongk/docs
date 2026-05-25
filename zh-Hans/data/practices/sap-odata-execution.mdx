@@ -5,6 +5,8 @@ description: 使用 UOSE 对 SAP OData Entity Set 执行读取、创建、更新
 
 SAP OData 场景的关键是 ontology-first。Agent 不应直接拼接 OData URL，而应先在 UOSE 本体中定位 Entity Set，读取关联 Entity Type，再通过受控 action 执行。
 
+SAP OData V2 和 V4 服务在本体侧使用同一套 action model。Agent 选定目标 Entity Set 或 Operation 后，adapter 会处理协议差异，例如 V2 使用 `MERGE` 更新，V4 使用 `PATCH` 更新。
+
 ## 读取集合
 
 适合问题：
@@ -44,7 +46,7 @@ SAP OData 场景的关键是 ontology-first。Agent 不应直接拼接 OData URL
 创建动作通常为 `sap_odata.create_entity`。执行前应确认：
 
 - Entity Set 允许 create。
-- `mutationEntitySets` 或 metadata restriction 已放行。
+- SAP metadata restriction 已放行。UOSE 不使用手工 mutation allowlist 覆盖源系统 metadata。
 - payload 字段存在于 Entity Type properties。
 - 源系统用户有写权限。
 - 策略没有拒绝或审批已通过。
@@ -67,6 +69,8 @@ SAP OData 场景的关键是 ontology-first。Agent 不应直接拼接 OData URL
 
 `sap_odata.invoke_operation` 用于 unbound action import 或 function import。它比普通读取风险更高，因为可能触发业务副作用。
 
+对 V2 服务，function import 的参数和 GET/POST 行为来自 metadata。对 V4 服务，action 和 function import 使用 V4 import 定义。
+
 建议：
 
 - 默认设置为审批动作。
@@ -79,5 +83,4 @@ SAP OData 场景的关键是 ontology-first。Agent 不应直接拼接 OData URL
 - 执行动作以前必须 `discoverActions`。
 - 写动作必须经过策略治理。
 - 不要把 SAP 密码或 token 放入 capabilities。
-- 如果服务发现过多，用 service root allowlist 缩小范围。
-
+- 如果服务发现过多，使用 SAP OData 服务选择框、来源筛选和搜索，只勾选本次同步需要的服务根路径。

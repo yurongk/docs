@@ -56,7 +56,7 @@ UOSE 支持两类同步模式：
 
 - 连接配置错误。
 - 源系统认证失败。
-- SAP OData metadata 不是 V4。
+- SAP OData metadata 无法作为支持的 V2/V4 EDMX 获取或解析。
 - Knowledge GraphRAG 未 ready。
 - 上游 API 返回不可解析结构。
 - 元数据过大并触发截断或限制。
@@ -66,9 +66,8 @@ UOSE 支持两类同步模式：
 ## 最佳实践
 
 - 初次接入使用 full sync，验证本体图谱后再切换到增量策略。
-- 对 SAP OData 使用 service root allowlist 缩小同步范围。
+- 对 SAP OData 使用服务选择框为每次同步选择服务根路径。
 - 对数据库设置 `maxTables` 和 `maxColumns`，避免一次同步过大。
 - 对知识图谱设置 `maxRelations` 和 mention 样本数，保持上下文可控。
 - 对失败 job 优先查看 failedReason 和 dead-letter，再决定 retry。
 - 每次重大 capabilities 调整后执行一次 full sync，以避免旧投影残留。
-

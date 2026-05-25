@@ -54,7 +54,7 @@ Constraints include:
 - Type constraints: actions can only apply to specified entity types.
 - Parameter constraints: action inputs must satisfy schemas.
 - Business constraints: whether write actions require approval or idempotency keys.
-- Runtime constraints: maximum query rows, maximum synced objects, and allowed service allowlists.
+- Runtime constraints: maximum query rows, maximum synced objects, source metadata restrictions, and sync-scoped selections.
 - Permission constraints: policy bindings decide `allow`, `deny`, or `require_approval`.
 
 Constraints keep UOSE execution controllable: Agents can generate plans, but the system must validate them.

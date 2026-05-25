@@ -28,7 +28,7 @@ Common causes:
 - baseUrl in the Secret payload is still an example address.
 - Authentication mode or token is incorrect.
 - Source system network is unreachable.
-- SAP OData is not V4 metadata.
+- SAP OData metadata cannot be fetched or parsed as supported V2/V4 EDMX.
 - knowledgebase GraphRAG status is not ready.
 - Database sync scope is too large.
 
@@ -36,7 +36,7 @@ How to handle:
 
 - Check the sync job failedReason.
 - Check the dead-letter payload.
-- Retry after narrowing the allowlist.
+- Retry after reducing the selected SAP OData services or narrowing database allowlists.
 - For certificate issues, check TLS configuration.
 - For background queue issues, check Redis and queue switches.
 
@@ -60,7 +60,7 @@ Troubleshooting order:
 2. Check whether the entity type is correct.
 3. Relax query keywords.
 4. In the resource graph, inspect nodes by type.
-5. Check whether capabilities filtered out the target object.
+5. For SAP OData, check whether the service was selected in the last sync run. For databases, check whether capabilities filtered out the target object.
 6. Run full sync if necessary.
 
 If the entity exists but the name does not match, add aliases or improve the adapter's label generation logic.
@@ -104,7 +104,7 @@ How to handle:
 | --- | --- |
 | Resource list is empty | Current organization, OIDC, resource registration |
 | Resource created successfully but graph is empty | Whether sync ran, snapshot status |
-| Too many SAP services | service root allowlist |
+| Too many SAP services | SAP OData service picker, source filter, and selected service roots |
 | Metric visible but cannot be queried | `analysis_contract`, query endpoint |
 | Database query rejected | Whether it is read-only, single-statement, maxQueryRows |
 | MCP connects but source access fails | `x-uose-actor-token` and current user OIDC |
