@@ -359,6 +359,7 @@
                       "en/ai/plugin/overview",
                       "en/ai/plugin/concepts",
                       "en/ai/plugin/develop",
+                      "en/ai/plugin/remote-component",
                       "en/ai/plugin/install",
                       "en/ai/plugin/permissions",
                       "en/ai/plugin/schema"
@@ -440,22 +441,6 @@
                       "en/ai/tutorial/project-group-single-vs-multi-agent",
                       "en/ai/tutorial/chatkit-browser-extension",
                       "en/ai/tutorial/tutorial"
-                    ]
-                  }
-                ]
-              },
-              {
-                "tab": "Skill",
-                "groups": [
-                  {
-                    "group": "Default",
-                    "pages": [
-                      "en/ai/skill/index",
-                      "en/ai/skill/marketplace",
-                      "en/ai/skill/workspace",
-                      "en/ai/skill/use-in-agent",
-                      "en/ai/skill/administration",
-                      "en/ai/skill/skill-package-format"
                     ]
                   }
                 ]
@@ -1160,6 +1145,7 @@
                       "zh-Hans/ai/plugin/overview",
                       "zh-Hans/ai/plugin/core-concepts",
                       "zh-Hans/ai/plugin/development-steps",
+                      "zh-Hans/ai/plugin/remote-component",
                       "zh-Hans/ai/plugin/publish-and-use",
                       "zh-Hans/ai/plugin/permission-design-guide",
                       "zh-Hans/ai/plugin/schema-ui-extension",
@@ -1249,35 +1235,6 @@
                       "zh-Hans/ai/tutorial/agentic-bi-end-to-end-analysis",
                       "zh-Hans/ai/tutorial/chatkit-browser-extension",
                       "zh-Hans/ai/tutorial/tutorial"
-                    ]
-                  }
-                ]
-              },
-              {
-                "tab": "技能",
-                "groups": [
-                  {
-                    "group": "默认",
-                    "pages": [
-                      "zh-Hans/ai/skill/index",
-                      "zh-Hans/ai/skill/marketplace",
-                      "zh-Hans/ai/skill/workspace",
-                      "zh-Hans/ai/skill/use-in-agent",
-                      "zh-Hans/ai/skill/administration",
-                      "zh-Hans/ai/skill/skill-package-format"
-                    ]
-                  }
-                ]
-              },
-              {
-                "tab": "System",
-                "groups": [
-                  {
-                    "group": "Permissions",
-                    "pages": [
-                      "zh-Hans/ai/system/permissions/control-sources-and-defaults",
-                      "zh-Hans/ai/system/permissions/feature-permission-role-matrix",
-                      "zh-Hans/ai/system/permissions/switch-function-mapping"
                     ]
                   }
                 ]
