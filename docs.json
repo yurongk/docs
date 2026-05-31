@@ -434,6 +434,7 @@
                     "group": "Default",
                     "pages": [
                       "en/ai/tutorial/workflow-and-agent",
+                      "en/ai/tutorial/develop-custom-agentic-app",
                       "en/ai/tutorial/wechat-work-integration",
                       "en/ai/tutorial/integrate-with-mcp-dify",
                       "en/ai/tutorial/agentic-bi-end-to-end-analysis",
@@ -1228,6 +1229,7 @@
                     "group": "默认",
                     "pages": [
                       "zh-Hans/ai/tutorial/workflow-and-agent",
+                      "zh-Hans/ai/tutorial/develop-custom-agentic-app",
                       "zh-Hans/ai/tutorial/wechat-work-integration",
                       "zh-Hans/ai/tutorial/integrate-with-mcp-dify",
                       "zh-Hans/ai/tutorial/build-agentic-chatbi-from-scratch",
