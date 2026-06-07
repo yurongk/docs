@@ -250,6 +250,21 @@ function parseFrontmatterSidebarPosition(content) {
   return null;
 }
 
+function parseFrontmatterSidebarHidden(content) {
+  if (!content.startsWith("---")) {
+    return false;
+  }
+
+  const endIndex = content.indexOf("---", 3);
+  if (endIndex === -1) {
+    return false;
+  }
+
+  const frontmatterText = content.slice(3, endIndex).trim();
+  const hiddenMatch = frontmatterText.match(/^sidebar_hidden:\s*(.+)$/m);
+  return hiddenMatch ? hiddenMatch[1].trim().toLowerCase() === "true" : false;
+}
+
 /**
  * Generate an English title from filename
  */
@@ -671,6 +686,9 @@ async function collectPagesRecursively(dirAbs, contentRootAbs, updateTitles = fa
         e.isFile() &&
         MARKDOWN_EXTS.has(path.extname(e.name).toLowerCase())
       ) {
+        const content = await fs.readFile(full, "utf8");
+        if (parseFrontmatterSidebarHidden(content)) continue;
+
         const pagePath = pagePathFromFile(contentRootAbs, full);
         pages.push(pagePath);
         
@@ -760,6 +778,9 @@ async function buildNavigationForLanguage(language, docs, contentRootAbs, update
           child.isFile() &&
           MARKDOWN_EXTS.has(path.extname(child.name).toLowerCase())
         ) {
+          const content = await fs.readFile(childAbs, "utf8");
+          if (parseFrontmatterSidebarHidden(content)) continue;
+
           const filePath = pagePathFromFile(contentRootAbs, childAbs);
           defaultPages.push(filePath);
           

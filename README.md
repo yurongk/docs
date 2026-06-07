@@ -32,6 +32,8 @@ node generate-navigation.mjs --dry-run
 node generate-navigation.mjs --update-titles
 ```
 
+Pages with `sidebar_hidden: true` in frontmatter are kept as routable documents but skipped when generating `docs.json`. Use this for deprecated compatibility pages that should not appear in navigation.
+
 ## Run Locally with Docker
 
 Run the documentation site locally using Docker:

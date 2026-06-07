@@ -32,6 +32,7 @@ Through the hybrid architecture, the stability of database queries is ensured wh
 ## Explore Detailed Technical Points
 
 - [**Agent**](./agent/)
+- [**Agent Workflow**](./agent-workflow/)
 - [**External Digital Expert**](./external/)
 - [**Session Variables**](./variables/)
 - [**Execution Endpoints**](./terminal/)

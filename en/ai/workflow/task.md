@@ -3,7 +3,7 @@ title: Task Handover
 sidebar_position: 33
 ---
 
-**Task Handover** is a node type in the XpertAI platform's Workflow, designed to enable efficient task transfer and collaboration between Agents. It can be assigned as an **Agent Tool**, allowing a higher-level Agent to dynamically delegate tasks to one or more available Sub-Agents, which then process the tasks until completion and return results to the higher-level Agent.
+**Task Handover** is a node type in the XpertAI platform's Workflow, designed to enable efficient task transfer and collaboration between Agents. It is exposed as a callable tool to a higher-level Agent, allowing that Agent to dynamically delegate tasks to one or more available Sub-Agents, which then process the tasks until completion and return results to the higher-level Agent.
 
 This node is particularly suitable for:
 
