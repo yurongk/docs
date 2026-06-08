@@ -559,6 +559,36 @@
                     ]
                   }
                 ]
+              },
+              {
+                "tab": "Apps",
+                "groups": [
+                  {
+                    "group": "Default",
+                    "pages": [
+                      "en/data/apps/index"
+                    ]
+                  },
+                  {
+                    "group": "Production Manufacturing",
+                    "pages": [
+                      "en/data/apps/production-manufacturing/bom-document-intake",
+                      "en/data/apps/production-manufacturing/smart-maintenance"
+                    ]
+                  },
+                  {
+                    "group": "Supply Chain",
+                    "pages": [
+                      "en/data/apps/supply-chain/procurement-quote-comparison"
+                    ]
+                  },
+                  {
+                    "group": "Sales and Service",
+                    "pages": [
+                      "en/data/apps/sales-and-service/sales-ontology"
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -1351,6 +1381,36 @@
                       "zh-Hans/data/practices/database-discovery",
                       "zh-Hans/data/practices/governance-playbook",
                       "zh-Hans/data/practices/troubleshooting"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tab": "插件应用",
+                "groups": [
+                  {
+                    "group": "默认",
+                    "pages": [
+                      "zh-Hans/data/apps/index"
+                    ]
+                  },
+                  {
+                    "group": "生产制造",
+                    "pages": [
+                      "zh-Hans/data/apps/production-manufacturing/bom-document-intake",
+                      "zh-Hans/data/apps/production-manufacturing/smart-maintenance"
+                    ]
+                  },
+                  {
+                    "group": "供应链",
+                    "pages": [
+                      "zh-Hans/data/apps/supply-chain/procurement-quote-comparison"
+                    ]
+                  },
+                  {
+                    "group": "销售服务",
+                    "pages": [
+                      "zh-Hans/data/apps/sales-and-service/sales-ontology"
                     ]
                   }
                 ]

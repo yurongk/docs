@@ -213,6 +213,56 @@
               ]
             }
           ]
+        },
+        {
+          "slug": "apps",
+          "groups": [
+            {
+              "slug": "__default__",
+              "pages": [
+                "index"
+              ]
+            },
+            {
+              "slug": "production-manufacturing",
+              "pages": [
+                "bom-document-intake",
+                "smart-maintenance"
+              ]
+            },
+            {
+              "slug": "financial-management",
+              "pages": []
+            },
+            {
+              "slug": "supply-chain",
+              "pages": [
+                "procurement-quote-comparison"
+              ]
+            },
+            {
+              "slug": "sales-and-service",
+              "pages": [
+                "sales-ontology"
+              ]
+            },
+            {
+              "slug": "customer-service",
+              "pages": []
+            },
+            {
+              "slug": "human-resources",
+              "pages": []
+            },
+            {
+              "slug": "risk-and-compliance",
+              "pages": []
+            },
+            {
+              "slug": "data-and-analytics",
+              "pages": []
+            }
+          ]
         }
       ]
     },

@@ -1,0 +1,77 @@
+---
+title: Plugin Apps
+description: Learn what Plugin Apps are in UOSE, how they are grouped by business domain, and how to develop business Apps for UOSE.
+---
+
+Plugin Apps are business-oriented plugins that run inside the UOSE system. They are not a single tool or prompt. A Plugin App is an installable, permissioned, configurable, and reviewable bundle of business capabilities, typically including Workbench views, Assistant tools, business Assistant templates, configuration, permission declarations, and an auditable data loop.
+
+The UOSE App marketplace showcases official Apps, partner Apps, and community Apps. Users can discover Apps by business domain, administrators can enable Apps according to organization permissions, and developers can package industry workflows as reusable business Apps through the Xpert plugin system.
+
+## What A Plugin App Usually Includes
+
+| Capability | Description |
+| --- | --- |
+| Workbench views | Review, maintain, configure, upload, verify, or operate business data in UOSE Workbench. |
+| Assistant tools | Expose business actions through Agent middleware, such as saving parsed results, running matches, or querying reference libraries. |
+| Business Assistant templates | Provide ready-to-use Assistant configuration, prompts, tool permissions, and starter questions. |
+| Permission and operation declarations | Declare read, write, admin, and other operation boundaries for authorization and audit. |
+| Configuration forms | Expose administrator-managed resource IDs, recall strategies, thresholds, defaults, or external-system settings. |
+| Business data models | Persist reviewable, retryable, and traceable structured data and evidence. |
+| Knowledgebase or ontology integration | Reuse UOSE Knowledgebase, resource graphs, ontology snapshots, and Agent Tools. |
+
+## Common Business Domains
+
+Plugin Apps are grouped by business domain. Common domains include:
+
+| Domain | Suitable App Types |
+| --- | --- |
+| Production Manufacturing | BOM, process planning, quality, equipment, production planning, technical agreements, and drawing intake. |
+| Supply Chain | Purchasing, supplier collaboration, inventory, logistics, receiving inspection, and delivery tracking. |
+| Financial Management | Expense review, receivables and payables, budgets, reimbursement, contract payments, and financial analysis. |
+| Sales and Service | Opportunities, quotations, contracts, customer follow-up, after-sales service, and project delivery. |
+| Customer Service | Tickets, knowledge answering, service quality, customer feedback, and escalation. |
+| Human Resources | Recruiting, onboarding, training, performance, policy Q&A, and employee services. |
+| Risk and Compliance | Approvals, audits, compliance checks, risk rules, and exception handling. |
+| Data and Analytics | Metric governance, data quality, dashboards, semantic queries, and analysis assistants. |
+
+Currently listed Plugin Apps include:
+
+| App | Domain | Description |
+| --- | --- | --- |
+| [Contract BOM Intelligent Assistant](./production-manufacturing/bom-document-intake) | Production Manufacturing | Parse contract packages, maintain BOM product profiles, build reference libraries, and match PBOMs. |
+| [Smart Maintenance](./production-manufacturing/smart-maintenance) | Production Manufacturing | Generate reviewable maintenance work orders from natural-language reports, with service-data import and review support. |
+| [Procurement Quote Comparison](./supply-chain/procurement-quote-comparison) | Supply Chain | Parse procurement requirements and supplier quotes, then generate comparison results, risks, and recommendations. |
+| [Sales Ontology](./sales-and-service/sales-ontology) | Sales and Service | Run perception, reasoning, suggestion generation, and action governance on sales business ontology. |
+
+## How To Choose A Plugin App
+
+When choosing a Plugin App, check whether:
+
+- The App matches the target business domain and real workflow.
+- It provides Workbench views for human review and operations.
+- Assistant tools have clear call order, input structure, and evidence requirements.
+- Permission boundaries separate normal use, write operations, and administrator capabilities.
+- It can reuse UOSE Knowledgebase, ontology resources, audit, and organization permissions.
+- It has official or partner maintenance guidance for upgrades and troubleshooting.
+
+## How To Develop A Plugin App
+
+To develop a UOSE Plugin App, use the AI product plugin development system instead of scattering business logic across prompts or temporary scripts. Recommended references:
+
+- [Plugin development](/en/ai/plugin/develop)
+- [Plugin concepts](/en/ai/plugin/concepts)
+- [Plugin schema](/en/ai/plugin/schema)
+- [Remote components](/en/ai/plugin/remote-component)
+- [Develop a custom Agentic App](/en/ai/tutorial/develop-custom-agentic-app)
+
+A UOSE business App usually needs to:
+
+1. Define plugin metadata, icon, target products, and marketplace content.
+2. Declare `targetApps: ['data-xpert']` and `targetAppMeta` to describe views, tools, business App capabilities, templates, and permissions.
+3. Register a server module with entities, services, Agent middleware, and a Workbench view provider.
+4. Split core business actions into explicit, retryable, and auditable Assistant tools.
+5. Provide Workbench views or Remote Components for workflows that need human review.
+6. Contribute business Assistant templates so users can create a usable Assistant in one step.
+7. Configure permissions, defaults, publishing, and upgrade guidance.
+
+Design the App as one loop between Agent automation and human review: the Agent extracts, reasons, retrieves, and executes; Workbench lets users inspect, confirm, correct, write back, and audit. This turns a Plugin App into an operable business system capability rather than a one-off automation script.
